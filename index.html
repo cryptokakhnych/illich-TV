@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Illich TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        
+        body, html { height: 100%; overflow: hidden; background: #000; }
+
+        /* ЭКРАН ЗАГРУЗКИ */
+        #splash-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/675D03F8-DE2B-4844-9B3F-011C5811F4EA.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+
+        .loader-container {
+            width: 80%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin-bottom: 100px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #fff; /* Цвет шкалы под стиль фото */
+            box-shadow: 0 0 15px #fff;
+            transition: width 2.5s linear;
+        }
+
+        /* ГЛАВНЫЙ ЭКРАН */
+        #main-content {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center;
+            background-size: cover;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .search-box {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        button {
+            padding: 10px 30px;
+            border-radius: 20px;
+            border: none;
+            background: #ff4e50; /* Цвет кнопки (можно сменить) */
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="loader-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск аниме...">
+            <br>
+            <button onclick="handleSearch()">Поиск</button>
+        </div>
+    </div>
+
+    <script>
+        // Настройка Supabase (вставь свои данные)
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_KEY = 'your-anon-key';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Логика загрузки
+        window.onload = () => {
+            const bar = document.getElementById('progress-bar');
+            const splash = document.getElementById('splash-screen');
+            const main = document.getElementById('main-content');
+
+            // Запускаем шкалу
+            setTimeout(() => {
+                bar.style.width = '100%';
+            }, 100);
+
+            // Через 2.5 сек скрываем сплеш и показываем контент
+            setTimeout(() => {
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    main.style.display = 'flex';
+                }, 500);
+            }, 2600);
+        };
+
+        // Функция поиска
+        async function handleSearch() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) return alert('Введите название!');
+            
+            console.log('Ищем:', query);
+            // Здесь будет логика запроса к API Shikimori или твоей базе в Supabase
+        }
+    </script>
+</body>
+</html>
