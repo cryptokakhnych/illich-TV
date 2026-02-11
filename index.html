@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Illich TV | Loading...</title>
+    <title>Illich TV</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
         
         body, html { height: 100%; overflow: hidden; background: #000; color: white; }
 
-        /* ЭКРАН ЗАГРУЗКИ (SPLASH) */
+        /* ЭКРАН ЗАГРУЗКИ */
         #splash-screen {
             position: fixed;
             width: 100%;
@@ -19,46 +19,48 @@
             background-size: cover;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Центрируем контент */
+            justify-content: center;
             align-items: center;
             z-index: 100;
             transition: opacity 0.8s ease;
         }
 
-        /* Контейнер для шкалы и цифр (размещаем над центром/телевизором) */
         .loader-wrapper {
-            width: 70%;
-            max-width: 400px;
-            margin-bottom: 50px; /* Смещение вверх, чтобы быть над "телевизором" */
+            width: 65%;
+            max-width: 350px;
+            margin-bottom: 120px; /* Позиция над телевизором */
             text-align: center;
         }
 
         #loader-number {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: #fff;
+            /* Неоновое свечение под стиль фото */
+            text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+            letter-spacing: 2px;
         }
 
         .loader-container {
             width: 100%;
-            height: 12px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
         #progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #ffffff, #888);
-            box-shadow: 0 0 15px #fff;
+            background: linear-gradient(90deg, #00d4ff, #ffffff);
+            box-shadow: 0 0 20px #00d4ff;
             transition: width 2.5s linear;
         }
 
-        /* ГЛАВНЫЙ ЭКРАН ПОСЛЕ ЗАГРУЗКИ */
+        /* ГЛАВНЫЙ ЭКРАН */
         #main-content {
             display: none;
             width: 100%;
@@ -66,61 +68,53 @@
             background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center;
             background-size: cover;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* Поднимаем выше */
             align-items: center;
+            padding-top: 15vh; /* Отступ сверху для строки поиска */
             opacity: 0;
             transition: opacity 1s ease;
         }
 
-        /* Поле поиска в стиле Google */
-        .search-container {
+        /* ЕДИНАЯ СТРОКА ПОИСКА */
+        .search-group {
             width: 90%;
-            max-width: 580px;
+            max-width: 600px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
         }
 
-        .search-bar {
-            width: 100%;
-            background: #fff;
-            display: flex;
-            padding: 5px 15px;
-            border-radius: 30px;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .search-bar input {
-            width: 100%;
-            height: 45px;
+        .search-group input {
+            flex: 1;
             border: none;
             outline: none;
+            padding: 15px 25px;
             font-size: 18px;
-            padding: 0 10px;
-            color: #333;
+            background: transparent;
+            color: #222;
         }
 
-        .search-buttons {
-            margin-top: 25px;
-        }
-
-        .btn-google {
-            padding: 10px 25px;
-            margin: 5px;
+        .search-btn {
+            background: #00d4ff;
+            color: white;
             border: none;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #eee;
-            font-size: 14px;
+            padding: 0 30px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
-            border: 1px solid transparent;
-            backdrop-filter: blur(5px);
+            transition: background 0.3s;
         }
 
-        .btn-google:hover {
-            border: 1px solid #ccc;
-            color: #fff;
+        .search-btn:hover {
+            background: #00a8cc;
+        }
+
+        .search-btn:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
@@ -136,45 +130,37 @@
     </div>
 
     <div id="main-content">
-        <div class="search-container">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Поиск в Illich TV или введите URL">
-            </div>
-            <div class="search-buttons">
-                <button class="btn-google" onclick="startSearch()">Поиск аниме</button>
-                <button class="btn-google" onclick="lucky()">Мне повезёт!</button>
-            </div>
+        <div class="search-group">
+            <input type="text" id="searchInput" placeholder="Найти аниме...">
+            <button class="search-btn" onclick="executeSearch()">ПОИСК</button>
         </div>
     </div>
 
     <script>
-        // Анимация цифр и шкалы
-        function startLoading() {
+        function init() {
             const bar = document.getElementById('progress-bar');
             const num = document.getElementById('loader-number');
             const splash = document.getElementById('splash-screen');
             const main = document.getElementById('main-content');
             
-            let count = 0;
-            const duration = 2500; // 2.5 секунды
-            const intervalTime = duration / 100;
+            let progress = 0;
+            const step = 100 / (2500 / 30); // Расчет шага для 2.5 секунд
 
-            // Запускаем шкалу (CSS переход сделает всё плавно за 2.5с)
-            setTimeout(() => {
-                bar.style.width = '100%';
-            }, 50);
+            // Анимация полосы
+            setTimeout(() => { bar.style.width = '100%'; }, 50);
 
-            // Интервал для цифр
-            const counter = setInterval(() => {
-                count++;
-                num.innerText = count + '%';
-                if (count >= 100) {
-                    clearInterval(counter);
-                    finishLoading();
+            // Анимация чисел
+            const interval = setInterval(() => {
+                progress += step;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    showMain();
                 }
-            }, intervalTime);
+                num.innerText = Math.floor(progress) + '%';
+            }, 30);
 
-            function finishLoading() {
+            function showMain() {
                 setTimeout(() => {
                     splash.style.opacity = '0';
                     setTimeout(() => {
@@ -182,22 +168,18 @@
                         main.style.display = 'flex';
                         setTimeout(() => main.style.opacity = '1', 50);
                     }, 800);
-                }, 300);
+                }, 400);
             }
         }
 
-        window.onload = startLoading;
+        window.onload = init;
 
-        // Функция поиска
-        function startSearch() {
-            const val = document.getElementById('searchInput').value;
-            if(val) {
-                alert('Ищем: ' + val + '\n(Здесь мы подключим ShikiVideo API)');
+        function executeSearch() {
+            const query = document.getElementById('searchInput').value;
+            if (query) {
+                // Здесь будет вызов ShikiVideo API
+                alert('Ищем контент для: ' + query);
             }
-        }
-
-        function lucky() {
-            alert('Случайное аниме загружается...');
         }
     </script>
 </body>
