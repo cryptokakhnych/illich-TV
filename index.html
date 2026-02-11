@@ -92,6 +92,7 @@
             border-radius: 50px;
             padding: 5px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            z-index: 10;
         }
 
         .search-group input {
@@ -118,6 +119,48 @@
 
         .search-btn:active { transform: scale(0.98); }
 
+        /* КОНТЕЙНЕР РЕЗУЛЬТАТОВ */
+        #results-container {
+            width: 95%;
+            max-width: 800px;
+            margin-top: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            overflow-y: auto;
+            max-height: 70vh;
+            padding: 10px;
+            scrollbar-width: none; /* Скрываем скролл для красоты */
+        }
+        #results-container::-webkit-scrollbar { display: none; }
+
+        .anime-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+            transition: transform 0.2s, border 0.2s;
+            cursor: pointer;
+        }
+        .anime-card:hover { 
+            transform: translateY(-5px);
+            border: 1px solid #00d4ff;
+        }
+        .anime-card img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .anime-card div {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.2;
+            height: 32px;
+            overflow: hidden;
+        }
+
     </style>
 </head>
 <body>
@@ -136,6 +179,7 @@
             <input type="text" id="searchInput" placeholder="Найти аниме...">
             <button class="search-btn" onclick="executeSearch()">ПОИСК</button>
         </div>
+        <div id="results-container"></div>
     </div>
 
     <script>
@@ -148,10 +192,8 @@
             const duration = 2500;
             const startTime = Date.now();
 
-            // Запуск полосы
             bar.style.width = '100%';
 
-            // Запуск синхронных цифр
             const timer = setInterval(() => {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min((elapsed / duration) * 100, 100);
@@ -160,7 +202,6 @@
 
                 if (progress >= 100) {
                     clearInterval(timer);
-                    // Плавный переход
                     setTimeout(() => {
                         splash.style.opacity = '0';
                         setTimeout(() => {
@@ -170,15 +211,63 @@
                         }, 800);
                     }, 300);
                 }
-            }, 16); // ~60 FPS для плавности
+            }, 16);
         }
 
         window.onload = init;
 
-        function executeSearch() {
+        // ФУНКЦИЯ ПОИСКА ЧЕРЕЗ SHIKIMORI API
+        async function executeSearch() {
             const query = document.getElementById('searchInput').value;
-            if (query) alert('Поиск: ' + query);
+            const container = document.getElementById('results-container');
+            
+            if (!query) return;
+
+            container.innerHTML = '<p style="text-align:center; width:100%; text-shadow: 0 0 10px #00d4ff;">Ищем в базе Shikimori...</p>';
+
+            try {
+                // Запрос к API Shikimori (лимит 12 для сетки)
+                const response = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(query)}&limit=12&order=popularity`);
+                const data = await response.json();
+
+                container.innerHTML = ''; 
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; width:100%;">Ничего не найдено :(</p>';
+                    return;
+                }
+
+                data.forEach(anime => {
+                    const card = document.createElement('div');
+                    card.className = 'anime-card';
+                    
+                    // Формируем ссылку на постер (у Шикимори относительные пути)
+                    const posterUrl = `https://shikimori.one${anime.image.preview}`;
+
+                    card.innerHTML = `
+                        <img src="${posterUrl}" alt="${anime.russian || anime.name}">
+                        <div>${anime.russian || anime.name}</div>
+                    `;
+
+                    // При клике - переход к выбору озвучки (пока алертом)
+                    card.onclick = () => {
+                        alert(`Вы выбрали: ${anime.russian || anime.name}\nShikimori ID: ${anime.id}\nДалее мы подтянем озвучки через ShikiVideo!`);
+                    };
+                    
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Ошибка API:', error);
+                container.innerHTML = '<p style="text-align:center; width:100%; color:red;">Ошибка подключения к базе</p>';
+            }
         }
+        
+        // Поиск по нажатию Enter
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                executeSearch();
+            }
+        });
     </script>
 </body>
 </html>
