@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Illich TV</title>
+    <title>Illich TV | Loading...</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
         
-        body, html { height: 100%; overflow: hidden; background: #000; }
+        body, html { height: 100%; overflow: hidden; background: #000; color: white; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
+        /* ЭКРАН ЗАГРУЗКИ (SPLASH) */
         #splash-screen {
             position: fixed;
             width: 100%;
@@ -19,31 +19,46 @@
             background-size: cover;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end;
+            justify-content: center; /* Центрируем контент */
             align-items: center;
             z-index: 100;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
+        }
+
+        /* Контейнер для шкалы и цифр (размещаем над центром/телевизором) */
+        .loader-wrapper {
+            width: 70%;
+            max-width: 400px;
+            margin-bottom: 50px; /* Смещение вверх, чтобы быть над "телевизором" */
+            text-align: center;
+        }
+
+        #loader-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
         }
 
         .loader-container {
-            width: 80%;
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            margin-bottom: 100px;
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
         }
 
         #progress-bar {
             width: 0%;
             height: 100%;
-            background: #fff; /* Цвет шкалы под стиль фото */
+            background: linear-gradient(90deg, #ffffff, #888);
             box-shadow: 0 0 15px #fff;
             transition: width 2.5s linear;
         }
 
-        /* ГЛАВНЫЙ ЭКРАН */
+        /* ГЛАВНЫЙ ЭКРАН ПОСЛЕ ЗАГРУЗКИ */
         #main-content {
             display: none;
             width: 100%;
@@ -53,95 +68,136 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
 
-        .search-box {
+        /* Поле поиска в стиле Google */
+        .search-container {
             width: 90%;
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 580px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        input[type="text"] {
+        .search-bar {
             width: 100%;
-            padding: 12px 20px;
-            border-radius: 20px;
+            background: #fff;
+            display: flex;
+            padding: 5px 15px;
+            border-radius: 30px;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .search-bar input {
+            width: 100%;
+            height: 45px;
             border: none;
             outline: none;
-            font-size: 16px;
-            margin-bottom: 15px;
-            background: rgba(255,255,255,0.9);
+            font-size: 18px;
+            padding: 0 10px;
+            color: #333;
         }
 
-        button {
-            padding: 10px 30px;
-            border-radius: 20px;
+        .search-buttons {
+            margin-top: 25px;
+        }
+
+        .btn-google {
+            padding: 10px 25px;
+            margin: 5px;
             border: none;
-            background: #ff4e50; /* Цвет кнопки (можно сменить) */
-            color: white;
-            font-weight: bold;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #eee;
+            font-size: 14px;
             cursor: pointer;
-            transition: transform 0.2s;
+            border: 1px solid transparent;
+            backdrop-filter: blur(5px);
         }
 
-        button:active { transform: scale(0.95); }
+        .btn-google:hover {
+            border: 1px solid #ccc;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <div class="loader-container">
-            <div id="progress-bar"></div>
+        <div class="loader-wrapper">
+            <div id="loader-number">0%</div>
+            <div class="loader-container">
+                <div id="progress-bar"></div>
+            </div>
         </div>
     </div>
 
     <div id="main-content">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Поиск аниме...">
-            <br>
-            <button onclick="handleSearch()">Поиск</button>
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Поиск в Illich TV или введите URL">
+            </div>
+            <div class="search-buttons">
+                <button class="btn-google" onclick="startSearch()">Поиск аниме</button>
+                <button class="btn-google" onclick="lucky()">Мне повезёт!</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Настройка Supabase (вставь свои данные)
-        const SUPABASE_URL = 'https://your-project.supabase.co';
-        const SUPABASE_KEY = 'your-anon-key';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Логика загрузки
-        window.onload = () => {
+        // Анимация цифр и шкалы
+        function startLoading() {
             const bar = document.getElementById('progress-bar');
+            const num = document.getElementById('loader-number');
             const splash = document.getElementById('splash-screen');
             const main = document.getElementById('main-content');
+            
+            let count = 0;
+            const duration = 2500; // 2.5 секунды
+            const intervalTime = duration / 100;
 
-            // Запускаем шкалу
+            // Запускаем шкалу (CSS переход сделает всё плавно за 2.5с)
             setTimeout(() => {
                 bar.style.width = '100%';
-            }, 100);
+            }, 50);
 
-            // Через 2.5 сек скрываем сплеш и показываем контент
-            setTimeout(() => {
-                splash.style.opacity = '0';
+            // Интервал для цифр
+            const counter = setInterval(() => {
+                count++;
+                num.innerText = count + '%';
+                if (count >= 100) {
+                    clearInterval(counter);
+                    finishLoading();
+                }
+            }, intervalTime);
+
+            function finishLoading() {
                 setTimeout(() => {
-                    splash.style.display = 'none';
-                    main.style.display = 'flex';
-                }, 500);
-            }, 2600);
-        };
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                        main.style.display = 'flex';
+                        setTimeout(() => main.style.opacity = '1', 50);
+                    }, 800);
+                }, 300);
+            }
+        }
+
+        window.onload = startLoading;
 
         // Функция поиска
-        async function handleSearch() {
-            const query = document.getElementById('searchInput').value;
-            if (!query) return alert('Введите название!');
-            
-            console.log('Ищем:', query);
-            // Здесь будет логика запроса к API Shikimori или твоей базе в Supabase
+        function startSearch() {
+            const val = document.getElementById('searchInput').value;
+            if(val) {
+                alert('Ищем: ' + val + '\n(Здесь мы подключим ShikiVideo API)');
+            }
+        }
+
+        function lucky() {
+            alert('Случайное аниме загружается...');
         }
     </script>
 </body>
