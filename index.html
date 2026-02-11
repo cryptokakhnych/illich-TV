@@ -17,15 +17,20 @@
             position: fixed;
         }
 
-        /* Фиксированный фон, который не реагирует на клавиатуру */
+        /* ИСПРАВЛЕННЫЙ ФОН: Не расширяется и не сжимается */
         .background-fixed {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center;
-            background-size: cover;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
+            background: #000;
+        }
+        .background-fixed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Это предотвращает искажения при изменении высоты вьюпорта */
         }
 
         /* ЭКРАН ЗАГРУЗКИ */
@@ -79,43 +84,56 @@
             transition: width 2.5s linear;
         }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ (Профиль и Выход) */
-        .top-bar {
+        /* ОБЪЕДИНЕННАЯ ВЕРХНЯЯ ПАНЕЛЬ */
+        .top-bar-container {
             position: absolute;
             top: 20px;
-            width: 100%;
-            padding: 0 20px;
+            width: 90%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 5px 10px;
             z-index: 20;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
         .profile-icon {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             background: rgba(0, 212, 255, 0.2);
             border: 2px solid #00d4ff;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
+            font-size: 18px;
             box-shadow: 0 0 10px #00d4ff;
         }
 
+        .welcome-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            text-shadow: 0 0 8px #00d4ff;
+        }
+
         .logout-btn {
-            padding: 8px 15px;
-            background: rgba(255, 0, 0, 0.2);
+            background: transparent;
             border: 1px solid #ff4e50;
-            color: white;
-            border-radius: 15px;
-            font-size: 12px;
+            color: #ff4e50;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(255, 78, 80, 0.5);
+            transition: 0.3s;
         }
+        .logout-btn:hover { background: rgba(255, 78, 80, 0.2); }
 
         /* ГЛАВНЫЙ ЭКРАН */
         #main-content {
@@ -125,7 +143,7 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding-top: 8vh; /* ПАНЕЛЬ ПОДНЯТА ВЫШЕ */
+            padding-top: 90px; /* Отступ под верхнюю панель */
             opacity: 0;
             transition: opacity 1s ease;
         }
@@ -139,6 +157,7 @@
             padding: 5px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             z-index: 10;
+            margin-top: 10px;
         }
 
         .search-group input {
@@ -169,7 +188,7 @@
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 15px;
             overflow-y: auto;
-            max-height: 75vh;
+            max-height: 70vh;
             padding: 10px;
             scrollbar-width: none;
         }
@@ -182,7 +201,6 @@
             border-radius: 12px;
             padding: 8px;
             text-align: center;
-            cursor: pointer;
         }
         .anime-card img { width: 100%; border-radius: 8px; margin-bottom: 5px; }
         .anime-card div { font-size: 12px; font-weight: 600; height: 30px; overflow: hidden; }
@@ -190,7 +208,9 @@
 </head>
 <body onclick="closeKeyboard(event)">
 
-    <div class="background-fixed"></div>
+    <div class="background-fixed">
+        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png" alt="bg">
+    </div>
 
     <div id="splash-screen">
         <div class="loader-wrapper">
@@ -202,8 +222,9 @@
     </div>
 
     <div id="main-content">
-        <div class="top-bar">
+        <div class="top-bar-container" onclick="event.stopPropagation()">
             <div class="profile-icon">👤</div>
+            <div class="welcome-text">Приятного просмотра:)</div>
             <button class="logout-btn" onclick="location.reload()">Выход</button>
         </div>
 
@@ -220,7 +241,6 @@
             document.getElementById('searchInput').blur();
         }
 
-        // Следим за вводом: если пусто - удаляем результаты
         document.getElementById('searchInput').addEventListener('input', function() {
             if (this.value.trim() === "") {
                 document.getElementById('results-container').innerHTML = "";
@@ -233,9 +253,9 @@
             const splash = document.getElementById('splash-screen');
             const main = document.getElementById('main-content');
             
-            const duration = 2500;
-            const startTime = Date.now();
             bar.style.width = '100%';
+            const startTime = Date.now();
+            const duration = 2500;
 
             const timer = setInterval(() => {
                 const elapsed = Date.now() - startTime;
@@ -263,13 +283,10 @@
             const query = input.value.trim();
             const container = document.getElementById('results-container');
             
-            if (!query) {
-                container.innerHTML = "";
-                return;
-            }
+            if (!query) return;
 
             input.blur();
-            container.innerHTML = '<p style="text-align:center; width:100%; color:#00d4ff;">Загрузка...</p>';
+            container.innerHTML = '<p style="text-align:center; width:100%; color:#00d4ff;">Ищем в Shikimori...</p>';
 
             try {
                 const response = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(query)}&limit=15&order=popularity`);
