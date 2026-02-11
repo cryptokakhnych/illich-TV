@@ -6,7 +6,7 @@
     <title>Illich TV</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
         body, html { height: 100%; overflow: hidden; background: #000; color: white; }
 
@@ -25,38 +25,40 @@
             transition: opacity 0.8s ease;
         }
 
+        /* ЕДИНЫЙ БЛОК ЗАГРУЗКИ */
         .loader-wrapper {
-            width: 65%;
-            max-width: 350px;
-            margin-bottom: 120px; /* Позиция над телевизором */
-            text-align: center;
+            width: 60%;
+            max-width: 300px;
+            margin-bottom: 120px; /* Над телевизором */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
         }
 
         #loader-number {
-            font-size: 32px;
-            font-weight: 900;
-            margin-bottom: 15px;
-            color: #fff;
-            /* Неоновое свечение под стиль фото */
-            text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
-            letter-spacing: 2px;
+            font-size: 18px; /* Уменьшил размер */
+            font-weight: 600;
+            color: #00d4ff;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+            letter-spacing: 1px;
         }
 
         .loader-container {
             width: 100%;
             height: 6px;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
             overflow: hidden;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
         }
 
         #progress-bar {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #00d4ff, #ffffff);
-            box-shadow: 0 0 20px #00d4ff;
+            box-shadow: 0 0 15px #00d4ff;
             transition: width 2.5s linear;
         }
 
@@ -68,14 +70,13 @@
             background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center;
             background-size: cover;
             flex-direction: column;
-            justify-content: flex-start; /* Поднимаем выше */
+            justify-content: flex-start;
             align-items: center;
-            padding-top: 15vh; /* Отступ сверху для строки поиска */
+            padding-top: 15vh;
             opacity: 0;
             transition: opacity 1s ease;
         }
 
-        /* ЕДИНАЯ СТРОКА ПОИСКА */
         .search-group {
             width: 90%;
             max-width: 600px;
@@ -84,7 +85,6 @@
             border-radius: 50px;
             padding: 5px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-            overflow: hidden;
         }
 
         .search-group input {
@@ -106,16 +106,8 @@
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
         }
 
-        .search-btn:hover {
-            background: #00a8cc;
-        }
-
-        .search-btn:active {
-            transform: scale(0.98);
-        }
     </style>
 </head>
 <body>
@@ -144,42 +136,37 @@
             const main = document.getElementById('main-content');
             
             let progress = 0;
-            const step = 100 / (2500 / 30); // Расчет шага для 2.5 секунд
+            const startTime = Date.now();
+            const duration = 2500;
 
-            // Анимация полосы
-            setTimeout(() => { bar.style.width = '100%'; }, 50);
+            // Синхронный запуск шкалы и чисел
+            bar.style.width = '100%';
 
-            // Анимация чисел
-            const interval = setInterval(() => {
-                progress += step;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    showMain();
-                }
+            const timer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                progress = Math.min((elapsed / duration) * 100, 100);
+                
                 num.innerText = Math.floor(progress) + '%';
-            }, 30);
 
-            function showMain() {
-                setTimeout(() => {
-                    splash.style.opacity = '0';
+                if (progress >= 100) {
+                    clearInterval(timer);
                     setTimeout(() => {
-                        splash.style.display = 'none';
-                        main.style.display = 'flex';
-                        setTimeout(() => main.style.opacity = '1', 50);
-                    }, 800);
-                }, 400);
-            }
+                        splash.style.opacity = '0';
+                        setTimeout(() => {
+                            splash.style.display = 'none';
+                            main.style.display = 'flex';
+                            setTimeout(() => main.style.opacity = '1', 50);
+                        }, 800);
+                    }, 300);
+                }
+            }, 30);
         }
 
         window.onload = init;
 
         function executeSearch() {
             const query = document.getElementById('searchInput').value;
-            if (query) {
-                // Здесь будет вызов ShikiVideo API
-                alert('Ищем контент для: ' + query);
-            }
+            if (query) alert('Поиск: ' + query);
         }
     </script>
 </body>
