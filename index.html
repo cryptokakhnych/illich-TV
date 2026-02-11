@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Illich TV</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,11 +11,21 @@
         body, html { 
             height: 100%; 
             width: 100%;
-            overflow: hidden; 
             background: #000; 
             color: white;
-            /* Предотвращаем скролл всей страницы */
-            position: fixed; 
+            overflow: hidden;
+            position: fixed;
+        }
+
+        /* Фиксированный фон, который не реагирует на клавиатуру */
+        .background-fixed {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
         }
 
         /* ЭКРАН ЗАГРУЗКИ */
@@ -30,7 +40,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            z-index: 1000;
             transition: opacity 0.8s ease;
         }
 
@@ -50,7 +60,6 @@
             color: #00d4ff;
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 10px rgba(0, 212, 255, 0.8);
             letter-spacing: 1px;
-            z-index: 2;
         }
 
         .loader-container {
@@ -60,7 +69,6 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid rgba(0, 212, 255, 0.5);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
         #progress-bar {
@@ -71,18 +79,53 @@
             transition: width 2.5s linear;
         }
 
+        /* ВЕРХНЯЯ ПАНЕЛЬ (Профиль и Выход) */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00d4ff;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff4e50;
+            color: white;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(255, 78, 80, 0.5);
+        }
+
         /* ГЛАВНЫЙ ЭКРАН */
         #main-content {
             display: none;
             width: 100%;
             height: 100%;
-            /* background-attachment: fixed защищает от прыжков при открытии клавиатуры */
-            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png') no-repeat center center fixed;
-            background-size: cover;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding-top: 15vh;
+            padding-top: 8vh; /* ПАНЕЛЬ ПОДНЯТА ВЫШЕ */
             opacity: 0;
             transition: opacity 1s ease;
         }
@@ -102,8 +145,8 @@
             flex: 1;
             border: none;
             outline: none;
-            padding: 15px 25px;
-            font-size: 18px;
+            padding: 12px 20px;
+            font-size: 16px;
             background: transparent;
             color: #222;
         }
@@ -112,28 +155,23 @@
             background: #00d4ff;
             color: white;
             border: none;
-            padding: 0 30px;
+            padding: 0 25px;
             border-radius: 40px;
             font-weight: bold;
-            font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
         }
-
-        .search-btn:active { transform: scale(0.98); }
 
         #results-container {
             width: 95%;
             max-width: 800px;
-            margin-top: 25px;
+            margin-top: 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 15px;
             overflow-y: auto;
-            max-height: 70vh;
+            max-height: 75vh;
             padding: 10px;
             scrollbar-width: none;
-            -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
         }
         #results-container::-webkit-scrollbar { display: none; }
 
@@ -144,14 +182,15 @@
             border-radius: 12px;
             padding: 8px;
             text-align: center;
-            transition: transform 0.2s, border 0.2s;
             cursor: pointer;
         }
-        .anime-card img { width: 100%; border-radius: 8px; margin-bottom: 8px; }
-        .anime-card div { font-size: 13px; font-weight: 600; line-height: 1.2; height: 32px; overflow: hidden; }
+        .anime-card img { width: 100%; border-radius: 8px; margin-bottom: 5px; }
+        .anime-card div { font-size: 12px; font-weight: 600; height: 30px; overflow: hidden; }
     </style>
 </head>
 <body onclick="closeKeyboard(event)">
+
+    <div class="background-fixed"></div>
 
     <div id="splash-screen">
         <div class="loader-wrapper">
@@ -163,23 +202,32 @@
     </div>
 
     <div id="main-content">
+        <div class="top-bar">
+            <div class="profile-icon">👤</div>
+            <button class="logout-btn" onclick="location.reload()">Выход</button>
+        </div>
+
         <div class="search-group" onclick="event.stopPropagation()">
             <input type="text" id="searchInput" placeholder="Найти аниме..." autocomplete="off">
             <button class="search-btn" onclick="executeSearch()">ПОИСК</button>
         </div>
+        
         <div id="results-container"></div>
     </div>
 
     <script>
-        // Закрытие клавиатуры при клике вне инпута
         function closeKeyboard(e) {
             document.getElementById('searchInput').blur();
         }
 
-        function init() {
-            // Фиксируем высоту body, чтобы клавиатура не "сжимала" фон
-            document.body.style.height = window.innerHeight + 'px';
+        // Следим за вводом: если пусто - удаляем результаты
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (this.value.trim() === "") {
+                document.getElementById('results-container').innerHTML = "";
+            }
+        });
 
+        function init() {
             const bar = document.getElementById('progress-bar');
             const num = document.getElementById('loader-number');
             const splash = document.getElementById('splash-screen');
@@ -187,13 +235,11 @@
             
             const duration = 2500;
             const startTime = Date.now();
-
             bar.style.width = '100%';
 
             const timer = setInterval(() => {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min((elapsed / duration) * 100, 100);
-                
                 num.innerText = Math.floor(progress) + '%';
 
                 if (progress >= 100) {
@@ -214,23 +260,24 @@
 
         async function executeSearch() {
             const input = document.getElementById('searchInput');
-            const query = input.value;
+            const query = input.value.trim();
             const container = document.getElementById('results-container');
             
-            if (!query) return;
+            if (!query) {
+                container.innerHTML = "";
+                return;
+            }
 
-            // Закрываем клавиатуру после начала поиска
             input.blur();
-
-            container.innerHTML = '<p style="text-align:center; width:100%; text-shadow: 0 0 10px #00d4ff;">Ищем в базе Shikimori...</p>';
+            container.innerHTML = '<p style="text-align:center; width:100%; color:#00d4ff;">Загрузка...</p>';
 
             try {
-                const response = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(query)}&limit=12&order=popularity`);
+                const response = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(query)}&limit=15&order=popularity`);
                 const data = await response.json();
                 container.innerHTML = ''; 
 
                 if (data.length === 0) {
-                    container.innerHTML = '<p style="text-align:center; width:100%;">Ничего не найдено :(</p>';
+                    container.innerHTML = '<p style="text-align:center; width:100%;">Ничего не найдено</p>';
                     return;
                 }
 
@@ -238,17 +285,17 @@
                     const card = document.createElement('div');
                     card.className = 'anime-card';
                     card.innerHTML = `
-                        <img src="https://shikimori.one${anime.image.preview}" alt="${anime.russian || anime.name}">
+                        <img src="https://shikimori.one${anime.image.preview}" alt="img">
                         <div>${anime.russian || anime.name}</div>
                     `;
                     card.onclick = (e) => {
-                        e.stopPropagation(); // Чтобы не срабатывал blur при клике на карточку
+                        e.stopPropagation();
                         alert(`Shikimori ID: ${anime.id}`);
                     };
                     container.appendChild(card);
                 });
             } catch (error) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:red;">Ошибка подключения</p>';
+                container.innerHTML = '<p style="text-align:center; width:100%; color:red;">Ошибка сети</p>';
             }
         }
         
