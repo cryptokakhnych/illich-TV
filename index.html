@@ -29,36 +29,43 @@
         .loader-wrapper {
             width: 60%;
             max-width: 300px;
-            margin-bottom: 120px; /* Над телевизором */
+            margin-bottom: 120px; /* Позиция над телевизором */
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 2px; /* Максимально близко к шкале */
         }
 
         #loader-number {
-            font-size: 18px; /* Уменьшил размер */
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 800;
             color: #00d4ff;
-            text-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
+            /* Легкая темная обводка для четкости */
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000,
+                 0 0 10px rgba(0, 212, 255, 0.8);
             letter-spacing: 1px;
+            z-index: 2;
         }
 
         .loader-container {
             width: 100%;
             height: 6px;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             overflow: hidden;
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
         }
 
         #progress-bar {
             width: 0%;
             height: 100%;
             background: linear-gradient(90deg, #00d4ff, #ffffff);
-            box-shadow: 0 0 15px #00d4ff;
+            box-shadow: 0 0 20px #00d4ff;
             transition: width 2.5s linear;
         }
 
@@ -106,7 +113,10 @@
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
+            transition: background 0.3s;
         }
+
+        .search-btn:active { transform: scale(0.98); }
 
     </style>
 </head>
@@ -135,21 +145,22 @@
             const splash = document.getElementById('splash-screen');
             const main = document.getElementById('main-content');
             
-            let progress = 0;
-            const startTime = Date.now();
             const duration = 2500;
+            const startTime = Date.now();
 
-            // Синхронный запуск шкалы и чисел
+            // Запуск полосы
             bar.style.width = '100%';
 
+            // Запуск синхронных цифр
             const timer = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                progress = Math.min((elapsed / duration) * 100, 100);
+                const progress = Math.min((elapsed / duration) * 100, 100);
                 
                 num.innerText = Math.floor(progress) + '%';
 
                 if (progress >= 100) {
                     clearInterval(timer);
+                    // Плавный переход
                     setTimeout(() => {
                         splash.style.opacity = '0';
                         setTimeout(() => {
@@ -159,7 +170,7 @@
                         }, 800);
                     }, 300);
                 }
-            }, 30);
+            }, 16); // ~60 FPS для плавности
         }
 
         window.onload = init;
