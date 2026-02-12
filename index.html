@@ -17,7 +17,7 @@
             -webkit-text-size-adjust: 100%;
         }
         
-        /* ФОН: Полная фиксация без расширения */
+        /* ФОН: Исправлено растяжение */
         #bg-container { 
             position: fixed; 
             top: 0; 
@@ -25,7 +25,7 @@
             width: 100%; 
             height: 100%; 
             z-index: -1; 
-            background: #000;
+            background: #000; /* Черный цвет там, где нет картинки */
         }
 
         .background-fixed {
@@ -34,7 +34,8 @@
             background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
             background-position: center;
             background-repeat: no-repeat;
-            background-size: cover; /* Оптимально для заполнения */
+            /* contain делает картинку уже, сохраняя пропорции */
+            background-size: contain; 
             opacity: 0.6;
         }
 
@@ -110,7 +111,7 @@
     </div>
 
     <script>
-        // ФИКС ФОНА: устанавливаем высоту в пикселях один раз при загрузке
+        // ФИКС ФОНА
         function fixBackground() {
             const h = window.innerHeight;
             document.getElementById('bg-container').style.height = h + 'px';
@@ -119,17 +120,16 @@
         window.addEventListener('load', fixBackground);
         window.addEventListener('orientationchange', () => setTimeout(fixBackground, 100));
 
-        // Функция закрытия клавиатуры
+        // Закрытие клавиатуры
         function closeKeyboard(e) {
             const input = document.getElementById('sInp');
             if (document.activeElement === input) {
                 input.blur();
-                // Возвращаем вьюпорт в нормальное состояние
                 window.scrollTo(0, 0);
             }
         }
 
-        // ЛОГИКА ЗАГРУЗКИ (2.5 секунды)
+        // ЗАГРУЗКА
         let progress = 0;
         const duration = 2500;
         const intervalTime = 25;
@@ -180,12 +180,10 @@
             const btn = document.getElementById('manual-btn');
             const statusText = document.getElementById('status-text');
             const url = `https://pizdec.pro/id/${id}`;
-            
             layer.style.display = 'block';
             iframe.src = url;
             statusText.innerText = "Проверка плеера...";
             btn.style.display = 'none';
-
             setTimeout(() => {
                 statusText.innerText = "Если плеер не загрузился, нажмите кнопку ниже:";
                 btn.href = url;
