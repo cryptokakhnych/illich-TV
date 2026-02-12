@@ -179,7 +179,7 @@
             width: 94%; 
             height: 82vh; 
             margin-bottom: 25px; 
-            background: rgba(255, 255, 255, 0.02); 
+            background: rgba(0, 0, 0, 0.4); 
             border-radius: 20px;
             border: 1.5px solid rgba(255, 255, 255, 0.2); 
             overflow: hidden; 
@@ -222,7 +222,7 @@
 
         .card { 
             width: 100%;
-            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 8px; 
+            background: rgba(0,0,0,0.5); border-radius: 12px; padding: 8px; 
             border: 1px solid rgba(255,255,255,0.1); 
             display: flex; 
             align-items: center; 
@@ -240,6 +240,7 @@
             border-radius: 6px; 
             display: block; 
             flex-shrink: 0;
+            filter: brightness(0.7);
         }
         .card div { 
             font-size: 14px; 
@@ -271,18 +272,12 @@
         }
         .forum-toolbar {
             display: flex; align-items: center; gap: 5px;
-            background: rgba(0,0,0,0.3); /* Общая стеклянная панель */
+            background: rgba(0,0,0,0.4); 
             border: 1px solid rgba(0,212,255,0.3);
             border-radius: 30px;
             padding: 4px;
         }
 
-        .forum-search {
-            flex: 1; border: none; background: transparent; 
-            padding: 5px 10px; font-size: 13px; outline: none;
-        }
-        
-        /* Поиск белого цвета, как у аниме */
         .forum-search-input {
             flex: 1;
             background: #fff; 
@@ -302,7 +297,7 @@
         .forum-add-btn {
             width: 32px; height: 32px; border-radius: 50%;
             border: none;
-            background: #00d4ff; /* Синяя кнопка */
+            background: #00d4ff; 
             color: #fff; font-weight: bold;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             text-shadow: 1px 1px 2px #000;
@@ -314,7 +309,7 @@
             border: none;
             background: #ff4b4b; 
             color: #fff; font-weight: bold;
-            display: none; /* Скрыто по умолчанию */
+            display: none; 
             align-items: center; justify-content: center; cursor: pointer;
             text-shadow: 1px 1px 2px #000;
             font-size: 16px;
@@ -324,7 +319,7 @@
         
         .new-topic-form {
             display: flex; flex-direction: column; gap: 10px; padding: 15px;
-            background: rgba(0,0,0,0.5); border-radius: 10px; margin-bottom: 10px;
+            background: rgba(0,0,0,0.6); border-radius: 10px; margin-bottom: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
         .new-topic-input {
@@ -335,7 +330,7 @@
         }
 
         .topic-card {
-            background: rgba(0,0,0,0.3); /* Затемнение как у аниме иконок */
+            background: rgba(0,0,0,0.5); 
             padding: 12px; border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
             display: flex; align-items: center; justify-content: space-between;
@@ -378,16 +373,20 @@
 
         /* ПРОФИЛЬ */
         .profile-view {
-            padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            padding: 20px; display: flex; flex-direction: column; gap: 15px; color: #fff;
         }
         .profile-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: rgba(0,0,0,0.3); /* Затемнение как у аниме */
+            padding: 15px; background: rgba(0,0,0,0.5); 
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .profile-label { color: #aaa; font-size: 13px; }
+        .profile-label { color: #fff; font-size: 13px; }
         .profile-val { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; }
+        .profile-input-edit {
+            background: transparent; border: none; border-bottom: 1px solid #00d4ff; color: #fff;
+            text-align: right; font-weight: bold; font-size: 14px; outline: none; width: 60%;
+        }
         
         .anon-toggle-btn {
             background: transparent; border: 1px solid #00d4ff; color: #00d4ff;
@@ -400,19 +399,11 @@
             padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;
         }
 
-        /* Формы редактирования в профиле */
-        .edit-form-container {
-            padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .edit-inp {
-            width: 100%; padding: 8px; background: #fff; color: #000; 
-            border: none; border-radius: 5px; font-size: 13px; outline: none;
-        }
-        .save-btn {
-            background: #00d4ff; color: #000; font-weight: bold; padding: 8px; 
-            border-radius: 5px; border: none; cursor: pointer; width: 100%; margin-top: 5px;
+        .save-profile-btn {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
+            border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+            display: none; z-index: 100;
         }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
@@ -472,6 +463,7 @@
                 <div id="container-label" class="container-title">История просмотров</div>
             </div>
             <div id="results"></div>
+            <button id="save-profile-btn" class="save-profile-btn" onclick="saveProfileChanges()">СОХРАНИТЬ</button>
         </div>
     </div>
 
@@ -487,7 +479,6 @@
         let forumTopics = JSON.parse(localStorage.getItem('forumTopics')) || [
             { id: 1, title: 'Правила форума', messages: [{user: 'Admin', text: 'Добро пожаловать! Будьте вежливы.', time: '12.02.2024 10:00'}] }
         ];
-        // Дополненный профиль
         let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
             login: 'Пользователь',
             email: '',
@@ -503,17 +494,13 @@
         let currentMode = 'history'; 
         let currentTopicId = null;
         let searchTimeout;
-        let deleteMode = false; // Для админа
+        let deleteMode = false;
 
         window.addEventListener('load', () => { 
             renderHistory(); 
-            
             const glass = document.getElementById('glass');
-            const fixedHeight = window.innerHeight * 0.82;
-            glass.style.height = fixedHeight + 'px';
-
-            const h = window.innerHeight;
-            document.getElementById('bg-container').style.height = h + 'px';
+            glass.style.height = (window.innerHeight * 0.82) + 'px';
+            document.getElementById('bg-container').style.height = window.innerHeight + 'px';
             
             if(localStorage.getItem('illich_is_logged_in') === 'true') {
                 document.getElementById('guest-menu').style.display = 'none';
@@ -521,7 +508,6 @@
             }
         });
 
-        // МЕНЮ И АВТОРИЗАЦИЯ
         function toggleMenu() {
             const m = document.getElementById('menu-overlay');
             m.style.display = (m.style.display === 'block') ? 'none' : 'block';
@@ -549,15 +535,9 @@
         function processAuth() {
             const emailInp = document.getElementById('auth-email').value;
             const passInp = document.getElementById('auth-pass').value;
-            
-            if(emailInp) {
-                userProfile.login = emailInp; // Используем ввод как логин/ID
-                userProfile.email = emailInp;
-            }
+            if(emailInp) { userProfile.login = emailInp; userProfile.email = emailInp; }
             if(passInp) userProfile.password = passInp;
-            
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('user-menu').style.display = 'block';
             localStorage.setItem('illich_is_logged_in', 'true');
@@ -568,34 +548,24 @@
             document.getElementById('user-menu').style.display = 'none';
             document.getElementById('guest-menu').style.display = 'block';
             document.getElementById('auth-form').style.display = 'none';
-            deleteMode = false;
             goHome();
         }
 
-        // НАВИГАЦИЯ
         function handleTyping(val) {
             clearTimeout(searchTimeout);
             if(val.trim().length > 0) {
                 isSearching = true;
                 currentMode = 'search';
                 document.getElementById('container-label').innerText = "Результаты поиска";
-                searchTimeout = setTimeout(() => {
-                    search();
-                }, 300);
+                searchTimeout = setTimeout(() => search(), 300);
             } else {
                 goHome();
             }
         }
 
         function goHome() {
-            if(currentMode === 'topic') {
-                openForum(); 
-                return;
-            }
-            if(currentMode === 'profile_edit') {
-                openProfile();
-                return;
-            }
+            document.getElementById('save-profile-btn').style.display = 'none';
+            if(currentMode === 'topic') { openForum(); return; }
             isSearching = false;
             currentMode = 'history';
             document.getElementById('sInp').value = '';
@@ -604,22 +574,10 @@
             renderHistory();
         }
 
-        // ОТРИСОВКА ИСТОРИИ
-        function renderHistory() {
-            const res = document.getElementById('results');
-            res.innerHTML = '';
-            if(history.length === 0) {
-                res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">История пуста</p>';
-                return;
-            }
-            history.forEach(a => res.appendChild(createCard(a)));
-        }
-
         function createCard(a) {
             const d = document.createElement('div');
             d.className = 'card';
-            
-            const isFav = favorites.some(f => f.id === a.id);
+            const isFav = favorites.some(f => String(f.id) === String(a.id));
             const favIcon = isFav ? '❤️' : '🤍';
             const favClass = isFav ? 'fav-active' : '';
 
@@ -631,6 +589,13 @@
             return d;
         }
 
+        function renderHistory() {
+            const res = document.getElementById('results');
+            res.innerHTML = '';
+            if(history.length === 0) { res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">История пуста</p>'; return; }
+            history.forEach(a => res.appendChild(createCard(a)));
+        }
+
         async function search() {
             const q = document.getElementById('sInp').value;
             if(!q.trim()) return;
@@ -640,20 +605,14 @@
                 const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
                 const data = await r.json();
                 res.innerHTML = '';
-                if(data.length === 0) {
-                    res.innerHTML = '<p style="text-align:center; padding:20px;">Не найдено</p>';
-                    return;
-                }
+                if(data.length === 0) { res.innerHTML = '<p style="text-align:center; padding:20px;">Не найдено</p>'; return; }
                 data.forEach(a => {
                     const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
                     res.appendChild(createCard(obj));
                 });
-            } catch(e) { 
-                res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка</p>';
-            }
+            } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка</p>'; }
         }
 
-        // ИЗБРАННОЕ
         function openFavorites() {
             hideMenu();
             currentMode = 'favorites';
@@ -664,44 +623,32 @@
         function renderFavorites() {
             const res = document.getElementById('results');
             res.innerHTML = '';
-            if(favorites.length === 0) {
-                res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Нет избранных</p>';
-                return;
-            }
+            if(favorites.length === 0) { res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Нет избранных</p>'; return; }
             favorites.forEach(a => res.appendChild(createCard(a)));
         }
 
         function toggleFav(e, id, title, img) {
             e.stopPropagation();
-            const index = favorites.findIndex(f => f.id == id);
-            
-            // Логика переключения
+            const index = favorites.findIndex(f => String(f.id) === String(id));
             if(index > -1) {
                 favorites.splice(index, 1);
-                // Если мы в избранном, удаляем элемент визуально сразу
-                if(currentMode === 'favorites') {
-                    renderFavorites();
-                    return;
-                }
-                // Иначе меняем иконку на белую
                 e.target.innerText = '🤍';
                 e.target.classList.remove('fav-active');
+                if(currentMode === 'favorites') renderFavorites();
             } else {
                 favorites.unshift({ id, title, img });
-                // Сразу краснеем
                 e.target.innerText = '❤️';
                 e.target.classList.add('fav-active');
             }
             localStorage.setItem('animeFavorites', JSON.stringify(favorites));
         }
 
-        // ПРОФИЛЬ
         function openProfile() {
             hideMenu();
             currentMode = 'profile';
             document.getElementById('container-label').innerText = "Профиль";
+            document.getElementById('save-profile-btn').style.display = 'block';
             const res = document.getElementById('results');
-            
             const anonState = userProfile.isAnon ? 'Аноним' : 'Не аноним';
             const anonClass = userProfile.isAnon ? 'anon-active' : '';
 
@@ -709,82 +656,40 @@
                 <div class="profile-view">
                     <div class="profile-row">
                         <span class="profile-label">Логин</span>
-                        <span class="profile-val">${userProfile.login}</span>
+                        <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email</span>
+                        <input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Дата рождения</span>
-                        <span class="profile-val">${userProfile.dob}</span>
+                        <input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Национальность</span>
-                        <span class="profile-val">${userProfile.nat}</span>
+                        <input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Пароль</span>
+                        <input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Режим форума</span>
                         <button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button>
                     </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Пароль</span>
-                        <button class="profile-btn" onclick="showChangePass()">Изменить</button>
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Email</span>
-                        <button class="profile-btn" onclick="showChangeEmail()">Изменить</button>
-                    </div>
                 </div>
             `;
         }
 
-        function showChangePass() {
-            currentMode = 'profile_edit';
-            const res = document.getElementById('results');
-            res.innerHTML = `
-                <div class="profile-view">
-                     <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">Смена пароля</h3>
-                     <div class="edit-form-container">
-                        <input type="password" class="edit-inp" placeholder="Введите старый пароль">
-                        <input type="password" id="new-pass" class="edit-inp" placeholder="Введите новый пароль">
-                        <button class="save-btn" onclick="saveNewPass()">Сохранить</button>
-                     </div>
-                     <button class="auth-back" onclick="openProfile()" style="background:none; border:none; margin-top:10px; color:#aaa;">Отмена</button>
-                </div>
-            `;
-        }
-
-        function saveNewPass() {
-            const newP = document.getElementById('new-pass').value;
-            if(newP) {
-                userProfile.password = newP;
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
-                alert("Пароль сохранен");
-                openProfile();
-            }
-        }
-
-        function showChangeEmail() {
-            currentMode = 'profile_edit';
-            const res = document.getElementById('results');
-            res.innerHTML = `
-                <div class="profile-view">
-                     <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">Смена Email</h3>
-                     <div class="edit-form-container">
-                        <input type="email" class="edit-inp" placeholder="Введите старый email">
-                        <input type="email" id="new-email" class="edit-inp" placeholder="Введите новый email">
-                        <button class="save-btn" onclick="saveNewEmail()">Сохранить</button>
-                     </div>
-                     <button class="auth-back" onclick="openProfile()" style="background:none; border:none; margin-top:10px; color:#aaa;">Отмена</button>
-                </div>
-            `;
-        }
-
-        function saveNewEmail() {
-            const newE = document.getElementById('new-email').value;
-            if(newE) {
-                userProfile.email = newE;
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
-                alert("Email сохранен");
-                openProfile();
-            }
+        function saveProfileChanges() {
+            userProfile.login = document.getElementById('edit-login').value;
+            userProfile.email = document.getElementById('edit-email').value;
+            userProfile.dob = document.getElementById('edit-dob').value;
+            userProfile.nat = document.getElementById('edit-nat').value;
+            userProfile.password = document.getElementById('edit-pass').value;
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            alert("Профиль сохранен");
         }
 
         function toggleAnon() {
@@ -793,102 +698,44 @@
             openProfile();
         }
 
-        // ФОРУМ
         function openForum() {
             hideMenu();
             currentMode = 'forum';
-            deleteMode = false; // сброс при входе
+            deleteMode = false;
+            document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Форум";
             const res = document.getElementById('results');
-            
-            // Проверка админа
             const isAdmin = (userProfile.login === ADMIN_ID);
-            const displayAdminBtn = isAdmin ? 'flex' : 'none';
-
             res.innerHTML = `
                 <div class="forum-header-bar">
                     <div class="forum-toolbar">
                         <input type="text" class="forum-search-input" placeholder="Поиск темы..." oninput="filterTopics(this.value)">
                         <div class="forum-btn-group">
                              <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
-                             <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${displayAdminBtn}" onclick="toggleDeleteMode()">-</div>
+                             <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${isAdmin ? 'flex' : 'none'}" onclick="toggleDeleteMode()">-</div>
                         </div>
                     </div>
                 </div>
-                <div id="new-topic-area" style="display:none;">
-                    <div class="new-topic-form">
-                        <input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы">
-                        <button class="new-topic-btn" onclick="createTopic()">Создать тему</button>
-                    </div>
-                </div>
+                <div id="new-topic-area" style="display:none;"><div class="new-topic-form">
+                    <input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы">
+                    <button class="new-topic-btn" onclick="createTopic()">Создать тему</button>
+                </div></div>
                 <div id="topics-list" style="padding:10px;"></div>
             `;
             renderTopicsList();
-        }
-
-        function toggleDeleteMode() {
-            deleteMode = !deleteMode;
-            const btn = document.getElementById('adm-del-btn');
-            if(deleteMode) btn.classList.add('del-mode-active');
-            else btn.classList.remove('del-mode-active');
-            renderTopicsList(); // Перерисовка кнопок
-        }
-
-        function toggleTopicForm() {
-            const area = document.getElementById('new-topic-area');
-            area.style.display = (area.style.display === 'none') ? 'block' : 'none';
-        }
-
-        function createTopic() {
-            const title = document.getElementById('new-topic-title').value;
-            if(!title.trim()) return;
-            const newId = Date.now();
-            forumTopics.unshift({ id: newId, title: title, messages: [] });
-            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
-            toggleTopicForm();
-            renderTopicsList();
-        }
-
-        function filterTopics(val) {
-            renderTopicsList(val);
         }
 
         function renderTopicsList(filter = '') {
             const list = document.getElementById('topics-list');
             list.innerHTML = '';
             const filtered = forumTopics.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()));
-            
-            if(filtered.length === 0) {
-                list.innerHTML = '<p style="text-align:center; opacity:0.5; padding:20px;">Нет тем</p>';
-                return;
-            }
-
             filtered.forEach(t => {
                 const d = document.createElement('div');
                 d.className = 'topic-card';
-                
-                let btnHtml = '';
-                if(deleteMode) {
-                    btnHtml = `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>`;
-                } else {
-                    btnHtml = `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`;
-                }
-
-                d.innerHTML = `
-                    <span class="topic-title">${t.title}</span>
-                    ${btnHtml}
-                `;
+                d.innerHTML = `<span class="topic-title">${t.title}</span>` + 
+                    (deleteMode ? `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>` : `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`);
                 list.appendChild(d);
             });
-        }
-
-        function deleteTopic(id) {
-            forumTopics = forumTopics.filter(t => t.id !== id);
-            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
-            deleteMode = false; // Отключаем режим после удаления 1 темы
-            const btn = document.getElementById('adm-del-btn');
-            if(btn) btn.classList.remove('del-mode-active');
-            renderTopicsList();
         }
 
         function openTopic(id) {
@@ -897,13 +744,11 @@
             const topic = forumTopics.find(t => t.id === id);
             document.getElementById('container-label').innerText = topic.title;
             const res = document.getElementById('results');
-            res.innerHTML = `
-                <div class="chat-container" id="chat-msgs"></div>
+            res.innerHTML = `<div class="chat-container" id="chat-msgs"></div>
                 <div class="chat-input-bar">
                     <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
                     <button class="chat-send-btn" onclick="sendMessage()">➤</button>
-                </div>
-            `;
+                </div>`;
             renderChatMessages(topic);
         }
 
@@ -913,72 +758,48 @@
             topic.messages.forEach(m => {
                 const d = document.createElement('div');
                 d.className = 'chat-msg';
-                d.innerHTML = `
-                    <div class="chat-user">${m.user}</div>
-                    <div class="chat-text">${m.text}</div>
-                    <div class="chat-time">${m.time}</div>
-                `;
+                d.innerHTML = `<div class="chat-user">${m.user}</div><div class="chat-text">${m.text}</div><div class="chat-time">${m.time}</div>`;
                 container.appendChild(d);
             });
-            const scrollBox = document.getElementById('results');
-            scrollBox.scrollTop = scrollBox.scrollHeight;
+            document.getElementById('results').scrollTop = document.getElementById('results').scrollHeight;
         }
 
         function sendMessage() {
             const txt = document.getElementById('chat-in').value;
             if(!txt.trim()) return;
-            
             const topic = forumTopics.find(t => t.id === currentTopicId);
             const now = new Date();
-            const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
-            const userName = userProfile.isAnon ? 'Аноним' : userProfile.login;
-
-            topic.messages.push({
-                user: userName,
-                text: txt,
-                time: timeStr
-            });
+            topic.messages.push({ user: userProfile.isAnon ? 'Аноним' : userProfile.login, text: txt, time: now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5) });
             localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
             document.getElementById('chat-in').value = '';
             renderChatMessages(topic);
         }
 
-        // ПЛЕЕР
         function play(id, title, img) {
-            const entry = { id, title, img };
-            history = history.filter(item => item.id !== id); 
-            history.unshift(entry);
+            history = history.filter(item => String(item.id) !== String(id)); 
+            history.unshift({ id, title, img });
             if(history.length > 20) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
-            
             if(currentMode === 'history') renderHistory();
-
-            const layer = document.getElementById('player-layer');
-            const iframe = document.getElementById('player-iframe');
-            layer.style.display = 'block';
-            iframe.src = `https://pizdec.pro/id/${id}`;
+            document.getElementById('player-layer').style.display = 'block';
+            document.getElementById('player-iframe').src = `https://pizdec.pro/id/${id}`;
         }
 
-        function closeVideo() {
-            document.getElementById('player-layer').style.display = 'none';
-            document.getElementById('player-iframe').src = '';
-        }
-
+        function closeVideo() { document.getElementById('player-layer').style.display = 'none'; document.getElementById('player-iframe').src = ''; }
         function closeKeyboard() { document.getElementById('sInp').blur(); }
+        function toggleTopicForm() { const a = document.getElementById('new-topic-area'); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
+        function toggleDeleteMode() { deleteMode = !deleteMode; document.getElementById('adm-del-btn').classList.toggle('del-mode-active'); renderTopicsList(); }
+        function deleteTopic(id) { forumTopics = forumTopics.filter(t => t.id !== id); localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); renderTopicsList(); }
+        function createTopic() { const t = document.getElementById('new-topic-title').value; if(!t.trim()) return; forumTopics.unshift({ id: Date.now(), title: t, messages: [] }); localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); openForum(); }
 
-        // ЗАГРУЗКА
         let prog = 0;
         let loadInt = setInterval(() => {
             prog += 2;
             if (prog >= 100) {
-                prog = 100;
                 clearInterval(loadInt);
                 setTimeout(() => {
                     document.getElementById('splash-screen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('splash-screen').style.display = 'none';
-                        document.getElementById('main-content').style.display = 'flex';
-                    }, 500);
+                    setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; document.getElementById('main-content').style.display = 'flex'; }, 500);
                 }, 200);
             }
             document.getElementById('bar').style.width = prog + '%';
