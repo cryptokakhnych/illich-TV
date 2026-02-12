@@ -8,168 +8,114 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100%; width: 100%; background: #000; color: white; overflow: hidden; position: fixed; }
         .background-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .background-fixed img { width: 100%; height: 100%; object-fit: cover; }
+        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
 
         /* ЭКРАН ЗАГРУЗКИ */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/675D03F8-DE2B-4844-9B3F-011C5811F4EA.png') center/cover;
+            background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/675D03F8-DE2B-4844-9B3F-011C5811F4EA.png') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s ease;
         }
-        #loader-number { font-size: 18px; font-weight: 800; color: #00d4ff; text-shadow: 0 0 10px rgba(0, 212, 255, 0.8); }
-        .loader-container { width: 200px; height: 6px; background: rgba(0, 0, 0, 0.7); border-radius: 10px; overflow: hidden; border: 1px solid rgba(0, 212, 255, 0.5); }
-        #progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00d4ff, #ffffff); box-shadow: 0 0 20px #00d4ff; transition: width 2.5s linear; }
 
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
-        .top-bar-container {
-            position: absolute; top: 15px; width: 90%; max-width: 600px; left: 5%;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px); border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 50px; display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; z-index: 20;
-        }
-        .profile-icon { font-size: 20px; border: 2px solid #00d4ff; border-radius: 50%; padding: 5px; box-shadow: 0 0 10px #00d4ff; }
-        .welcome-text { font-size: 13px; font-weight: 600; text-shadow: 0 0 8px #00d4ff; }
-        .logout-btn { border: 1px solid #ff4e50; color: #ff4e50; background: none; padding: 5px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; }
+        /* ПОИСК И ИНТЕРФЕЙС */
+        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; opacity: 0; transition: 0.5s; }
+        .top-bar { position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid #00d4ff33; }
+        
+        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; }
+        .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; }
+        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 20px; border-radius: 50px; font-weight: bold; }
 
-        /* КОНТЕНТ */
-        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 85px; opacity: 0; transition: opacity 1s ease; }
-        .search-group { width: 90%; max-width: 600px; display: flex; background: rgba(255, 255, 255, 0.95); border-radius: 50px; padding: 5px; z-index: 10; }
-        .search-group input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; background: transparent; color: #000; }
-        .search-btn { background: #00d4ff; color: white; border: none; padding: 0 20px; border-radius: 40px; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
-
-        #results-container { width: 95%; max-width: 800px; margin-top: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; overflow-y: auto; flex-grow: 1; padding-bottom: 100px; }
-        #results-container::-webkit-scrollbar { display: none; }
-        .anime-card { background: rgba(0, 0, 0, 0.7); border-radius: 12px; padding: 10px; text-align: center; border: 1px solid rgba(0, 212, 255, 0.2); transition: 0.3s; }
-        .anime-card img { width: 100%; border-radius: 8px; margin-bottom: 8px; object-fit: cover; aspect-ratio: 3/4; }
-        .anime-card div { font-size: 12px; font-weight: bold; color: white; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px 100px; overflow-y: auto; }
+        .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #ffffff11; text-align: center; }
+        .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
+        .card div { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* ПЛЕЕР */
-        #player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; flex-direction: column; }
-        #video-frame { width: 100%; height: 100%; border: none; }
-        .player-ui { position: absolute; top: 40px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 2001; }
-        .btn-close { background: #00d4ff; color: white; border: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; box-shadow: 0 0 20px #00d4ff; cursor: pointer; }
-        #source-status { font-size: 12px; color: #00d4ff; text-shadow: 0 0 5px #000; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 10px; }
+        #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
+        #player-iframe { width: 100%; height: 100%; border: none; }
+        .close-btn { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); background: #00d4ff; color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 800; box-shadow: 0 0 20px #00d4ff; z-index: 2001; }
     </style>
 </head>
-<body onclick="document.activeElement.blur()">
+<body>
 
     <div class="background-fixed">
-        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png" alt="bg">
+        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png">
     </div>
 
     <div id="splash-screen">
-        <div id="loader-number">0%</div>
-        <div class="loader-container"><div id="progress-bar"></div></div>
+        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px;" id="perc">0%</div>
+        <div style="width: 200px; height: 4px; background: #222; border-radius: 10px;">
+            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: 0.1s;"></div>
+        </div>
     </div>
 
     <div id="main-content">
-        <div class="top-bar-container" onclick="event.stopPropagation()">
-            <div class="profile-icon">👤</div>
-            <div class="welcome-text">Приятного просмотра:)</div>
-            <button class="logout-btn" onclick="location.reload()">Выход</button>
+        <div class="top-bar">
+            <span style="font-size: 12px;">👤 Приятного просмотра!</span>
+            <button onclick="location.reload()" style="background:none; border: 1px solid #ff4e50; color: #ff4e50; padding: 4px 10px; border-radius: 20px; font-size: 10px;">Выход</button>
         </div>
-        <div class="search-group" onclick="event.stopPropagation()">
-            <input type="text" id="searchInput" placeholder="Найти аниме..." autocomplete="off">
-            <button class="search-btn" onclick="executeSearch()">ПОИСК</button>
+
+        <div class="search-box">
+            <input type="text" id="sInp" placeholder="Найти аниме (например, Наруто)...">
+            <button class="search-btn" onclick="search()">ПОИСК</button>
         </div>
-        <div id="results-container"></div>
+
+        <div id="results"></div>
     </div>
 
-    <div id="player-overlay">
-        <div class="player-ui">
-            <button class="btn-close" onclick="closePlayer()">✕ ЗАКРЫТЬ ПЛЕЕР</button>
-            <div id="source-status">Подключаем источник 1...</div>
-        </div>
-        <iframe id="video-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <div id="player-layer">
+        <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ ПЛЕЕР</button>
+        <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
     <script>
-        let currentSourceIndex = 0;
-        let activeAnimeId = null;
-        let sourceTimer = null;
-
-        const sources = [
-            (id) => `https://shiza.pro/shiki/${id}`, 
-            (id) => `https://vidsrc.me/embed/anime?shikimori=${id}`,
-            (id) => `https://kodik.info/find-player?shikimori_id=${id}`
-        ];
-
-        function openPlayer(id) {
-            activeAnimeId = id;
-            currentSourceIndex = 0;
-            document.getElementById('player-overlay').style.display = 'flex';
-            tryNextSource();
-        }
-
-        function tryNextSource() {
-            if (currentSourceIndex >= sources.length) {
-                document.getElementById('source-status').innerHTML = "Ошибка: Источники не найдены. Попробуйте браузер.";
-                document.getElementById('source-status').style.color = "#ff4e50";
-                return;
+        // Загрузка
+        let p = 0;
+        let iv = setInterval(() => {
+            p += 2;
+            document.getElementById('bar').style.width = p + '%';
+            document.getElementById('perc').innerText = p + '%';
+            if(p >= 100) {
+                clearInterval(iv);
+                document.getElementById('splash-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'flex';
+                    setTimeout(() => document.getElementById('main-content').style.opacity = '1', 50);
+                }, 800);
             }
+        }, 30);
 
-            const iframe = document.getElementById('video-frame');
-            const status = document.getElementById('source-status');
-            
-            status.innerText = `Загрузка источника ${currentSourceIndex + 1}...`;
-            iframe.src = sources[currentSourceIndex](activeAnimeId);
-
-            clearTimeout(sourceTimer);
-            // Если за 6 секунд не загрузилось - прыгаем на следующий
-            sourceTimer = setTimeout(() => {
-                currentSourceIndex++;
-                tryNextSource();
-            }, 6500);
-        }
-
-        function closePlayer() {
-            const overlay = document.getElementById('player-overlay');
-            const iframe = document.getElementById('video-frame');
-            iframe.src = '';
-            overlay.style.display = 'none';
-            clearTimeout(sourceTimer);
-        }
-
-        // --- Стандартные функции ---
-        window.onload = () => {
-            const bar = document.getElementById('progress-bar');
-            const num = document.getElementById('loader-number');
-            bar.style.width = '100%';
-            let p = 0;
-            let iv = setInterval(() => {
-                p += 2; if (p > 100) p = 100;
-                num.innerText = p + '%';
-                if(p >= 100) {
-                    clearInterval(iv);
-                    document.getElementById('splash-screen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('splash-screen').style.display = 'none';
-                        document.getElementById('main-content').style.display = 'flex';
-                        setTimeout(() => document.getElementById('main-content').style.opacity = '1', 50);
-                    }, 800);
-                }
-            }, 50);
-        };
-
-        async function executeSearch() {
-            const q = document.getElementById('searchInput').value.trim();
-            const res = document.getElementById('results-container');
+        async function search() {
+            const q = document.getElementById('sInp').value;
             if(!q) return;
-            res.innerHTML = '<p style="text-align:center; width:100%;">Ищем аниме...</p>';
+            document.getElementById('results').innerHTML = '<p>Загрузка...</p>';
             try {
                 const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=16`);
                 const data = await r.json();
-                res.innerHTML = '';
+                document.getElementById('results').innerHTML = '';
                 data.forEach(a => {
-                    const div = document.createElement('div');
-                    div.className = 'anime-card';
-                    div.innerHTML = `<img src="https://shikimori.one${a.image.preview}"><div>${a.russian || a.name}</div>`;
-                    div.onclick = () => openPlayer(a.id);
-                    res.appendChild(div);
+                    const d = document.createElement('div');
+                    d.className = 'card';
+                    d.innerHTML = `<img src="https://shikimori.one${a.image.preview}"><div>${a.russian || a.name}</div>`;
+                    d.onclick = () => play(a.id);
+                    document.getElementById('results').appendChild(d);
                 });
-            } catch(e) { res.innerHTML = 'Ошибка сети'; }
+            } catch(e) { alert('Ошибка поиска'); }
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') executeSearch(); });
+        function play(id) {
+            const player = document.getElementById('player-layer');
+            const iframe = document.getElementById('player-iframe');
+            // Используем базу Kodik, которая лучше всего понимает Shikimori ID
+            iframe.src = `https://pizdec.pro/id/${id}`; 
+            player.style.display = 'block';
+        }
+
+        function closeVideo() {
+            document.getElementById('player-layer').style.display = 'none';
+            document.getElementById('player-iframe').src = '';
+        }
     </script>
 </body>
 </html>
