@@ -7,7 +7,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
-        /* Фикс для фона и высоты */
         body, html { 
             height: 100%; 
             width: 100%; 
@@ -15,23 +14,29 @@
             color: white; 
             overflow: hidden; 
             position: fixed;
+            /* Предотвращает скролл при открытии клавиатуры */
+            -webkit-overflow-scrolling: none;
         }
         
-        /* ФОН МЕНЮ - теперь зафиксирован и не растягивается */
+        /* ИСПРАВЛЕННЫЙ ФОН */
         .background-fixed { 
             position: fixed; 
             top: 0; 
-            left: 0; 
+            left: 50%; 
+            transform: translateX(-50%);
             width: 100vw; 
             height: 100vh; 
             z-index: -1; 
             background: #000;
+            overflow: hidden;
         }
         .background-fixed img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; /* Сохраняет пропорции, заполняя экран */
+            height: 100%; /* Фиксируем по высоте */
+            width: auto;   /* Ширина подстраивается автоматически */
+            min-width: 100%; /* Но не меньше экрана */
+            object-fit: cover;
             opacity: 0.6; 
+            display: block;
         }
 
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
@@ -39,6 +44,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
+            transition: opacity 0.5s ease;
         }
         #splash-screen::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: -1;
@@ -62,7 +68,7 @@
         #player-iframe { width: 100%; height: 100%; border: none; background: #000; }
         .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
         
-        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; display: inline-block; }
+        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body onclick="closeKeyboard(event)">
@@ -74,7 +80,7 @@
     <div id="splash-screen">
         <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px; font-size: 24px;" id="perc">0%</div>
         <div style="width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden;">
-            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff;"></div>
+            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
         </div>
     </div>
 
@@ -94,17 +100,19 @@
         <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
         <div class="player-status" id="p-status" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%;">
             <p id="status-text">Загрузка плеера...</p>
-            <a href="#" id="manual-btn" class="error-btn" target="_blank" style="display:none;">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
+            <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
         </div>
         <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
     <script>
-        // Функция закрытия клавиатуры
+        // Функция закрытия клавиатуры и предотвращения сдвига экрана
         function closeKeyboard(e) {
             const input = document.getElementById('sInp');
             if (document.activeElement === input) {
                 input.blur();
+                // Фикс для iOS: возвращаем прокрутку в ноль
+                window.scrollTo(0, 0);
             }
         }
 
@@ -120,11 +128,12 @@
                 progress = 100;
                 clearInterval(loadingInterval);
                 setTimeout(() => {
-                    document.getElementById('splash-screen').style.opacity = '0';
+                    const ss = document.getElementById('splash-screen');
+                    ss.style.opacity = '0';
                     setTimeout(() => {
-                        document.getElementById('splash-screen').style.display = 'none';
+                        ss.style.display = 'none';
                         document.getElementById('main-content').style.display = 'flex';
-                    }, 300);
+                    }, 500);
                 }, 200);
             }
             const displayValue = Math.round(progress);
