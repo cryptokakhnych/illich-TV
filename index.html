@@ -12,30 +12,30 @@
             width: 100%; 
             background: #000; 
             color: white; 
-            overflow: hidden; 
+            overflow: hidden;
             position: fixed;
-            /* Предотвращает скролл при открытии клавиатуры */
-            -webkit-overflow-scrolling: none;
         }
         
-        /* ИСПРАВЛЕННЫЙ ФОН */
+        /* ИСПРАВЛЕННЫЙ ФОН: жесткая фиксация */
         .background-fixed { 
             position: fixed; 
+            /* Используем top/left и фиксированные 100vw/100vh, чтобы не зависеть от клавиатуры */
             top: 0; 
-            left: 50%; 
-            transform: translateX(-50%);
+            left: 0;
             width: 100vw; 
             height: 100vh; 
             z-index: -1; 
             background: #000;
-            overflow: hidden;
+            /* Предотвращаем любые сдвиги */
+            pointer-events: none; 
         }
+
         .background-fixed img { 
-            height: 100%; /* Фиксируем по высоте */
-            width: auto;   /* Ширина подстраивается автоматически */
-            min-width: 100%; /* Но не меньше экрана */
-            object-fit: cover;
-            opacity: 0.6; 
+            width: 100%;
+            height: 100%;
+            /* object-fit: cover сохранит пропорции как в видео */
+            object-fit: cover; 
+            opacity: 0.6;
             display: block;
         }
 
@@ -106,12 +106,11 @@
     </div>
 
     <script>
-        // Функция закрытия клавиатуры и предотвращения сдвига экрана
+        // Закрытие клавиатуры
         function closeKeyboard(e) {
             const input = document.getElementById('sInp');
             if (document.activeElement === input) {
                 input.blur();
-                // Фикс для iOS: возвращаем прокрутку в ноль
                 window.scrollTo(0, 0);
             }
         }
@@ -183,6 +182,16 @@
         function closeVideo() {
             document.getElementById('player-layer').style.display = 'none';
             document.getElementById('player-iframe').src = '';
+        }
+
+        // Фикс для визуального вьюпорта (для современных браузеров)
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                // Принудительно держим фон на месте, даже если вьюпорт изменился
+                const bg = document.querySelector('.background-fixed');
+                bg.style.height = window.innerHeight + 'px';
+                window.scrollTo(0,0);
+            });
         }
     </script>
 </body>
