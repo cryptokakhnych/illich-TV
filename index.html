@@ -102,7 +102,7 @@
             min-width: 0; 
             background: #fff; 
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
-            caret-color: #000; /* Цвет мигающей палочки ввода теперь черный */
+            caret-color: #000; 
         }
         
         .search-box input:focus {
@@ -187,6 +187,7 @@
             flex-direction: column;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             flex-shrink: 0;
+            position: relative;
         }
 
         .container-header { 
@@ -196,6 +197,7 @@
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             flex-shrink: 0;
+            min-height: 45px;
         }
         .container-title { 
             font-size: 13px; 
@@ -228,6 +230,7 @@
             transition: transform 0.2s;
             overflow: hidden;
             flex-shrink: 0;
+            position: relative;
         }
         .card:active { transform: scale(0.98); }
         .card img { 
@@ -247,6 +250,105 @@
             color: #fff; 
             flex: 1;
         }
+        
+        /* КНОПКА ИЗБРАННОГО НА КАРТОЧКЕ */
+        .fav-btn-card {
+            background: #333; color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+            margin-left: auto;
+            flex-shrink: 0;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .fav-active { color: #ff4b4b; border-color: #ff4b4b; }
+
+        /* ФОРУМ СТИЛИ */
+        .forum-header-bar {
+            width: 100%; display: flex; gap: 10px; padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .forum-search {
+            flex: 1; border: 1px solid rgba(0,212,255,0.3); border-radius: 30px;
+            background: rgba(0,0,0,0.3); color: #fff; padding: 8px 15px; font-size: 13px; outline: none;
+            caret-color: #fff;
+        }
+        .forum-add-btn {
+            width: 35px; height: 35px; border-radius: 50%;
+            border: 1px solid rgba(0,212,255,0.3);
+            background: rgba(0,212,255,0.2); color: #fff; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            text-shadow: 1px 1px 2px #000;
+        }
+        
+        .new-topic-form {
+            display: flex; flex-direction: column; gap: 10px; padding: 15px;
+            background: rgba(0,0,0,0.5); border-radius: 10px; margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .new-topic-input {
+            width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; outline: none;
+        }
+        .new-topic-btn {
+            background: #00d4ff; color: #000; padding: 8px; border-radius: 8px; border: none; font-weight: bold;
+        }
+
+        .topic-card {
+            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .topic-title { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
+        .topic-select-btn {
+            background: #00d4ff; color: #fff; border: none; padding: 5px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
+        }
+
+        /* ЧАТ ТЕМЫ */
+        .chat-container {
+            display: flex; flex-direction: column; gap: 8px; padding-bottom: 60px;
+        }
+        .chat-msg {
+            background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .chat-user { font-size: 10px; color: #00d4ff; margin-bottom: 2px; font-weight: bold; }
+        .chat-text { font-size: 13px; color: #fff; }
+        .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
+        
+        .chat-input-bar {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.8);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .chat-input {
+            flex: 1; background: #222; border: 1px solid #444; color: #fff; 
+            padding: 8px; border-radius: 20px; font-size: 13px; outline: none;
+        }
+        .chat-send-btn {
+            background: #00d4ff; color: #fff; border: none; width: 35px; height: 35px;
+            border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ПРОФИЛЬ */
+        .profile-view {
+            padding: 20px; display: flex; flex-direction: column; gap: 15px;
+        }
+        .profile-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .profile-label { color: #aaa; font-size: 13px; }
+        .profile-val { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; }
+        
+        .anon-toggle-btn {
+            background: transparent; border: 1px solid #00d4ff; color: #00d4ff;
+            padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
+        }
+        .anon-active { background: #00d4ff; color: #000; }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
@@ -293,9 +395,9 @@
             </div>
 
             <div id="user-menu" style="display:none">
-                <div class="menu-item">👤 Профиль</div>
-                <div class="menu-item">⭐ Избранные</div>
-                <div class="menu-item">💬 Форум</div>
+                <div class="menu-item" onclick="openProfile()">👤 Профиль</div>
+                <div class="menu-item" onclick="openFavorites()">⭐ Избранные</div>
+                <div class="menu-item" onclick="openForum()">💬 Форум</div>
                 <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">🚪 Выход</div>
             </div>
         </div>
@@ -314,8 +416,22 @@
     </div>
 
     <script>
+        // ДАННЫЕ
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
+        let favorites = JSON.parse(localStorage.getItem('animeFavorites')) || [];
+        let forumTopics = JSON.parse(localStorage.getItem('forumTopics')) || [
+            { id: 1, title: 'Правила форума', messages: [{user: 'Admin', text: 'Добро пожаловать! Будьте вежливы.', time: '12.02.2024 10:00'}] }
+        ];
+        let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
+            login: 'Пользователь',
+            dob: '01.01.2000',
+            nat: 'Планета Земля',
+            isAnon: false
+        };
+
         let isSearching = false;
+        let currentMode = 'history'; // history, search, favorites, forum, topic, profile
+        let currentTopicId = null;
         let searchTimeout;
 
         window.addEventListener('load', () => { 
@@ -334,6 +450,7 @@
             }
         });
 
+        // МЕНЮ И АВТОРИЗАЦИЯ
         function toggleMenu() {
             const m = document.getElementById('menu-overlay');
             m.style.display = (m.style.display === 'block') ? 'none' : 'block';
@@ -359,6 +476,10 @@
         }
 
         function processAuth() {
+            const email = document.getElementById('auth-email').value;
+            if(email) userProfile.login = email.split('@')[0];
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('user-menu').style.display = 'block';
             localStorage.setItem('illich_is_logged_in', 'true');
@@ -369,12 +490,15 @@
             document.getElementById('user-menu').style.display = 'none';
             document.getElementById('guest-menu').style.display = 'block';
             document.getElementById('auth-form').style.display = 'none';
+            goHome();
         }
 
+        // НАВИГАЦИЯ
         function handleTyping(val) {
             clearTimeout(searchTimeout);
             if(val.trim().length > 0) {
                 isSearching = true;
+                currentMode = 'search';
                 document.getElementById('container-label').innerText = "Результаты поиска";
                 searchTimeout = setTimeout(() => {
                     search();
@@ -385,13 +509,20 @@
         }
 
         function goHome() {
+            if(currentMode === 'topic') {
+                openForum(); // Если в теме, назад в форум
+                return;
+            }
+            // Иначе домой
             isSearching = false;
+            currentMode = 'history';
             document.getElementById('sInp').value = '';
             document.getElementById('container-label').innerText = "История просмотров";
             closeKeyboard();
             renderHistory();
         }
 
+        // ОТРИСОВКА ИСТОРИИ И ПОИСКА
         function renderHistory() {
             const res = document.getElementById('results');
             res.innerHTML = '';
@@ -405,8 +536,16 @@
         function createCard(a) {
             const d = document.createElement('div');
             d.className = 'card';
-            d.innerHTML = `<img src="${a.img}"><div>${a.title}</div>`;
-            d.onclick = () => play(a.id, a.title, a.img);
+            
+            const isFav = favorites.some(f => f.id === a.id);
+            const favIcon = isFav ? '❤️' : '🤍';
+            const favClass = isFav ? 'fav-active' : '';
+
+            d.innerHTML = `
+                <img src="${a.img}" onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">
+                <div onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${a.title}</div>
+                <button class="fav-btn-card ${favClass}" onclick="toggleFav(event, '${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${favIcon}</button>
+            `;
             return d;
         }
 
@@ -432,12 +571,211 @@
             }
         }
 
+        // ИЗБРАННОЕ
+        function openFavorites() {
+            hideMenu();
+            currentMode = 'favorites';
+            document.getElementById('container-label').innerText = "Избранные";
+            renderFavorites();
+        }
+
+        function renderFavorites() {
+            const res = document.getElementById('results');
+            res.innerHTML = '';
+            if(favorites.length === 0) {
+                res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Нет избранных</p>';
+                return;
+            }
+            favorites.forEach(a => res.appendChild(createCard(a)));
+        }
+
+        function toggleFav(e, id, title, img) {
+            e.stopPropagation();
+            const index = favorites.findIndex(f => f.id == id);
+            if(index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.unshift({ id, title, img });
+            }
+            localStorage.setItem('animeFavorites', JSON.stringify(favorites));
+            
+            // Перерисовка в зависимости от режима
+            if(currentMode === 'favorites') {
+                renderFavorites();
+            } else if(currentMode === 'history') {
+                renderHistory();
+            } else if(currentMode === 'search') {
+                // Если поиск, просто обновим иконку (сложнее, проще оставить как есть, при следующем поиске обновится)
+                e.target.innerText = (index > -1) ? '🤍' : '❤️';
+                e.target.classList.toggle('fav-active');
+            }
+        }
+
+        // ПРОФИЛЬ
+        function openProfile() {
+            hideMenu();
+            currentMode = 'profile';
+            document.getElementById('container-label').innerText = "Профиль";
+            const res = document.getElementById('results');
+            
+            const anonState = userProfile.isAnon ? 'Аноним' : 'Не аноним';
+            const anonClass = userProfile.isAnon ? 'anon-active' : '';
+
+            res.innerHTML = `
+                <div class="profile-view">
+                    <div class="profile-row">
+                        <span class="profile-label">Логин</span>
+                        <span class="profile-val">${userProfile.login}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Дата рождения</span>
+                        <span class="profile-val">${userProfile.dob}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Национальность</span>
+                        <span class="profile-val">${userProfile.nat}</span>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Режим форума</span>
+                        <button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleAnon() {
+            userProfile.isAnon = !userProfile.isAnon;
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            openProfile();
+        }
+
+        // ФОРУМ
+        function openForum() {
+            hideMenu();
+            currentMode = 'forum';
+            document.getElementById('container-label').innerText = "Форум";
+            const res = document.getElementById('results');
+            res.innerHTML = `
+                <div class="forum-header-bar">
+                    <input type="text" class="forum-search" placeholder="Поиск темы..." oninput="filterTopics(this.value)">
+                    <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
+                </div>
+                <div id="new-topic-area" style="display:none;">
+                    <div class="new-topic-form">
+                        <input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы">
+                        <button class="new-topic-btn" onclick="createTopic()">Создать тему</button>
+                    </div>
+                </div>
+                <div id="topics-list" style="padding:10px;"></div>
+            `;
+            renderTopicsList();
+        }
+
+        function toggleTopicForm() {
+            const area = document.getElementById('new-topic-area');
+            area.style.display = (area.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function createTopic() {
+            const title = document.getElementById('new-topic-title').value;
+            if(!title.trim()) return;
+            const newId = Date.now();
+            forumTopics.unshift({ id: newId, title: title, messages: [] });
+            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
+            toggleTopicForm();
+            renderTopicsList();
+        }
+
+        function filterTopics(val) {
+            renderTopicsList(val);
+        }
+
+        function renderTopicsList(filter = '') {
+            const list = document.getElementById('topics-list');
+            list.innerHTML = '';
+            const filtered = forumTopics.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()));
+            
+            if(filtered.length === 0) {
+                list.innerHTML = '<p style="text-align:center; opacity:0.5; padding:20px;">Нет тем</p>';
+                return;
+            }
+
+            filtered.forEach(t => {
+                const d = document.createElement('div');
+                d.className = 'topic-card';
+                d.innerHTML = `
+                    <span class="topic-title">${t.title}</span>
+                    <button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>
+                `;
+                list.appendChild(d);
+            });
+        }
+
+        function openTopic(id) {
+            currentMode = 'topic';
+            currentTopicId = id;
+            const topic = forumTopics.find(t => t.id === id);
+            document.getElementById('container-label').innerText = topic.title;
+            const res = document.getElementById('results');
+            res.innerHTML = `
+                <div class="chat-container" id="chat-msgs"></div>
+                <div class="chat-input-bar">
+                    <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
+                    <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                </div>
+            `;
+            renderChatMessages(topic);
+        }
+
+        function renderChatMessages(topic) {
+            const container = document.getElementById('chat-msgs');
+            container.innerHTML = '';
+            topic.messages.forEach(m => {
+                const d = document.createElement('div');
+                d.className = 'chat-msg';
+                d.innerHTML = `
+                    <div class="chat-user">${m.user}</div>
+                    <div class="chat-text">${m.text}</div>
+                    <div class="chat-time">${m.time}</div>
+                `;
+                container.appendChild(d);
+            });
+            // Прокрутка вниз
+            const scrollBox = document.getElementById('results');
+            scrollBox.scrollTop = scrollBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const txt = document.getElementById('chat-in').value;
+            if(!txt.trim()) return;
+            
+            const topic = forumTopics.find(t => t.id === currentTopicId);
+            const now = new Date();
+            const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
+            const userName = userProfile.isAnon ? 'Аноним' : userProfile.login;
+
+            topic.messages.push({
+                user: userName,
+                text: txt,
+                time: timeStr
+            });
+            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
+            document.getElementById('chat-in').value = '';
+            renderChatMessages(topic);
+        }
+
+
+        // ПЛЕЕР
         function play(id, title, img) {
             const entry = { id, title, img };
             history = history.filter(item => item.id !== id); 
             history.unshift(entry);
             if(history.length > 20) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
+            
+            // Если мы в истории или поиске, обновляем вид
+            if(currentMode === 'history') renderHistory();
+
             const layer = document.getElementById('player-layer');
             const iframe = document.getElementById('player-iframe');
             layer.style.display = 'block';
@@ -447,11 +785,11 @@
         function closeVideo() {
             document.getElementById('player-layer').style.display = 'none';
             document.getElementById('player-iframe').src = '';
-            if(!isSearching) renderHistory();
         }
 
         function closeKeyboard() { document.getElementById('sInp').blur(); }
 
+        // ЗАГРУЗКА
         let prog = 0;
         let loadInt = setInterval(() => {
             prog += 2;
