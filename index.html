@@ -6,11 +6,33 @@
     <title>Illich TV</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body, html { height: 100%; width: 100%; background: #000; color: white; overflow: hidden; position: fixed; }
         
-        /* ФОН МЕНЮ */
-        .background-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        /* Фикс для фона и высоты */
+        body, html { 
+            height: 100%; 
+            width: 100%; 
+            background: #000; 
+            color: white; 
+            overflow: hidden; 
+            position: fixed;
+        }
+        
+        /* ФОН МЕНЮ - теперь зафиксирован и не растягивается */
+        .background-fixed { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: -1; 
+            background: #000;
+        }
+        .background-fixed img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* Сохраняет пропорции, заполняя экран */
+            opacity: 0.6; 
+        }
 
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
         #splash-screen {
@@ -18,7 +40,6 @@
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
-        /* Затемнение для читаемости текста на сплеш-скрине */
         #splash-screen::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: -1;
         }
@@ -27,11 +48,11 @@
         #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; }
         .top-bar { position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid #00d4ff33; z-index: 100; }
         
-        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; z-index: 100; }
+        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; z-index: 101; }
         .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #000; }
-        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 20px; border-radius: 50px; font-weight: bold; }
+        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px 100px; overflow-y: auto; }
+        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px 100px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #00d4ff22; text-align: center; }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
         .card div { font-size: 12px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -39,23 +60,21 @@
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; background: #000; }
-        
-        .player-status { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; }
-        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; box-shadow: 0 0 20px #00d4ff; }
-        
         .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
+        
+        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; display: inline-block; }
     </style>
 </head>
-<body>
+<body onclick="closeKeyboard(event)">
 
     <div class="background-fixed">
         <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp">
     </div>
 
     <div id="splash-screen">
-        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px; font-size: 24px; text-shadow: 0 0 10px #000;" id="perc">0%</div>
+        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px; font-size: 24px;" id="perc">0%</div>
         <div style="width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden;">
-            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
+            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff;"></div>
         </div>
     </div>
 
@@ -64,27 +83,35 @@
             <span style="font-size: 12px;">👤 Приятного просмотра!</span>
             <button onclick="location.reload()" style="background:none; border: 1px solid #ff4e50; color: #ff4e50; padding: 4px 10px; border-radius: 20px; font-size: 10px;">Выход</button>
         </div>
-        <div class="search-box">
-            <input type="text" id="sInp" placeholder="Название аниме...">
-            <button class="search-btn" onclick="search()">ПОИСК</button>
+        <div class="search-box" onclick="event.stopPropagation()">
+            <input type="text" id="sInp" placeholder="Название аниме..." onkeypress="if(event.key === 'Enter') { search(); closeKeyboard(event); }">
+            <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
         </div>
         <div id="results"></div>
     </div>
 
     <div id="player-layer">
         <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
-        <div class="player-status" id="p-status">
+        <div class="player-status" id="p-status" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%;">
             <p id="status-text">Загрузка плеера...</p>
-            <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
+            <a href="#" id="manual-btn" class="error-btn" target="_blank" style="display:none;">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
         </div>
         <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
     <script>
-        // ЛОГИКА ЗАГРУЗКИ (2.5 секунды = 2500 мс)
+        // Функция закрытия клавиатуры
+        function closeKeyboard(e) {
+            const input = document.getElementById('sInp');
+            if (document.activeElement === input) {
+                input.blur();
+            }
+        }
+
+        // ЛОГИКА ЗАГРУЗКИ (2.5 секунды)
         let progress = 0;
-        const duration = 2500; // Общее время
-        const intervalTime = 25; // Частота обновления (мс)
+        const duration = 2500;
+        const intervalTime = 25;
         const step = 100 / (duration / intervalTime);
 
         let loadingInterval = setInterval(() => {
@@ -93,11 +120,13 @@
                 progress = 100;
                 clearInterval(loadingInterval);
                 setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'flex';
+                    document.getElementById('splash-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('splash-screen').style.display = 'none';
+                        document.getElementById('main-content').style.display = 'flex';
+                    }, 300);
                 }, 200);
             }
-            
             const displayValue = Math.round(progress);
             document.getElementById('bar').style.width = displayValue + '%';
             document.getElementById('perc').innerText = displayValue + '%';
@@ -115,10 +144,12 @@
                     const d = document.createElement('div');
                     d.className = 'card';
                     d.innerHTML = `<img src="https://shikimori.one${a.image.preview}"><div>${a.russian || a.name}</div>`;
-                    d.onclick = () => play(a.id);
+                    d.onclick = (e) => { e.stopPropagation(); play(a.id); };
                     document.getElementById('results').appendChild(d);
                 });
-            } catch(e) { }
+            } catch(e) { 
+                document.getElementById('results').innerHTML = '<p>Ошибка поиска</p>';
+            }
         }
 
         function play(id) {
