@@ -17,7 +17,7 @@
             -webkit-text-size-adjust: 100%;
         }
         
-        /* ФОН: Фиксация, отсутствие полос и полная видимость краев */
+        /* ФОН */
         #bg-container { 
             position: fixed; 
             top: 0; 
@@ -34,7 +34,6 @@
             background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
             background-position: center center;
             background-repeat: no-repeat;
-            /* 100% 100% заставляет фото сжаться точно по ширине экрана, убирая обрезку краев */
             background-size: 100% 100%; 
             opacity: 0.6;
         }
@@ -50,20 +49,98 @@
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: -1;
         }
 
-        /* КОНТЕНТ */
-        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; position: relative; }
-        
-        .top-bar { 
-            position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; 
-            background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); 
-            border: 1px solid #00d4ff33; z-index: 100; 
+        /* Шкала и цифры (подняты выше, обводка, цифры меньше) */
+        #loading-container {
+            margin-top: -60px; /* Поднимаем всю конструкцию выше */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        
-        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; z-index: 101; }
-        .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #000; }
-        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px 100px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        #perc {
+            color: #00d4ff; 
+            font-weight: 900; 
+            margin-bottom: 2px; /* Прижимаем к шкале */
+            font-size: 18px; /* Цифры немного меньше */
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; /* Обводка текста */
+        }
+
+        .progress-box {
+            width: 200px; 
+            height: 6px; 
+            background: rgba(0,0,0,0.5); 
+            border-radius: 10px; 
+            overflow: hidden;
+            border: 1px solid rgba(0,212,255,0.3); /* Легкая обводка шкалы */
+        }
+
+        /* КОНТЕНТ */
+        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 70px; position: relative; }
+        
+        /* Верхняя панель теперь содержит поиск и меню */
+        .top-bar { 
+            position: absolute; 
+            top: 15px; 
+            width: 94%; 
+            display: flex; 
+            gap: 10px;
+            align-items: center; 
+            z-index: 100; 
+        }
+
+        .search-box { 
+            flex: 1; /* Поиск занимает всё свободное место */
+            display: flex; 
+            background: #fff; 
+            border-radius: 50px; 
+            padding: 3px; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .search-box input { 
+            flex: 1; 
+            border: none; 
+            outline: none; 
+            padding: 8px 15px; 
+            font-size: 14px; 
+            border-radius: 50px; 
+            color: #000; 
+        }
+
+        .search-btn { 
+            background: #00d4ff; 
+            color: #fff; 
+            border: none; 
+            padding: 0 15px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 12px;
+            cursor: pointer; 
+        }
+
+        /* Кнопка меню с 3 полосками */
+        .menu-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #00d4ff33;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+        .menu-btn span {
+            width: 20px;
+            height: 2px;
+            background: #00d4ff;
+            border-radius: 2px;
+        }
+
+        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px 15px 100px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #00d4ff22; text-align: center; }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
         .card div { font-size: 12px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -83,21 +160,27 @@
     </div>
 
     <div id="splash-screen">
-        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px; font-size: 24px;" id="perc">0%</div>
-        <div style="width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden;">
-            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
+        <div id="loading-container">
+            <div id="perc">0%</div>
+            <div class="progress-box">
+                <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
+            </div>
         </div>
     </div>
 
     <div id="main-content">
         <div class="top-bar">
-            <span style="font-size: 12px;">👤 Приятного просмотра!</span>
-            <button onclick="location.reload()" style="background:none; border: 1px solid #ff4e50; color: #ff4e50; padding: 4px 10px; border-radius: 20px; font-size: 10px;">Выход</button>
+            <div class="search-box" onclick="event.stopPropagation()">
+                <input type="text" id="sInp" placeholder="Название аниме..." onkeypress="if(event.key === 'Enter') { search(); closeKeyboard(event); }">
+                <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
+            </div>
+            <div class="menu-btn" onclick="alert('Меню в разработке')">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-        <div class="search-box" onclick="event.stopPropagation()">
-            <input type="text" id="sInp" placeholder="Название аниме..." onkeypress="if(event.key === 'Enter') { search(); closeKeyboard(event); }">
-            <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
-        </div>
+        
         <div id="results"></div>
     </div>
 
@@ -137,9 +220,10 @@
             }
         }
 
+        // ЛОГИКА ЗАГРУЗКИ (2.1 секунды)
         let progress = 0;
-        const duration = 2500;
-        const intervalTime = 25;
+        const duration = 2100; // 2.1 сек
+        const intervalTime = 20;
         const step = 100 / (duration / intervalTime);
 
         let loadingInterval = setInterval(() => {
