@@ -7,14 +7,20 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100%; width: 100%; background: #000; color: white; overflow: hidden; position: fixed; }
+        
+        /* ФОН МЕНЮ */
         .background-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
 
-        /* ЗАГРУЗКА */
+        /* ЗАГРУЗОЧНЫЙ ЭКРАН */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/675D03F8-DE2B-4844-9B3F-011C5811F4EA.png') center/cover;
+            background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
+        }
+        /* Затемнение для читаемости текста на сплеш-скрине */
+        #splash-screen::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: -1;
         }
 
         /* КОНТЕНТ */
@@ -43,13 +49,13 @@
 <body>
 
     <div class="background-fixed">
-        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/B27771DC-EBA0-4BCB-8EE0-CC0E6B370598.png">
+        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp">
     </div>
 
     <div id="splash-screen">
-        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px;" id="perc">0%</div>
-        <div style="width: 200px; height: 4px; background: #222; border-radius: 10px;">
-            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff;"></div>
+        <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px; font-size: 24px; text-shadow: 0 0 10px #000;" id="perc">0%</div>
+        <div style="width: 200px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden;">
+            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
         </div>
     </div>
 
@@ -67,29 +73,35 @@
 
     <div id="player-layer">
         <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
-        
         <div class="player-status" id="p-status">
             <p id="status-text">Загрузка плеера...</p>
             <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
         </div>
-        
         <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
     <script>
-        // Загрузка
-        let p = 0;
-        let iv = setInterval(() => {
-            p += 5;
-            document.getElementById('bar').style.width = p + '%';
-            document.getElementById('perc').innerText = p + '%';
-            if(p >= 100) {
-                clearInterval(iv);
-                document.getElementById('splash-screen').style.display = 'none';
-                document.getElementById('main-content').style.display = 'flex';
-                document.getElementById('main-content').style.opacity = '1';
+        // ЛОГИКА ЗАГРУЗКИ (2.5 секунды = 2500 мс)
+        let progress = 0;
+        const duration = 2500; // Общее время
+        const intervalTime = 25; // Частота обновления (мс)
+        const step = 100 / (duration / intervalTime);
+
+        let loadingInterval = setInterval(() => {
+            progress += step;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(loadingInterval);
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'flex';
+                }, 200);
             }
-        }, 50);
+            
+            const displayValue = Math.round(progress);
+            document.getElementById('bar').style.width = displayValue + '%';
+            document.getElementById('perc').innerText = displayValue + '%';
+        }, intervalTime);
 
         async function search() {
             const q = document.getElementById('sInp').value;
@@ -114,7 +126,6 @@
             const iframe = document.getElementById('player-iframe');
             const btn = document.getElementById('manual-btn');
             const statusText = document.getElementById('status-text');
-            
             const url = `https://pizdec.pro/id/${id}`;
             
             layer.style.display = 'block';
@@ -122,7 +133,6 @@
             statusText.innerText = "Проверка плеера...";
             btn.style.display = 'none';
 
-            // Если через 5 секунд не исчезнет черный экран, даем кнопку
             setTimeout(() => {
                 statusText.innerText = "Если плеер не загрузился, нажмите кнопку ниже:";
                 btn.href = url;
