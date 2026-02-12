@@ -177,7 +177,8 @@
 
         .glass-container {
             width: 94%; 
-            height: 82vh; 
+            height: 75vh; 
+            margin-top: 20px;
             margin-bottom: 25px; 
             background: rgba(0, 0, 0, 0.4); 
             border-radius: 20px;
@@ -347,7 +348,7 @@
 
         /* ЧАТ ТЕМЫ */
         .chat-container {
-            display: flex; flex-direction: column; gap: 8px; padding-bottom: 60px;
+            display: flex; flex-direction: column; gap: 8px; padding-bottom: 110px;
         }
         .chat-msg {
             background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
@@ -357,11 +358,12 @@
         .chat-text { font-size: 13px; color: #fff; }
         .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
         
-        .chat-input-bar {
+        .chat-input-area {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            display: flex; gap: 5px; padding: 10px; background: rgba(0,0,0,0.8);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.9); border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px; display: flex; flex-direction: column; gap: 5px;
         }
+        .chat-input-bar { display: flex; gap: 5px; }
         .chat-input {
             flex: 1; background: #222; border: 1px solid #444; color: #fff; 
             padding: 8px; border-radius: 20px; font-size: 13px; outline: none;
@@ -370,16 +372,22 @@
             background: #00d4ff; color: #fff; border: none; width: 35px; height: 35px;
             border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
+        .chat-back-btn {
+            width: 100%; background: #ff4b4b; color: #fff; border: none;
+            padding: 6px; border-radius: 20px; font-size: 10px; font-weight: bold;
+        }
 
         /* ПРОФИЛЬ */
         .profile-view {
             padding: 20px; display: flex; flex-direction: column; gap: 15px; color: #fff;
+            overflow-y: auto; flex: 1;
         }
         .profile-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 15px; background: rgba(0,0,0,0.5); 
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
         }
         .profile-label { color: #fff; font-size: 13px; }
         .profile-val { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; }
@@ -400,10 +408,10 @@
         }
 
         .save-profile-btn {
-            position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
+            position: sticky; bottom: 10px; left: 50%; transform: translateX(-50%);
             background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
             border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
-            display: none; z-index: 100;
+            display: none; z-index: 100; margin-top: 10px;
         }
 
         .section-back-btn {
@@ -482,39 +490,41 @@
     </div>
 
     <script>
-        // ДАННЫЕ
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
         let favorites = JSON.parse(localStorage.getItem('animeFavorites')) || [];
         let forumTopics = JSON.parse(localStorage.getItem('forumTopics')) || [
             { id: 1, title: 'Правила форума', messages: [{user: 'Admin', text: 'Добро пожаловать! Будьте вежливы.', time: '12.02.2024 10:00'}] }
         ];
         let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
-            login: 'Пользователь',
-            email: '',
-            password: '',
-            dob: '01.01.2000',
-            nat: 'Планета Земля',
-            isAnon: false
+            login: 'Пользователь', email: '', password: '', dob: '01.01.2000', nat: 'Планета Земля', isAnon: false
         };
 
         const ADMIN_ID = "663587165"; 
-
         let isSearching = false;
         let currentMode = 'history'; 
         let currentTopicId = null;
         let searchTimeout;
         let deleteMode = false;
+        let allAnimePage = 1;
+        let isLoadingAll = false;
 
         window.addEventListener('load', () => { 
             renderHistory(); 
             const glass = document.getElementById('glass');
-            glass.style.height = (window.innerHeight * 0.82) + 'px';
             document.getElementById('bg-container').style.height = window.innerHeight + 'px';
             
             if(localStorage.getItem('illich_is_logged_in') === 'true') {
                 document.getElementById('guest-menu').style.display = 'none';
                 document.getElementById('user-menu').style.display = 'block';
             }
+
+            document.getElementById('results').addEventListener('scroll', function() {
+                if (currentMode === 'all-anime' && !isLoadingAll) {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
+                        loadAllAnime(true);
+                    }
+                }
+            });
         });
 
         function toggleMenu() {
@@ -591,7 +601,6 @@
             const isFav = favorites.some(f => String(f.id) === String(a.id));
             const favIcon = isFav ? '❤️' : '🤍';
             const favClass = isFav ? 'fav-active' : '';
-
             d.innerHTML = `
                 <img src="${a.img}" onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">
                 <div onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${a.title}</div>
@@ -627,6 +636,7 @@
         function openAllAnime() {
             hideMenu();
             currentMode = 'all-anime';
+            allAnimePage = 1;
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Все аниме";
@@ -635,17 +645,23 @@
             loadAllAnime();
         }
 
-        async function loadAllAnime() {
+        async function loadAllAnime(append = false) {
+            if (isLoadingAll) return;
+            isLoadingAll = true;
             try {
-                const r = await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity`);
+                const r = await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity&page=${allAnimePage}`);
                 const data = await r.json();
                 const res = document.getElementById('results');
-                res.innerHTML = '';
-                data.forEach(a => {
-                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
-                    res.appendChild(createCard(obj));
-                });
-            } catch(e) { document.getElementById('results').innerHTML = '<p style="text-align:center; padding:20px;">Ошибка загрузки</p>'; }
+                if (!append) res.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(a => {
+                        const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                        res.appendChild(createCard(obj));
+                    });
+                    allAnimePage++;
+                }
+            } catch(e) {}
+            isLoadingAll = false;
         }
 
         function openFavorites() {
@@ -692,7 +708,7 @@
             const anonClass = userProfile.isAnon ? 'anon-active' : '';
 
             res.innerHTML = `
-                <div class="profile-view">
+                <div class="profile-view" id="profile-scroll-box">
                     <div class="profile-row">
                         <span class="profile-label">Логин</span>
                         <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()">
@@ -792,9 +808,12 @@
             document.getElementById('container-label').innerText = topic.title;
             const res = document.getElementById('results');
             res.innerHTML = `<div class="chat-container" id="chat-msgs"></div>
-                <div class="chat-input-bar">
-                    <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
-                    <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                <div class="chat-input-area">
+                    <div class="chat-input-bar">
+                        <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
+                        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                    </div>
+                    <button class="chat-back-btn" onclick="openForum()">НАЗАД</button>
                 </div>`;
             renderChatMessages(topic);
         }
