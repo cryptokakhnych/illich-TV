@@ -72,48 +72,64 @@
 
         /* ОКНО МЕНЮ */
         #menu-overlay {
-            display: none; position: fixed; top: 70px; right: 3%; width: 250px;
-            background: rgba(0,0,0,0.95); border: 1px solid rgba(0,212,255,0.3);
+            display: none; position: fixed; top: 70px; right: 3%; width: 260px;
+            background: rgba(15, 15, 15, 0.95); border: 1px solid rgba(0, 212, 255, 0.4);
             border-radius: 15px; padding: 15px; z-index: 500; backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
         .menu-item { 
-            padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); 
-            cursor: pointer; font-size: 14px; transition: background 0.2s;
+            padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); 
+            cursor: pointer; font-size: 14px; transition: color 0.3s;
+            display: flex; align-items: center; gap: 10px;
         }
         .menu-item:last-child { border: none; }
-        .menu-item:active { background: rgba(0,212,255,0.1); }
+        .menu-item:hover { color: #00d4ff; }
 
         /* ФОРМЫ АВТОРИЗАЦИИ */
-        .auth-form { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
-        .auth-form input { padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; outline: none; }
-        .auth-form button { background: #00d4ff; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .auth-container { display: none; flex-direction: column; gap: 10px; padding: 5px 0; }
+        .auth-container input { 
+            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; 
+            background: #222; color: #fff; font-size: 13px; outline: none;
+        }
+        .auth-container button { 
+            background: #00d4ff; color: #000; border: none; padding: 10px; 
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;
+        }
+        .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
 
-        /* ОБВОДКА И РЕЗУЛЬТАТЫ */
+        /* СТЕКЛЯННАЯ ОБВОДКА (КОНТЕЙНЕР) */
         .glass-container {
-            flex: 1; width: 94%; margin-bottom: 20px; background: transparent; 
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); 
+            flex: 1; width: 94%; margin-bottom: 20px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(5px);
             overflow: hidden; display: flex; flex-direction: column;
         }
-        .container-title { padding: 15px 15px 5px 15px; font-size: 11px; color: #00d4ff; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; }
+        .container-header { 
+            padding: 15px 15px 5px 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .container-title { font-size: 12px; color: #00d4ff; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
+        /* СЕТКА АНИМЕ (ИКОНКИ МЕНЬШЕ) */
         #results { 
-            width: 100%; display: grid; grid-template-columns: 1fr 1fr; 
-            gap: 12px; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; 
+            width: 100%; display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; /* ТРИ колонки вместо двух, чтобы иконки были меньше */
+            gap: 10px; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; 
         }
 
         .card { 
-            background: rgba(255,255,255,0.05); border-radius: 10px; padding: 6px; 
-            border: 1px solid rgba(255,255,255,0.1); text-align: center;
-            height: fit-content;
+            background: rgba(0,0,0,0.3); border-radius: 10px; padding: 5px; 
+            border: 1px solid rgba(255,255,255,0.05); text-align: center; 
+            transition: transform 0.2s;
         }
-        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 6px; display: block; }
-        .card div { font-size: 10px; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
+        .card:active { transform: scale(0.95); }
+        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; border-radius: 6px; }
+        .card div { font-size: 9px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #ccc; }
 
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 0 15px rgba(255,75,75,0.4); }
+        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body onclick="hideMenu()">
@@ -130,7 +146,7 @@
     <div id="main-content">
         <div class="top-bar">
             <div class="search-box" onclick="event.stopPropagation()">
-                <input type="text" id="sInp" placeholder="Найти аниме..." oninput="handleSearchInput(this.value)">
+                <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="handleTyping(this.value)">
                 <button class="search-btn" onclick="search(); closeKeyboard();">ПОИСК</button>
                 <button class="back-btn" onclick="goHome();">НАЗАД</button>
             </div>
@@ -141,26 +157,30 @@
 
         <div id="menu-overlay" onclick="event.stopPropagation()">
             <div id="guest-menu">
-                <div class="menu-item" onclick="showAuth('login')">Вход</div>
-                <div class="menu-item" onclick="showAuth('reg')">Регистрация</div>
+                <div class="menu-item" onclick="openAuth('login')">🔑 Вход</div>
+                <div class="menu-item" onclick="openAuth('reg')">📝 Регистрация</div>
             </div>
+            
+            <div id="auth-form" class="auth-container">
+                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px;">Вход</h4>
+                <input type="email" placeholder="Email" id="auth-email">
+                <input type="password" placeholder="Пароль" id="auth-pass">
+                <button id="auth-submit-btn" onclick="processAuth()">Войти</button>
+                <div class="auth-back" onclick="resetMenu()">← Назад</div>
+            </div>
+
             <div id="user-menu" style="display:none">
                 <div class="menu-item">👤 Профиль</div>
                 <div class="menu-item">⭐ Избранные</div>
                 <div class="menu-item">💬 Форум</div>
-                <div class="menu-item" style="color:#ff4b4b" onclick="logout()">Выход</div>
-            </div>
-            <div id="auth-form-container" class="auth-form">
-                <h3 id="form-title" style="font-size:14px; text-align:center; color:#00d4ff"></h3>
-                <input type="email" id="emailField" placeholder="Email">
-                <input type="password" id="passField" placeholder="Пароль">
-                <button id="submitBtn" onclick="submitAuth()">Войти</button>
-                <div class="menu-item" style="font-size:11px; text-align:center; border:none; margin-top:5px" onclick="cancelAuth()">Назад к меню</div>
+                <div class="menu-item" style="color:#ff4b4b" onclick="logout()">🚪 Выход</div>
             </div>
         </div>
         
         <div class="glass-container">
-            <div id="container-label" class="container-title">История просмотров</div>
+            <div class="container-header">
+                <div id="container-label" class="container-title">История просмотров</div>
+            </div>
             <div id="results"></div>
         </div>
     </div>
@@ -171,129 +191,152 @@
     </div>
 
     <script>
+        // Данные
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
+        let isSearching = false;
 
+        // Инициализация
         window.addEventListener('load', () => { 
+            renderHistory(); 
+            // Фикс высоты для мобилок
             const h = window.innerHeight;
             document.getElementById('bg-container').style.height = h + 'px';
-            renderHistory(); 
         });
 
-        // --- ЛОГИКА МЕНЮ ---
+        // --- МЕНЮ И АВТОРИЗАЦИЯ ---
         function toggleMenu() {
             const m = document.getElementById('menu-overlay');
             m.style.display = (m.style.display === 'block') ? 'none' : 'block';
         }
         function hideMenu() { document.getElementById('menu-overlay').style.display = 'none'; }
 
-        function showAuth(type) {
+        function openAuth(mode) {
             document.getElementById('guest-menu').style.display = 'none';
-            document.getElementById('auth-form-container').style.display = 'flex';
-            document.getElementById('form-title').innerText = (type === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ');
-            document.getElementById('submitBtn').innerText = (type === 'login' ? 'ВОЙТИ' : 'ЗАРЕГИСТРИРОВАТЬСЯ');
+            document.getElementById('auth-form').style.display = 'flex';
+            const title = document.getElementById('auth-title');
+            const btn = document.getElementById('auth-submit-btn');
+            
+            if(mode === 'login') {
+                title.innerText = "ВХОД";
+                btn.innerText = "ВОЙТИ";
+            } else {
+                title.innerText = "РЕГИСТРАЦИЯ";
+                btn.innerText = "СОЗДАТЬ АККАУНТ";
+            }
         }
 
-        function cancelAuth() {
-            document.getElementById('auth-form-container').style.display = 'none';
-            document.getElementById('guest-menu').style.display = 'block';
-        }
-
-        function submitAuth() {
-            // Имитация входа
-            document.getElementById('auth-form-container').style.display = 'none';
-            document.getElementById('user-menu').style.display = 'block';
-        }
-
-        function logout() {
+        function resetMenu() {
+            document.getElementById('auth-form').style.display = 'none';
             document.getElementById('user-menu').style.display = 'none';
             document.getElementById('guest-menu').style.display = 'block';
         }
 
-        // --- ЛОГИКА ПОИСКА И ИСТОРИИ ---
-        function handleSearchInput(val) {
-            if(!val.trim()) {
-                renderHistory();
+        function processAuth() {
+            // Имитация входа
+            document.getElementById('auth-form').style.display = 'none';
+            document.getElementById('user-menu').style.display = 'block';
+        }
+
+        function logout() {
+            resetMenu();
+        }
+
+        // --- ПОИСК И ИСТОРИЯ ---
+        function handleTyping(val) {
+            if(val.trim().length > 0) {
+                if(!isSearching) {
+                    isSearching = true;
+                    document.getElementById('container-label').innerText = "Результаты поиска";
+                    document.getElementById('results').innerHTML = ""; // Очищаем историю при начале ввода
+                }
             } else {
-                document.getElementById('container-label').innerText = "Результаты поиска";
+                goHome();
             }
         }
 
-        function renderHistory() {
+        function goHome() {
+            isSearching = false;
+            document.getElementById('sInp').value = '';
             document.getElementById('container-label').innerText = "История просмотров";
+            closeKeyboard();
+            renderHistory();
+        }
+
+        function renderHistory() {
             const res = document.getElementById('results');
             res.innerHTML = '';
             if(history.length === 0) {
-                res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:30px; opacity:0.3; font-size:12px">История пуста</p>';
+                res.innerHTML = '<p style="grid-column: 1/4; text-align:center; padding:40px; opacity:0.3; font-size:12px;">Вы еще ничего не смотрели</p>';
                 return;
             }
-            history.forEach(a => {
-                res.appendChild(createCard(a));
-            });
+            history.forEach(a => res.appendChild(createCard(a)));
         }
 
         function createCard(a) {
             const d = document.createElement('div');
             d.className = 'card';
             d.innerHTML = `<img src="${a.img}"><div>${a.title}</div>`;
-            d.onclick = (e) => { e.stopPropagation(); play(a.id, a.title, a.img); };
+            d.onclick = () => play(a.id, a.title, a.img);
             return d;
-        }
-
-        function goHome() {
-            document.getElementById('sInp').value = '';
-            closeKeyboard();
-            renderHistory();
         }
 
         async function search() {
             const q = document.getElementById('sInp').value;
             if(!q.trim()) return;
+            
             const res = document.getElementById('results');
-            res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px; font-size:12px">Загрузка...</p>';
+            res.innerHTML = '<p style="grid-column: 1/4; text-align:center; padding:20px; font-size:12px;">Ищем аниме...</p>';
             
             try {
-                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
+                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=18`);
                 const data = await r.json();
                 res.innerHTML = '';
+                
                 if(data.length === 0) {
-                    res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px; font-size:12px">Ничего не найдено</p>';
+                    res.innerHTML = '<p style="grid-column: 1/4; text-align:center; padding:20px;">Ничего не найдено</p>';
                     return;
                 }
+                
                 data.forEach(a => {
-                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                    const obj = { 
+                        id: a.id, 
+                        title: a.russian || a.name, 
+                        img: `https://shikimori.one${a.image.preview}` 
+                    };
                     res.appendChild(createCard(obj));
                 });
             } catch(e) { 
-                res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px; font-size:12px">Ошибка сети</p>';
+                res.innerHTML = '<p style="grid-column: 1/4; text-align:center; padding:20px;">Ошибка сети</p>';
             }
         }
 
+        // --- ПЛЕЕР ---
         function play(id, title, img) {
-            // Добавляем в историю
+            // Сохраняем в историю (в начало списка)
             const entry = { id, title, img };
             history = history.filter(item => item.id !== id); 
             history.unshift(entry);
-            if(history.length > 20) history.pop();
+            if(history.length > 15) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
 
             const layer = document.getElementById('player-layer');
             const iframe = document.getElementById('player-iframe');
             layer.style.display = 'block';
-            iframe.src = `https://pizdec.pro/id/${id}`;
+            iframe.src = `https://pizdec.pro/id/${id}`; // Ваш роут плеера
         }
 
         function closeVideo() {
             document.getElementById('player-layer').style.display = 'none';
             document.getElementById('player-iframe').src = '';
-            if(!document.getElementById('sInp').value.trim()) renderHistory();
+            if(!isSearching) renderHistory();
         }
 
         function closeKeyboard() { document.getElementById('sInp').blur(); }
 
-        // ЗАГРУЗКА
+        // ЗАГРУЗКА (Splash)
         let prog = 0;
         let loadInt = setInterval(() => {
-            prog += 2.5;
+            prog += 2;
             if (prog >= 100) {
                 prog = 100;
                 clearInterval(loadInt);
@@ -306,8 +349,8 @@
                 }, 200);
             }
             document.getElementById('bar').style.width = prog + '%';
-            document.getElementById('perc').innerText = Math.floor(prog) + '%';
-        }, 40);
+            document.getElementById('perc').innerText = prog + '%';
+        }, 30);
     </script>
 </body>
 </html>
