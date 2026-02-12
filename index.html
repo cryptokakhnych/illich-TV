@@ -17,7 +17,7 @@
             -webkit-text-size-adjust: 100%;
         }
         
-        /* ФОН */
+        /* ФОН ПРИЛОЖЕНИЯ */
         #bg-container { 
             position: fixed; 
             top: 0; 
@@ -41,17 +41,14 @@
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            /* Фон загрузки без затемнения */
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
             transition: opacity 0.5s ease;
         }
-        #splash-screen::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: -1;
-        }
 
-        /* Шкала и цифры (подняты выше, обводка, цифры меньше) */
         #loading-container {
-            margin-top: -60px; /* Поднимаем всю конструкцию выше */
+            margin-top: -60px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -60,9 +57,9 @@
         #perc {
             color: #00d4ff; 
             font-weight: 900; 
-            margin-bottom: 2px; /* Прижимаем к шкале */
-            font-size: 18px; /* Цифры немного меньше */
-            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; /* Обводка текста */
+            margin-bottom: 2px;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
         }
 
         .progress-box {
@@ -71,25 +68,31 @@
             background: rgba(0,0,0,0.5); 
             border-radius: 10px; 
             overflow: hidden;
-            border: 1px solid rgba(0,212,255,0.3); /* Легкая обводка шкалы */
+            border: 1px solid rgba(0,212,255,0.3);
         }
 
         /* КОНТЕНТ */
-        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 70px; position: relative; }
+        #main-content { 
+            display: none; 
+            width: 100%; 
+            height: 100%; 
+            flex-direction: column; 
+            align-items: center; 
+            padding-top: 15px; 
+            position: relative; 
+        }
         
-        /* Верхняя панель теперь содержит поиск и меню */
         .top-bar { 
-            position: absolute; 
-            top: 15px; 
             width: 94%; 
             display: flex; 
             gap: 10px;
             align-items: center; 
             z-index: 100; 
+            margin-bottom: 15px;
         }
 
         .search-box { 
-            flex: 1; /* Поиск занимает всё свободное место */
+            flex: 1;
             display: flex; 
             background: #fff; 
             border-radius: 50px; 
@@ -98,59 +101,62 @@
         }
 
         .search-box input { 
-            flex: 1; 
-            border: none; 
-            outline: none; 
-            padding: 8px 15px; 
-            font-size: 14px; 
-            border-radius: 50px; 
-            color: #000; 
+            flex: 1; border: none; outline: none; padding: 8px 15px; 
+            font-size: 14px; border-radius: 50px; color: #000; 
         }
 
         .search-btn { 
-            background: #00d4ff; 
-            color: #fff; 
-            border: none; 
-            padding: 0 15px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 12px;
-            cursor: pointer; 
+            background: #00d4ff; color: #fff; border: none; padding: 0 15px; 
+            border-radius: 50px; font-weight: bold; font-size: 12px;
         }
 
-        /* Кнопка меню с 3 полосками */
         .menu-btn {
-            width: 40px;
-            height: 40px;
-            background: rgba(0,0,0,0.7);
-            border: 1px solid #00d4ff33;
-            border-radius: 50%;
+            width: 40px; height: 40px; background: rgba(0,0,0,0.7);
+            border: 1px solid #00d4ff33; border-radius: 50%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; gap: 4px; backdrop-filter: blur(5px);
+        }
+        .menu-btn span { width: 20px; height: 2px; background: #00d4ff; border-radius: 2px; }
+
+        /* СТЕКЛЯННАЯ ОБЛАСТЬ ВЫВОДА */
+        .glass-container {
+            flex: 1;
+            width: 94%;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Стеклянная обводка */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-        .menu-btn span {
-            width: 20px;
-            height: 2px;
-            background: #00d4ff;
-            border-radius: 2px;
         }
 
-        #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px 15px 100px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #00d4ff22; text-align: center; }
+        #results { 
+            width: 100%; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            padding: 15px; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        .card { 
+            background: rgba(0,0,0,0.6); 
+            border-radius: 12px; 
+            padding: 8px; 
+            border: 1px solid rgba(0,212,255,0.1); 
+            text-align: center; 
+        }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
-        .card div { font-size: 12px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card div { font-size: 11px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
-        #player-iframe { width: 100%; height: 100%; border: none; background: #000; }
+        #player-iframe { width: 100%; height: 100%; border: none; }
         .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
-        
-        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body onclick="closeKeyboard(event)">
@@ -175,21 +181,17 @@
                 <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
             </div>
             <div class="menu-btn" onclick="alert('Меню в разработке')">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
         </div>
         
-        <div id="results"></div>
+        <div class="glass-container">
+            <div id="results"></div>
+        </div>
     </div>
 
     <div id="player-layer">
         <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
-        <div class="player-status" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%;">
-            <p id="status-text">Загрузка плеера...</p>
-            <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
-        </div>
         <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
@@ -220,9 +222,9 @@
             }
         }
 
-        // ЛОГИКА ЗАГРУЗКИ (2.1 секунды)
+        // ЗАГРУЗКА 2.1 сек
         let progress = 0;
-        const duration = 2100; // 2.1 сек
+        const duration = 2100; 
         const intervalTime = 20;
         const step = 100 / (duration / intervalTime);
 
@@ -248,11 +250,15 @@
         async function search() {
             const q = document.getElementById('sInp').value;
             if(!q) return;
-            document.getElementById('results').innerHTML = '<p>Ищем...</p>';
+            document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ищем...</p>';
             try {
                 const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
                 const data = await r.json();
                 document.getElementById('results').innerHTML = '';
+                if(data.length === 0) {
+                    document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ничего не найдено</p>';
+                    return;
+                }
                 data.forEach(a => {
                     const d = document.createElement('div');
                     d.className = 'card';
@@ -261,25 +267,15 @@
                     document.getElementById('results').appendChild(d);
                 });
             } catch(e) { 
-                document.getElementById('results').innerHTML = '<p>Ошибка поиска</p>';
+                document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ошибка сети</p>';
             }
         }
 
         function play(id) {
             const layer = document.getElementById('player-layer');
             const iframe = document.getElementById('player-iframe');
-            const btn = document.getElementById('manual-btn');
-            const statusText = document.getElementById('status-text');
-            const url = `https://pizdec.pro/id/${id}`;
             layer.style.display = 'block';
-            iframe.src = url;
-            statusText.innerText = "Проверка плеера...";
-            btn.style.display = 'none';
-            setTimeout(() => {
-                statusText.innerText = "Если плеер не загрузился, нажмите кнопку ниже:";
-                btn.href = url;
-                btn.style.display = 'inline-block';
-            }, 5000);
+            iframe.src = `https://pizdec.pro/id/${id}`;
         }
 
         function closeVideo() {
