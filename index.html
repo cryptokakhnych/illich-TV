@@ -91,9 +91,22 @@
             padding: 3px; box-shadow: 0 0 15px rgba(0,0,0,0.5); gap: 5px;
         }
 
+        /* ОБНОВЛЕННЫЙ СТИЛЬ INPUT: добавлена рамка и внутренний отступ для видимости границ */
         .search-box input { 
-            flex: 1; border: none; outline: none; padding: 8px 12px; 
-            font-size: 14px; border-radius: 50px; color: #000; min-width: 0; 
+            flex: 1; 
+            border: 1px solid #ddd; /* Видимая граница ввода */
+            outline: none; 
+            padding: 8px 15px; 
+            font-size: 14px; 
+            border-radius: 50px; 
+            color: #000; 
+            min-width: 0; 
+            background: #f9f9f9; /* Легкий тон для контраста */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Внутренняя тень для объема */
+        }
+        
+        .search-box input:focus {
+            border-color: #00d4ff; /* Подсветка при клике */
         }
 
         .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 12px; border-radius: 50px; font-weight: bold; font-size: 11px; cursor: pointer; }
@@ -147,7 +160,6 @@
             background: rgba(255, 255, 255, 0.02); 
             border-radius: 20px;
             border: 1.5px solid rgba(255, 255, 255, 0.2); 
-            /* Блюр удален */
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
