@@ -8,32 +8,36 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body, html { height: 100%; width: 100%; background: #000; color: white; overflow: hidden; position: fixed; }
         .background-fixed { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+        .background-fixed img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
 
-        /* ЭКРАН ЗАГРУЗКИ */
+        /* ЗАГРУЗКА */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/675D03F8-DE2B-4844-9B3F-011C5811F4EA.png') center/cover;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s ease;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
         }
 
-        /* ПОИСК И ИНТЕРФЕЙС */
-        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; opacity: 0; transition: 0.5s; }
-        .top-bar { position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid #00d4ff33; }
+        /* КОНТЕНТ */
+        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; }
+        .top-bar { position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid #00d4ff33; z-index: 100; }
         
-        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; }
-        .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; }
+        .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; z-index: 100; }
+        .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #000; }
         .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 20px; border-radius: 50px; font-weight: bold; }
 
         #results { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px 100px; overflow-y: auto; }
-        .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #ffffff11; text-align: center; }
-        .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; margin-bottom: 5px; }
-        .card div { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card { background: rgba(0,0,0,0.8); border-radius: 12px; padding: 8px; border: 1px solid #00d4ff22; text-align: center; }
+        .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
+        .card div { font-size: 12px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
-        #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); background: #00d4ff; color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 800; box-shadow: 0 0 20px #00d4ff; z-index: 2001; }
+        #player-iframe { width: 100%; height: 100%; border: none; background: #000; }
+        
+        .player-status { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%; }
+        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; box-shadow: 0 0 20px #00d4ff; }
+        
+        .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
     </style>
 </head>
 <body>
@@ -45,7 +49,7 @@
     <div id="splash-screen">
         <div style="color: #00d4ff; font-weight: 900; margin-bottom: 10px;" id="perc">0%</div>
         <div style="width: 200px; height: 4px; background: #222; border-radius: 10px;">
-            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: 0.1s;"></div>
+            <div id="bar" style="width: 0%; height: 100%; background: #00d4ff;"></div>
         </div>
     </div>
 
@@ -54,17 +58,21 @@
             <span style="font-size: 12px;">👤 Приятного просмотра!</span>
             <button onclick="location.reload()" style="background:none; border: 1px solid #ff4e50; color: #ff4e50; padding: 4px 10px; border-radius: 20px; font-size: 10px;">Выход</button>
         </div>
-
         <div class="search-box">
-            <input type="text" id="sInp" placeholder="Найти аниме (например, Наруто)...">
+            <input type="text" id="sInp" placeholder="Название аниме...">
             <button class="search-btn" onclick="search()">ПОИСК</button>
         </div>
-
         <div id="results"></div>
     </div>
 
     <div id="player-layer">
-        <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ ПЛЕЕР</button>
+        <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
+        
+        <div class="player-status" id="p-status">
+            <p id="status-text">Загрузка плеера...</p>
+            <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
+        </div>
+        
         <iframe id="player-iframe" allowfullscreen></iframe>
     </div>
 
@@ -72,26 +80,23 @@
         // Загрузка
         let p = 0;
         let iv = setInterval(() => {
-            p += 2;
+            p += 5;
             document.getElementById('bar').style.width = p + '%';
             document.getElementById('perc').innerText = p + '%';
             if(p >= 100) {
                 clearInterval(iv);
-                document.getElementById('splash-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                    document.getElementById('main-content').style.display = 'flex';
-                    setTimeout(() => document.getElementById('main-content').style.opacity = '1', 50);
-                }, 800);
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'flex';
+                document.getElementById('main-content').style.opacity = '1';
             }
-        }, 30);
+        }, 50);
 
         async function search() {
             const q = document.getElementById('sInp').value;
             if(!q) return;
-            document.getElementById('results').innerHTML = '<p>Загрузка...</p>';
+            document.getElementById('results').innerHTML = '<p>Ищем...</p>';
             try {
-                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=16`);
+                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
                 const data = await r.json();
                 document.getElementById('results').innerHTML = '';
                 data.forEach(a => {
@@ -101,15 +106,28 @@
                     d.onclick = () => play(a.id);
                     document.getElementById('results').appendChild(d);
                 });
-            } catch(e) { alert('Ошибка поиска'); }
+            } catch(e) { }
         }
 
         function play(id) {
-            const player = document.getElementById('player-layer');
+            const layer = document.getElementById('player-layer');
             const iframe = document.getElementById('player-iframe');
-            // Используем базу Kodik, которая лучше всего понимает Shikimori ID
-            iframe.src = `https://pizdec.pro/id/${id}`; 
-            player.style.display = 'block';
+            const btn = document.getElementById('manual-btn');
+            const statusText = document.getElementById('status-text');
+            
+            const url = `https://pizdec.pro/id/${id}`;
+            
+            layer.style.display = 'block';
+            iframe.src = url;
+            statusText.innerText = "Проверка плеера...";
+            btn.style.display = 'none';
+
+            // Если через 5 секунд не исчезнет черный экран, даем кнопку
+            setTimeout(() => {
+                statusText.innerText = "Если плеер не загрузился, нажмите кнопку ниже:";
+                btn.href = url;
+                btn.style.display = 'inline-block';
+            }, 5000);
         }
 
         function closeVideo() {
