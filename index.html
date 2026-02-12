@@ -142,7 +142,7 @@
 
         .glass-container {
             width: 94%; 
-            height: 82vh; /* Сделана немного длиннее */
+            height: 82vh; 
             margin-bottom: 25px; 
             background: rgba(255, 255, 255, 0.02); 
             border-radius: 20px;
@@ -152,6 +152,7 @@
             display: flex; 
             flex-direction: column;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            flex-shrink: 0;
         }
 
         .container-header { 
@@ -175,6 +176,7 @@
             width: 100%; 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
+            grid-auto-rows: max-content;
             gap: 15px; 
             padding: 15px; 
             overflow-y: auto; 
@@ -183,6 +185,7 @@
         }
 
         .card { 
+            width: 100%;
             background: rgba(0,0,0,0.3); border-radius: 12px; padding: 8px; 
             border: 1px solid rgba(255,255,255,0.1); text-align: center; 
             transition: transform 0.2s;
@@ -264,7 +267,7 @@
         window.addEventListener('load', () => { 
             renderHistory(); 
             
-            // Фиксация высоты в пикселях, чтобы панель не уменьшалась при открытии клавиатуры
+            // Фиксация высоты панели при загрузке (чтобы не прыгала от клавиатуры)
             const glass = document.getElementById('glass');
             const fixedHeight = window.innerHeight * 0.82;
             glass.style.height = fixedHeight + 'px';
@@ -320,7 +323,6 @@
             if(val.trim().length > 0) {
                 isSearching = true;
                 document.getElementById('container-label').innerText = "Результаты поиска";
-                // Сразу очищаем и запускаем поиск при вводе
                 searchTimeout = setTimeout(() => {
                     search();
                 }, 300);
