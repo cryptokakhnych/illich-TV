@@ -35,7 +35,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #loading-container {
@@ -82,6 +82,8 @@
         #main-content { 
             display: none; width: 100%; height: 100%; flex-direction: column; 
             align-items: center; padding-top: 15px; position: relative; 
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
         }
         
         .top-bar { 
@@ -116,9 +118,8 @@
             border-color: #00d4ff; 
         }
 
-        /* ИЗМЕНЕНО: Стеклянная синяя кнопка поиска */
         .search-btn { 
-            background: rgba(0, 212, 255, 0.3); /* Полупрозрачный синий */
+            background: rgba(0, 212, 255, 0.3); 
             color: #fff; 
             border: 1px solid rgba(0, 212, 255, 0.3); 
             padding: 0 12px; 
@@ -127,14 +128,14 @@
             font-size: 11px; 
             cursor: pointer;
             text-shadow: 1px 1px 2px #000; 
-            backdrop-filter: blur(10px); /* Эффект стекла */
+            backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.1);
         }
 
-        /* ИЗМЕНЕНО: Стеклянная красная кнопка назад (верхняя) */
         .back-btn { 
-            background: rgba(255, 75, 75, 0.3); /* Полупрозрачный красный */
+            display: none; /* Скрыта по умолчанию */
+            background: rgba(255, 75, 75, 0.3); 
             color: #fff; 
             border: 1px solid rgba(255, 75, 75, 0.3); 
             padding: 0 12px; 
@@ -143,7 +144,7 @@
             font-size: 11px; 
             cursor: pointer;
             text-shadow: 1px 1px 2px #000; 
-            backdrop-filter: blur(10px); /* Эффект стекла */
+            backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(255, 75, 75, 0.1);
         }
@@ -201,6 +202,7 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             flex-shrink: 0;
             position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .container-header { 
@@ -235,6 +237,7 @@
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
             flex: 1; 
+            transition: opacity 0.3s ease;
         }
 
         .card { 
@@ -286,7 +289,7 @@
         .forum-header-bar {
             width: 100%; padding: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: sticky; top: 0; background: rgba(0,0,0,0.6); z-index: 5;
+            position: sticky; top: 0; background: transparent; z-index: 5;
         }
         .forum-toolbar {
             display: flex; align-items: center; gap: 5px;
@@ -301,23 +304,27 @@
 
         .forum-add-btn {
             width: 32px; height: 32px; border-radius: 50%;
-            border: none;
-            background: #00d4ff; 
+            background: rgba(0, 212, 255, 0.3); 
+            border: 1px solid rgba(0, 212, 255, 0.4);
             color: #fff; font-weight: bold;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             text-shadow: 1px 1px 2px #000;
             font-size: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .forum-admin-del-btn {
             width: 32px; height: 32px; border-radius: 50%;
-            border: none;
-            background: #ff4b4b; 
+            background: rgba(255, 75, 75, 0.3); 
+            border: 1px solid rgba(255, 75, 75, 0.4);
             color: #fff; font-weight: bold;
             display: none; 
             align-items: center; justify-content: center; cursor: pointer;
             text-shadow: 1px 1px 2px #000;
             font-size: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .del-mode-active { border: 2px solid #fff; box-shadow: 0 0 10px red; }
@@ -367,7 +374,7 @@
         
         .chat-bottom-area {
             flex-shrink: 0;
-            background: rgba(0,0,0,0.8); 
+            background: transparent; 
             display: flex; flex-direction: column; 
             z-index: 100;
         }
@@ -377,9 +384,13 @@
         }
 
         .chat-send-btn {
-            background: #00d4ff; color: #fff; border: none; width: 40px; height: 40px;
+            background: rgba(0, 212, 255, 0.3); 
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: #fff; width: 40px; height: 40px;
             border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 10px rgba(0,212,255,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
         }
 
         /* ПРОФИЛЬ */
@@ -419,17 +430,16 @@
             display: none; z-index: 100;
         }
 
-        /* ИЗМЕНЕНО: Стеклянная красная кнопка назад (внизу всех разделов) */
         .section-back-btn {
             width: 100%; 
             padding: 15px; 
-            background: rgba(255, 75, 75, 0.3); /* Полупрозрачный красный */
+            background: rgba(255, 75, 75, 0.3); 
             color: #fff; 
             border: 1px solid rgba(255, 75, 75, 0.3); 
             font-weight: bold; cursor: pointer; flex-shrink: 0;
             font-size: 12px; text-align: center;
             margin-top: auto; 
-            backdrop-filter: blur(10px); /* Эффект стекла */
+            backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 -4px 15px rgba(255, 75, 75, 0.1);
         }
@@ -457,7 +467,7 @@
             <div class="search-box" onclick="event.stopPropagation()">
                 <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="handleTyping(this.value)">
                 <button class="search-btn" onclick="search(); closeKeyboard();">ПОИСК</button>
-                <button class="back-btn" onclick="goHome();">НАЗАД</button>
+                <button class="back-btn" id="main-back-btn" onclick="goHome();">НАЗАД</button>
             </div>
             <div class="menu-btn" onclick="event.stopPropagation(); toggleMenu()">
                 <span></span><span></span><span></span>
@@ -587,28 +597,40 @@
 
         function handleTyping(val) {
             clearTimeout(searchTimeout);
+            const backBtn = document.getElementById('main-back-btn');
             if(val.trim().length > 0) {
+                backBtn.style.display = 'block';
                 isSearching = true;
                 currentMode = 'search';
                 document.getElementById('container-label').innerText = "Результаты поиска";
                 searchTimeout = setTimeout(() => search(), 300);
             } else {
+                backBtn.style.display = 'none';
                 goHome();
             }
         }
 
         function goHome() {
+            document.getElementById('main-back-btn').style.display = 'none';
             document.getElementById('glass').style.height = '75vh';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
             if(currentMode === 'topic') { openForum(); return; }
-            isSearching = false;
-            currentMode = 'history';
-            document.getElementById('sInp').value = '';
-            document.getElementById('container-label').innerText = "История просмотров";
-            closeKeyboard();
-            renderHistory();
+            
+            // Мягкое обновление контента
+            const results = document.getElementById('results');
+            results.style.opacity = '0';
+            
+            setTimeout(() => {
+                isSearching = false;
+                currentMode = 'history';
+                document.getElementById('sInp').value = '';
+                document.getElementById('container-label').innerText = "История просмотров";
+                closeKeyboard();
+                renderHistory();
+                results.style.opacity = '1';
+            }, 200);
         }
 
         function createCard(a) {
@@ -826,11 +848,9 @@
             currentTopicId = id;
             const topic = forumTopics.find(t => t.id === id);
             document.getElementById('container-label').innerText = topic.title;
-            // Прячем глобальную кнопку назад, так как она будет внутри области чата
             document.getElementById('global-back-btn').style.display = 'none';
             
             const res = document.getElementById('results');
-            // ВАЖНО: Структура для фиксации над клавиатурой
             res.innerHTML = `
                 <div class="chat-view-wrapper">
                     <div class="chat-container" id="chat-msgs"></div>
@@ -899,8 +919,14 @@
             if (prog >= 100) {
                 clearInterval(loadInt);
                 setTimeout(() => {
-                    document.getElementById('splash-screen').style.opacity = '0';
-                    setTimeout(() => { document.getElementById('splash-screen').style.display = 'none'; document.getElementById('main-content').style.display = 'flex'; }, 500);
+                    const splash = document.getElementById('splash-screen');
+                    splash.style.opacity = '0';
+                    setTimeout(() => { 
+                        splash.style.display = 'none'; 
+                        const main = document.getElementById('main-content');
+                        main.style.display = 'flex';
+                        setTimeout(() => main.style.opacity = '1', 50);
+                    }, 800);
                 }, 200);
             }
             document.getElementById('bar').style.width = prog + '%';
