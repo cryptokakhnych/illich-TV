@@ -350,7 +350,7 @@
             display: flex; flex-direction: column; gap: 8px; padding-bottom: 60px;
         }
         .chat-msg {
-            background: rgba(255,255,255,0.08); padding: 8px 12px; border-radius: 8px;
+            background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .chat-user { font-size: 10px; color: #00d4ff; margin-bottom: 2px; font-weight: bold; }
@@ -400,10 +400,16 @@
         }
 
         .save-profile-btn {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%);
             background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
             border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
             display: none; z-index: 100;
+        }
+
+        .section-back-btn {
+            width: 100%; padding: 12px; background: rgba(255, 75, 75, 0.2);
+            color: #ff4b4b; border: none; border-top: 1px solid rgba(255, 75, 75, 0.3);
+            font-weight: bold; cursor: pointer; flex-shrink: 0;
         }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
@@ -425,7 +431,7 @@
     </div>
 
     <div id="main-content">
-        <div class="top-bar">
+        <div class="top-bar" id="top-search-bar">
             <div class="search-box" onclick="event.stopPropagation()">
                 <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="handleTyping(this.value)">
                 <button class="search-btn" onclick="search(); closeKeyboard();">ПОИСК</button>
@@ -439,6 +445,7 @@
         <div id="menu-overlay" onclick="event.stopPropagation()">
             <div id="guest-menu">
                 <div class="menu-item" onclick="openAuth('login')">🔑 Вход</div>
+                <div class="menu-item" onclick="openAllAnime()">📺 Все аниме</div>
                 <div class="menu-item" onclick="openAuth('reg')">📝 Регистрация</div>
             </div>
             
@@ -452,6 +459,7 @@
 
             <div id="user-menu" style="display:none">
                 <div class="menu-item" onclick="openProfile()">👤 Профиль</div>
+                <div class="menu-item" onclick="openAllAnime()">📺 Все аниме</div>
                 <div class="menu-item" onclick="openFavorites()">⭐ Избранные</div>
                 <div class="menu-item" onclick="openForum()">💬 Форум</div>
                 <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">🚪 Выход</div>
@@ -464,6 +472,7 @@
             </div>
             <div id="results"></div>
             <button id="save-profile-btn" class="save-profile-btn" onclick="saveProfileChanges()">СОХРАНИТЬ</button>
+            <button id="global-back-btn" class="section-back-btn" style="display:none" onclick="goHome()">НАЗАД</button>
         </div>
     </div>
 
@@ -565,6 +574,8 @@
 
         function goHome() {
             document.getElementById('save-profile-btn').style.display = 'none';
+            document.getElementById('top-search-bar').style.display = 'flex';
+            document.getElementById('global-back-btn').style.display = 'none';
             if(currentMode === 'topic') { openForum(); return; }
             isSearching = false;
             currentMode = 'history';
@@ -596,9 +607,9 @@
             history.forEach(a => res.appendChild(createCard(a)));
         }
 
-        async function search() {
-            const q = document.getElementById('sInp').value;
-            if(!q.trim()) return;
+        async function search(query = null) {
+            const q = query || document.getElementById('sInp').value;
+            if(!q && !query) return;
             const res = document.getElementById('results');
             res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
             try {
@@ -613,9 +624,35 @@
             } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка</p>'; }
         }
 
+        function openAllAnime() {
+            hideMenu();
+            currentMode = 'all-anime';
+            document.getElementById('top-search-bar').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'block';
+            document.getElementById('container-label').innerText = "Все аниме";
+            const res = document.getElementById('results');
+            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка списка...</p>';
+            loadAllAnime();
+        }
+
+        async function loadAllAnime() {
+            try {
+                const r = await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity`);
+                const data = await r.json();
+                const res = document.getElementById('results');
+                res.innerHTML = '';
+                data.forEach(a => {
+                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                    res.appendChild(createCard(obj));
+                });
+            } catch(e) { document.getElementById('results').innerHTML = '<p style="text-align:center; padding:20px;">Ошибка загрузки</p>'; }
+        }
+
         function openFavorites() {
             hideMenu();
             currentMode = 'favorites';
+            document.getElementById('top-search-bar').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Избранные";
             renderFavorites();
         }
@@ -646,8 +683,10 @@
         function openProfile() {
             hideMenu();
             currentMode = 'profile';
+            document.getElementById('top-search-bar').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Профиль";
-            document.getElementById('save-profile-btn').style.display = 'block';
+            document.getElementById('save-profile-btn').style.display = 'none';
             const res = document.getElementById('results');
             const anonState = userProfile.isAnon ? 'Аноним' : 'Не аноним';
             const anonClass = userProfile.isAnon ? 'anon-active' : '';
@@ -656,23 +695,23 @@
                 <div class="profile-view">
                     <div class="profile-row">
                         <span class="profile-label">Логин</span>
-                        <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}">
+                        <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Email</span>
-                        <input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}">
+                        <input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}" oninput="showSaveBtn()">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Дата рождения</span>
-                        <input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}">
+                        <input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}" oninput="showSaveBtn()">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Национальность</span>
-                        <input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}">
+                        <input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}" oninput="showSaveBtn()">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Пароль</span>
-                        <input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}">
+                        <input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}" oninput="showSaveBtn()">
                     </div>
                     <div class="profile-row">
                         <span class="profile-label">Режим форума</span>
@@ -682,6 +721,8 @@
             `;
         }
 
+        function showSaveBtn() { document.getElementById('save-profile-btn').style.display = 'block'; }
+
         function saveProfileChanges() {
             userProfile.login = document.getElementById('edit-login').value;
             userProfile.email = document.getElementById('edit-email').value;
@@ -689,6 +730,7 @@
             userProfile.nat = document.getElementById('edit-nat').value;
             userProfile.password = document.getElementById('edit-pass').value;
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            document.getElementById('save-profile-btn').style.display = 'none';
             alert("Профиль сохранен");
         }
 
@@ -702,6 +744,8 @@
             hideMenu();
             currentMode = 'forum';
             deleteMode = false;
+            document.getElementById('top-search-bar').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Форум";
             const res = document.getElementById('results');
@@ -709,8 +753,9 @@
             res.innerHTML = `
                 <div class="forum-header-bar">
                     <div class="forum-toolbar">
-                        <input type="text" class="forum-search-input" placeholder="Поиск темы..." oninput="filterTopics(this.value)">
+                        <input type="text" id="forum-s-inp" class="forum-search-input" placeholder="Поиск темы...">
                         <div class="forum-btn-group">
+                             <div class="search-btn" style="padding: 0 10px; display:flex; align-items:center;" onclick="filterTopics(document.getElementById('forum-s-inp').value)">ПОИСК</div>
                              <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
                              <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${isAdmin ? 'flex' : 'none'}" onclick="toggleDeleteMode()">-</div>
                         </div>
@@ -724,6 +769,8 @@
             `;
             renderTopicsList();
         }
+
+        function filterTopics(val) { renderTopicsList(val); }
 
         function renderTopicsList(filter = '') {
             const list = document.getElementById('topics-list');
@@ -789,7 +836,15 @@
         function closeKeyboard() { document.getElementById('sInp').blur(); }
         function toggleTopicForm() { const a = document.getElementById('new-topic-area'); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
         function toggleDeleteMode() { deleteMode = !deleteMode; document.getElementById('adm-del-btn').classList.toggle('del-mode-active'); renderTopicsList(); }
-        function deleteTopic(id) { forumTopics = forumTopics.filter(t => t.id !== id); localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); renderTopicsList(); }
+        
+        function deleteTopic(id) { 
+            forumTopics = forumTopics.filter(t => t.id !== id); 
+            localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); 
+            deleteMode = false;
+            document.getElementById('adm-del-btn').classList.remove('del-mode-active');
+            renderTopicsList(); 
+        }
+
         function createTopic() { const t = document.getElementById('new-topic-title').value; if(!t.trim()) return; forumTopics.unshift({ id: Date.now(), title: t, messages: [] }); localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); openForum(); }
 
         let prog = 0;
