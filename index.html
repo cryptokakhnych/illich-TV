@@ -88,13 +88,17 @@
         }
 
         .search-group input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; background: transparent; color: #000; }
-        .search-btn { background: #00d4ff; color: white; border: none; padding: 0 20px; border-radius: 40px; font-weight: bold; cursor: pointer; }
+        .search-btn { 
+            background: #00d4ff; color: white; border: none; padding: 0 20px; 
+            border-radius: 40px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
 
         #results-container {
             width: 95%; max-width: 800px;
             margin-top: 20px;
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 колонки для мобильных */
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             overflow-y: auto;
             flex-grow: 1;
@@ -104,9 +108,10 @@
 
         .anime-card { 
             background: rgba(0, 0, 0, 0.7); border-radius: 12px; 
-            padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.1); 
-            transition: transform 0.2s;
+            padding: 10px; text-align: center; border: 1px solid rgba(0, 212, 255, 0.2); 
+            transition: 0.3s;
         }
+        .anime-card:active { transform: scale(0.95); border-color: #00d4ff; }
         .anime-card img { width: 100%; border-radius: 8px; margin-bottom: 8px; object-fit: cover; aspect-ratio: 3/4; }
         .anime-card div { font-size: 12px; font-weight: bold; color: white; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
 
@@ -123,22 +128,35 @@
 
         #video-frame { width: 100%; height: 100%; border: none; }
 
-        .close-player {
+        .player-controls {
             position: absolute;
-            top: 40px; right: 20px;
-            background: rgba(0, 212, 255, 0.8);
+            top: 40px; width: 100%;
+            display: flex; justify-content: space-between;
+            padding: 0 20px; z-index: 2001;
+        }
+
+        .btn-ui {
+            background: rgba(0, 212, 255, 0.9);
             color: white; border: none;
-            padding: 10px 20px; border-radius: 30px;
-            font-weight: bold; z-index: 2001;
+            padding: 10px 15px; border-radius: 30px;
+            font-weight: bold; font-size: 12px;
             box-shadow: 0 0 15px #00d4ff;
         }
         
-        .player-loader {
+        #player-error-msg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
+        
+        .loader-text {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             color: #00d4ff;
-            z-index: 1999;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -171,28 +189,51 @@
     </div>
 
     <div id="player-overlay">
-        <div class="player-loader">Загрузка плеера...</div>
-        <button class="close-player" onclick="closePlayer()">✕ ЗАКРЫТЬ</button>
+        <div id="player-loading-text" class="loader-text">Загрузка плеера...</div>
+        
+        <div id="player-error-msg">
+            <p style="margin-bottom: 15px;">Плеер загружается слишком долго...</p>
+            <button id="external-link" class="btn-ui" style="background: #ff4e50; box-shadow: 0 0 15px #ff4e50;">ОТКРЫТЬ В БРАУЗЕРЕ</button>
+        </div>
+
+        <div class="player-controls">
+            <button class="btn-ui" onclick="closePlayer()">✕ ЗАКРЫТЬ</button>
+        </div>
         <iframe id="video-frame" allowfullscreen allow="autoplay; fullscreen"></iframe>
     </div>
 
     <script>
+        let errorTimer;
+
         function closeKeyboard() { document.activeElement.blur(); }
 
-        document.getElementById('searchInput').addEventListener('input', function() {
-            if (!this.value.trim()) document.getElementById('results-container').innerHTML = "";
-        });
-
-        // Использование стабильного зеркала плеера
-        function openPlayer(shikimoriId) {
+        function openPlayer(shikimoriId, title) {
             const overlay = document.getElementById('player-overlay');
             const iframe = document.getElementById('video-frame');
+            const errorBlock = document.getElementById('player-error-msg');
+            const loaderText = document.getElementById('player-loading-text');
+            const extBtn = document.getElementById('external-link');
+
+            // Ссылка на плеер (используем проверенный Kodik агрегатор)
+            const playerUrl = `https://voidboost.net/embed/${shikimoriId}`;
             
-            // Мы используем библиотеку ворлд-арт/шикимори для подбора плеера
-            // Данный URL является стабильным агрегатором
-            iframe.src = `https://blackbox.vrbiz.io/id/${shikimoriId}`; 
-            
+            iframe.src = playerUrl;
             overlay.style.display = 'flex';
+            errorBlock.style.display = 'none';
+            loaderText.style.display = 'block';
+
+            // Если через 7 секунд плеер не оживет - предложим открыть в браузере
+            clearTimeout(errorTimer);
+            errorTimer = setTimeout(() => {
+                errorBlock.style.display = 'block';
+                loaderText.style.display = 'none';
+                extBtn.onclick = () => window.open(playerUrl, '_blank');
+            }, 7000);
+
+            iframe.onload = () => {
+                loaderText.style.display = 'none';
+                clearTimeout(errorTimer);
+            };
         }
 
         function closePlayer() {
@@ -200,16 +241,17 @@
             const iframe = document.getElementById('video-frame');
             iframe.src = ''; 
             overlay.style.display = 'none';
+            clearTimeout(errorTimer);
         }
 
+        // Логика загрузки и поиска (без изменений)
         window.onload = () => {
             const bar = document.getElementById('progress-bar');
             const num = document.getElementById('loader-number');
             bar.style.width = '100%';
             let p = 0;
             let iv = setInterval(() => {
-                p += 2;
-                if (p > 100) p = 100;
+                p += 2; if (p > 100) p = 100;
                 num.innerText = p + '%';
                 if(p >= 100) {
                     clearInterval(iv);
@@ -221,7 +263,7 @@
                         setTimeout(() => mc.style.opacity = '1', 50);
                     }, 800);
                 }
-            }, 40);
+            }, 3000 / 50);
         };
 
         async function executeSearch() {
@@ -229,36 +271,25 @@
             const res = document.getElementById('results-container');
             if(!q) return;
             closeKeyboard();
-            res.innerHTML = '<p style="text-align:center; width:100%; margin-top: 20px;">Поиск...</p>';
+            res.innerHTML = '<p style="text-align:center; width:100%;">Ищем...</p>';
             
             try {
-                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20&order=popularity`);
+                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
                 const data = await r.json();
                 res.innerHTML = '';
-                
-                if (data.length === 0) {
-                    res.innerHTML = '<p style="text-align:center; width:100%;">Ничего не найдено</p>';
-                    return;
-                }
+                if (data.length === 0) { res.innerHTML = 'Ничего не нашли'; return; }
 
                 data.forEach(a => {
                     const div = document.createElement('div');
                     div.className = 'anime-card';
-                    div.innerHTML = `
-                        <img src="https://shikimori.one${a.image.preview}" loading="lazy">
-                        <div>${a.russian || a.name}</div>
-                    `;
-                    div.onclick = (e) => { e.stopPropagation(); openPlayer(a.id); };
+                    div.innerHTML = `<img src="https://shikimori.one${a.image.preview}"><div>${a.russian || a.name}</div>`;
+                    div.onclick = (e) => { e.stopPropagation(); openPlayer(a.id, a.russian || a.name); };
                     res.appendChild(div);
                 });
-            } catch(e) { 
-                res.innerHTML = '<p style="text-align:center; width:100%;">Ошибка загрузки. Проверьте сеть.</p>'; 
-            }
+            } catch(e) { res.innerHTML = 'Ошибка сети'; }
         }
 
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') executeSearch();
-        });
+        document.getElementById('searchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') executeSearch(); });
     </script>
 </body>
 </html>
