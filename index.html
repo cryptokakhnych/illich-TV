@@ -140,15 +140,14 @@
         }
         .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
 
-        /* ИЗМЕНЕННАЯ СТЕКЛЯННАЯ ПАНЕЛЬ */
         .glass-container {
             width: 94%; 
-            height: 75vh; /* Конкретный размер */
-            margin-bottom: 25px; /* Отступ от низа */
-            background: rgba(255, 255, 255, 0.02); /* Почти прозрачный фон */
+            height: 82vh; /* Сделана немного длиннее */
+            margin-bottom: 25px; 
+            background: rgba(255, 255, 255, 0.02); 
             border-radius: 20px;
-            border: 1.5px solid rgba(255, 255, 255, 0.2); /* Видимая обводка */
-            backdrop-filter: blur(10px); /* Эффект стекла для читаемости */
+            border: 1.5px solid rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(10px); 
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
@@ -260,9 +259,16 @@
     <script>
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
         let isSearching = false;
+        let searchTimeout;
 
         window.addEventListener('load', () => { 
             renderHistory(); 
+            
+            // Фиксация высоты в пикселях, чтобы панель не уменьшалась при открытии клавиатуры
+            const glass = document.getElementById('glass');
+            const fixedHeight = window.innerHeight * 0.82;
+            glass.style.height = fixedHeight + 'px';
+
             const h = window.innerHeight;
             document.getElementById('bg-container').style.height = h + 'px';
             
@@ -310,9 +316,14 @@
         }
 
         function handleTyping(val) {
+            clearTimeout(searchTimeout);
             if(val.trim().length > 0) {
                 isSearching = true;
                 document.getElementById('container-label').innerText = "Результаты поиска";
+                // Сразу очищаем и запускаем поиск при вводе
+                searchTimeout = setTimeout(() => {
+                    search();
+                }, 300);
             } else {
                 goHome();
             }
