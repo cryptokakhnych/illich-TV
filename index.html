@@ -14,29 +14,28 @@
             color: white; 
             overflow: hidden;
             position: fixed;
+            -webkit-text-size-adjust: 100%;
         }
         
-        /* ИСПРАВЛЕННЫЙ ФОН: жесткая фиксация */
-        .background-fixed { 
+        /* ФОН: Полная фиксация без расширения */
+        #bg-container { 
             position: fixed; 
-            /* Используем top/left и фиксированные 100vw/100vh, чтобы не зависеть от клавиатуры */
             top: 0; 
             left: 0;
-            width: 100vw; 
-            height: 100vh; 
+            width: 100%; 
+            height: 100%; 
             z-index: -1; 
             background: #000;
-            /* Предотвращаем любые сдвиги */
-            pointer-events: none; 
         }
 
-        .background-fixed img { 
+        .background-fixed {
             width: 100%;
             height: 100%;
-            /* object-fit: cover сохранит пропорции как в видео */
-            object-fit: cover; 
+            background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover; /* Оптимально для заполнения */
             opacity: 0.6;
-            display: block;
         }
 
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
@@ -51,8 +50,13 @@
         }
 
         /* КОНТЕНТ */
-        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; }
-        .top-bar { position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); border: 1px solid #00d4ff33; z-index: 100; }
+        #main-content { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding-top: 80px; position: relative; }
+        
+        .top-bar { 
+            position: absolute; top: 15px; width: 92%; display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(0,0,0,0.6); padding: 10px 15px; border-radius: 50px; backdrop-filter: blur(10px); 
+            border: 1px solid #00d4ff33; z-index: 100; 
+        }
         
         .search-box { width: 92%; display: flex; background: #fff; border-radius: 50px; padding: 5px; margin-bottom: 20px; z-index: 101; }
         .search-box input { flex: 1; border: none; outline: none; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #000; }
@@ -68,13 +72,13 @@
         #player-iframe { width: 100%; height: 100%; border: none; background: #000; }
         .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
         
-        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; }
+        .error-btn { display: none; margin-top: 20px; background: #00d4ff; color: #fff; border: none; padding: 15px 25px; border-radius: 10px; font-weight: bold; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body onclick="closeKeyboard(event)">
 
-    <div class="background-fixed">
-        <img src="https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp">
+    <div id="bg-container">
+        <div class="background-fixed"></div>
     </div>
 
     <div id="splash-screen">
@@ -98,7 +102,7 @@
 
     <div id="player-layer">
         <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
-        <div class="player-status" id="p-status" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%;">
+        <div class="player-status" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 80%;">
             <p id="status-text">Загрузка плеера...</p>
             <a href="#" id="manual-btn" class="error-btn" target="_blank">СМОТРЕТЬ (ОТКРЫТЬ ПЛЕЕР)</a>
         </div>
@@ -106,11 +110,21 @@
     </div>
 
     <script>
-        // Закрытие клавиатуры
+        // ФИКС ФОНА: устанавливаем высоту в пикселях один раз при загрузке
+        function fixBackground() {
+            const h = window.innerHeight;
+            document.getElementById('bg-container').style.height = h + 'px';
+            document.querySelector('.background-fixed').style.height = h + 'px';
+        }
+        window.addEventListener('load', fixBackground);
+        window.addEventListener('orientationchange', () => setTimeout(fixBackground, 100));
+
+        // Функция закрытия клавиатуры
         function closeKeyboard(e) {
             const input = document.getElementById('sInp');
             if (document.activeElement === input) {
                 input.blur();
+                // Возвращаем вьюпорт в нормальное состояние
                 window.scrollTo(0, 0);
             }
         }
@@ -182,16 +196,6 @@
         function closeVideo() {
             document.getElementById('player-layer').style.display = 'none';
             document.getElementById('player-iframe').src = '';
-        }
-
-        // Фикс для визуального вьюпорта (для современных браузеров)
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                // Принудительно держим фон на месте, даже если вьюпорт изменился
-                const bg = document.querySelector('.background-fixed');
-                bg.style.height = window.innerHeight + 'px';
-                window.scrollTo(0,0);
-            });
         }
     </script>
 </body>
