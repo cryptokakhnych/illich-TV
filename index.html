@@ -17,12 +17,11 @@
             -webkit-text-size-adjust: 100%;
         }
         
-        /* ФОН: Фиксация без полос и прыжков */
+        /* ФОН: Фиксация, отсутствие полос и полная видимость краев */
         #bg-container { 
             position: fixed; 
             top: 0; 
-            left: 50%;
-            transform: translateX(-50%); /* Центрируем контейнер */
+            left: 0;
             width: 100%; 
             height: 100%; 
             z-index: -1; 
@@ -33,12 +32,11 @@
             width: 100%;
             height: 100%;
             background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
-            background-position: center top; /* Фиксируем верхушку */
+            background-position: center center;
             background-repeat: no-repeat;
-            /* Используем cover, чтобы убрать черные полосы */
-            background-size: cover; 
+            /* 100% 100% заставляет фото сжаться точно по ширине экрана, убирая обрезку краев */
+            background-size: 100% 100%; 
             opacity: 0.6;
-            transition: height 999999s; /* Блокируем изменение высоты от клавиатуры */
         }
 
         /* ЗАГРУЗОЧНЫЙ ЭКРАН */
@@ -113,20 +111,16 @@
     </div>
 
     <script>
-        // Запоминаем изначальную высоту экрана, чтобы клавиатура её не меняла
         const initialHeight = window.innerHeight;
 
         function fixBackground() {
             const bgContainer = document.getElementById('bg-container');
             const bgFixed = document.querySelector('.background-fixed');
-            
-            // Устанавливаем высоту в пикселях строго один раз
             bgContainer.style.height = initialHeight + 'px';
             bgFixed.style.height = initialHeight + 'px';
         }
 
         window.addEventListener('load', fixBackground);
-        // Не пересчитываем при resize, чтобы избежать прыжков от клавиатуры
         window.addEventListener('orientationchange', () => {
             setTimeout(() => {
                 const h = window.innerHeight;
@@ -143,7 +137,6 @@
             }
         }
 
-        // Логика загрузки
         let progress = 0;
         const duration = 2500;
         const intervalTime = 25;
