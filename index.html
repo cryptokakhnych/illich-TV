@@ -17,24 +17,16 @@
             -webkit-text-size-adjust: 100%;
         }
         
-        /* ФОН ПРИЛОЖЕНИЯ */
         #bg-container { 
             position: fixed; 
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            height: 100%; 
-            z-index: -1; 
-            background: #000;
+            top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: -1; background: #000;
         }
 
         .background-fixed {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-size: 100% 100%; 
+            background-position: center center; background-repeat: no-repeat; background-size: 100% 100%; 
             opacity: 0.6;
         }
 
@@ -46,119 +38,72 @@
             transition: opacity 0.5s ease;
         }
 
-        #loading-container {
-            margin-top: -60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #perc {
-            color: #00d4ff; 
-            font-weight: 900; 
-            margin-bottom: 2px;
-            font-size: 18px;
-            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
-        }
-
-        .progress-box {
-            width: 200px; 
-            height: 6px; 
-            background: rgba(0,0,0,0.5); 
-            border-radius: 10px; 
-            overflow: hidden;
-            border: 1px solid rgba(0,212,255,0.3);
-        }
+        #perc { color: #00d4ff; font-weight: 900; margin-bottom: 2px; font-size: 18px; text-shadow: 1px 1px 2px #000; }
+        .progress-box { width: 200px; height: 6px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,212,255,0.3); }
 
         /* КОНТЕНТ */
         #main-content { 
-            display: none; 
-            width: 100%; 
-            height: 100%; 
-            flex-direction: column; 
-            align-items: center; 
-            padding-top: 15px; 
-            position: relative; 
+            display: none; width: 100%; height: 100%; flex-direction: column; 
+            align-items: center; padding-top: 15px; position: relative; 
         }
         
-        .top-bar { 
-            width: 94%; 
-            display: flex; 
-            gap: 10px;
-            align-items: center; 
-            z-index: 100; 
-            margin-bottom: 15px;
-        }
+        .top-bar { width: 94%; display: flex; gap: 10px; align-items: center; z-index: 100; margin-bottom: 15px; }
 
         .search-box { 
-            flex: 1;
-            display: flex; 
-            background: #fff; 
-            border-radius: 50px; 
-            padding: 3px; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            gap: 5px;
+            flex: 1; display: flex; background: #fff; border-radius: 50px; 
+            padding: 3px; box-shadow: 0 0 15px rgba(0,0,0,0.5); gap: 5px;
         }
 
         .search-box input { 
             flex: 1; border: none; outline: none; padding: 8px 12px; 
-            font-size: 14px; border-radius: 50px; color: #000; 
-            min-width: 0; /* предотвращает раздувание инпута */
+            font-size: 14px; border-radius: 50px; color: #000; min-width: 0; 
         }
 
-        .search-btn, .back-btn { 
-            border: none; 
-            padding: 0 12px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 11px;
-            cursor: pointer;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .search-btn { background: #00d4ff; color: #fff; }
-        .back-btn { background: #ff4b4b; color: #fff; }
+        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 12px; border-radius: 50px; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .back-btn { background: #ff4b4b; color: #fff; border: none; padding: 0 12px; border-radius: 50px; font-weight: bold; font-size: 11px; cursor: pointer; }
 
         .menu-btn {
             width: 40px; height: 40px; background: rgba(0,0,0,0.7);
             border: 1px solid #00d4ff33; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; gap: 4px;
+            align-items: center; gap: 4px; cursor: pointer;
         }
         .menu-btn span { width: 20px; height: 2px; background: #00d4ff; border-radius: 2px; }
 
-        /* ПРОСТО ОБВОДКА БЕЗ БЛЮРА И ФОНА */
-        .glass-container {
-            flex: 1;
-            width: 94%;
-            margin-bottom: 20px;
-            background: transparent; 
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2); 
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        /* ОКНО МЕНЮ */
+        #menu-overlay {
+            display: none; position: fixed; top: 70px; right: 3%; width: 250px;
+            background: rgba(0,0,0,0.9); border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 15px; padding: 15px; z-index: 500; backdrop-filter: blur(10px);
         }
+        .menu-item { 
+            padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); 
+            cursor: pointer; font-size: 14px; transition: color 0.3s;
+        }
+        .menu-item:last-child { border: none; }
+        .menu-item:hover { color: #00d4ff; }
+
+        /* ФОРМЫ */
+        .auth-form { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .auth-form input { padding: 10px; border-radius: 8px; border: none; background: #222; color: #fff; }
+        .auth-form button { background: #00d4ff; color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* ОБВОДКА И РЕЗУЛЬТАТЫ */
+        .glass-container {
+            flex: 1; width: 94%; margin-bottom: 20px; background: transparent; 
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); 
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .container-title { padding: 15px 15px 0 15px; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
 
         #results { 
-            width: 100%; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            padding: 15px; 
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; 
+            width: 100%; display: grid; grid-template-columns: 1fr 1fr; 
+            gap: 15px; padding: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; 
         }
 
         .card { 
-            background: rgba(0,0,0,0.4); 
-            border-radius: 12px; 
-            padding: 8px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            text-align: center; 
+            background: rgba(0,0,0,0.4); border-radius: 12px; padding: 8px; 
+            border: 1px solid rgba(255,255,255,0.05); text-align: center; 
         }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
         .card div { font-size: 11px; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -166,43 +111,54 @@
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { 
-            position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); 
-            color: #fff; border: none; padding: 10px 20px; border-radius: 30px; 
-            font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; 
-        }
+        .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
     </style>
 </head>
-<body onclick="closeKeyboard(event)">
+<body onclick="hideMenu()">
 
-    <div id="bg-container">
-        <div class="background-fixed"></div>
-    </div>
+    <div id="bg-container"><div class="background-fixed"></div></div>
 
     <div id="splash-screen">
         <div id="loading-container">
             <div id="perc">0%</div>
-            <div class="progress-box">
-                <div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div>
-            </div>
+            <div class="progress-box"><div id="bar" style="width: 0%; height: 100%; background: #00d4ff; transition: width 0.1s linear;"></div></div>
         </div>
     </div>
 
     <div id="main-content">
         <div class="top-bar">
             <div class="search-box" onclick="event.stopPropagation()">
-                <input type="text" id="sInp" placeholder="Поиск..." 
-                    oninput="checkClear(this.value)"
-                    onkeypress="if(event.key === 'Enter') { search(); closeKeyboard(event); }">
-                <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
+                <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="handleSearchInput(this.value)">
+                <button class="search-btn" onclick="search(); closeKeyboard();">ПОИСК</button>
                 <button class="back-btn" onclick="goHome();">НАЗАД</button>
             </div>
-            <div class="menu-btn">
+            <div class="menu-btn" onclick="event.stopPropagation(); toggleMenu()">
                 <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <div id="menu-overlay" onclick="event.stopPropagation()">
+            <div id="guest-menu">
+                <div class="menu-item" onclick="showAuth('login')">Вход</div>
+                <div class="menu-item" onclick="showAuth('reg')">Регистрация</div>
+            </div>
+            <div id="user-menu" style="display:none">
+                <div class="menu-item">Профиль</div>
+                <div class="menu-item">Избранные</div>
+                <div class="menu-item">Форум</div>
+                <div class="menu-item" style="color:#ff4b4b" onclick="logout()">Выход</div>
+            </div>
+            <div id="auth-form-container" class="auth-form">
+                <h3 id="form-title" style="font-size:14px; margin-bottom:5px"></h3>
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Пароль">
+                <button onclick="login()">Подтвердить</button>
+                <div class="menu-item" style="font-size:10px; text-align:center" onclick="cancelAuth()">Отмена</div>
             </div>
         </div>
         
         <div class="glass-container">
+            <div id="container-label" class="container-title">История просмотров</div>
             <div id="results"></div>
         </div>
     </div>
@@ -213,90 +169,113 @@
     </div>
 
     <script>
-        const initialHeight = window.innerHeight;
+        let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
 
         function fixBackground() {
-            const bgContainer = document.getElementById('bg-container');
-            const bgFixed = document.querySelector('.background-fixed');
-            bgContainer.style.height = initialHeight + 'px';
-            bgFixed.style.height = initialHeight + 'px';
+            const h = window.innerHeight;
+            document.getElementById('bg-container').style.height = h + 'px';
+            document.querySelector('.background-fixed').style.height = h + 'px';
+        }
+        window.addEventListener('load', () => { fixBackground(); renderHistory(); });
+
+        // МЕНЮ И АВТОРИЗАЦИЯ
+        function toggleMenu() {
+            const m = document.getElementById('menu-overlay');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        }
+        function hideMenu() { document.getElementById('menu-overlay').style.display = 'none'; }
+
+        function showAuth(mode) {
+            document.getElementById('guest-menu').style.display = 'none';
+            document.getElementById('auth-form-container').style.display = 'flex';
+            document.getElementById('form-title').innerText = mode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ';
         }
 
-        window.addEventListener('load', fixBackground);
-        
-        // Очистка результатов при пустом инпуте
-        function checkClear(val) {
+        function cancelAuth() {
+            document.getElementById('auth-form-container').style.display = 'none';
+            document.getElementById('guest-menu').style.display = 'block';
+        }
+
+        function login() {
+            document.getElementById('auth-form-container').style.display = 'none';
+            document.getElementById('user-menu').style.display = 'block';
+            // В реальном приложении здесь был бы запрос к серверу
+        }
+
+        function logout() {
+            document.getElementById('user-menu').style.display = 'none';
+            document.getElementById('guest-menu').style.display = 'block';
+        }
+
+        // ПОИСК И ИСТОРИЯ
+        function handleSearchInput(val) {
             if(!val.trim()) {
-                document.getElementById('results').innerHTML = '';
+                renderHistory();
+            } else {
+                // Если нужно искать сразу при вводе — можно раскомментировать вызов search()
+                // Но сейчас просто меняем заголовок
+                document.getElementById('container-label').innerText = "Результаты поиска";
             }
         }
 
-        // Возврат на главное
+        function renderHistory() {
+            document.getElementById('container-label').innerText = "История просмотров";
+            const res = document.getElementById('results');
+            res.innerHTML = '';
+            if(history.length === 0) {
+                res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px; opacity:0.5">Тут будет ваша история</p>';
+                return;
+            }
+            history.forEach(a => {
+                res.appendChild(createCard(a));
+            });
+        }
+
+        function createCard(a) {
+            const d = document.createElement('div');
+            d.className = 'card';
+            d.innerHTML = `<img src="${a.img}"><div>${a.title}</div>`;
+            d.onclick = () => play(a.id, a.title, a.img);
+            return d;
+        }
+
         function goHome() {
-            const inp = document.getElementById('sInp');
-            inp.value = '';
-            document.getElementById('results').innerHTML = '';
+            document.getElementById('sInp').value = '';
             closeKeyboard();
+            renderHistory();
         }
-
-        function closeKeyboard(e) {
-            const input = document.getElementById('sInp');
-            if (document.activeElement === input) {
-                input.blur();
-                window.scrollTo(0, 0);
-            }
-        }
-
-        // ЗАГРУЗКА 2.1 сек
-        let progress = 0;
-        const duration = 2100; 
-        const intervalTime = 20;
-        const step = 100 / (duration / intervalTime);
-
-        let loadingInterval = setInterval(() => {
-            progress += step;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(loadingInterval);
-                setTimeout(() => {
-                    const ss = document.getElementById('splash-screen');
-                    ss.style.opacity = '0';
-                    setTimeout(() => {
-                        ss.style.display = 'none';
-                        document.getElementById('main-content').style.display = 'flex';
-                    }, 500);
-                }, 200);
-            }
-            const displayValue = Math.round(progress);
-            document.getElementById('bar').style.width = displayValue + '%';
-            document.getElementById('perc').innerText = displayValue + '%';
-        }, intervalTime);
 
         async function search() {
             const q = document.getElementById('sInp').value;
             if(!q.trim()) return;
-            document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ищем...</p>';
+            const res = document.getElementById('results');
+            res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px;">Ищем...</p>';
+            
             try {
                 const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
                 const data = await r.json();
-                document.getElementById('results').innerHTML = '';
+                res.innerHTML = '';
                 if(data.length === 0) {
-                    document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ничего не найдено</p>';
+                    res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px;">Ничего не нашли</p>';
                     return;
                 }
                 data.forEach(a => {
-                    const d = document.createElement('div');
-                    d.className = 'card';
-                    d.innerHTML = `<img src="https://shikimori.one${a.image.preview}"><div>${a.russian || a.name}</div>`;
-                    d.onclick = (e) => { e.stopPropagation(); play(a.id); };
-                    document.getElementById('results').appendChild(d);
+                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                    res.appendChild(createCard(obj));
                 });
             } catch(e) { 
-                document.getElementById('results').innerHTML = '<p style="padding:20px; text-align:center;">Ошибка сети</p>';
+                res.innerHTML = '<p style="grid-column: 1/3; text-align:center; padding:20px;">Ошибка сети</p>';
             }
         }
 
-        function play(id) {
+        function play(id, title, img) {
+            // Сохраняем в историю
+            const entry = { id, title, img };
+            history = history.filter(item => item.id !== id); // Удаляем дубликат
+            history.unshift(entry); // Добавляем в начало
+            if(history.length > 20) history.pop(); // Лимит истории
+            localStorage.setItem('animeHistory', JSON.stringify(history));
+
             const layer = document.getElementById('player-layer');
             const iframe = document.getElementById('player-iframe');
             layer.style.display = 'block';
@@ -306,7 +285,29 @@
         function closeVideo() {
             document.getElementById('player-layer').style.display = 'none';
             document.getElementById('player-iframe').src = '';
+            if(!document.getElementById('sInp').value.trim()) renderHistory();
         }
+
+        function closeKeyboard() { document.getElementById('sInp').blur(); }
+
+        // ЗАГРУЗКА
+        let prog = 0;
+        let loadInt = setInterval(() => {
+            prog += 2;
+            if (prog >= 100) {
+                prog = 100;
+                clearInterval(loadInt);
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('splash-screen').style.display = 'none';
+                        document.getElementById('main-content').style.display = 'flex';
+                    }, 500);
+                }, 200);
+            }
+            document.getElementById('bar').style.width = prog + '%';
+            document.getElementById('perc').innerText = prog + '%';
+        }, 30);
     </script>
 </body>
 </html>
