@@ -117,16 +117,16 @@
         }
         .menu-btn span { width: 20px; height: 2px; background: #00d4ff; border-radius: 2px; }
 
-        /* ОБНОВЛЕННАЯ СТЕКЛЯННАЯ ПАНЕЛЬ (Более прозрачная) */
+        /* УЛЬТРАПРОЗРАЧНАЯ СТЕКЛЯННАЯ ПАНЕЛЬ */
         .glass-container {
             flex: 1;
             width: 94%;
             margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.03); /* Уменьшена непрозрачность */
-            backdrop-filter: blur(5px); /* Уменьшено размытие для видимости фона */
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.01); /* Почти полная прозрачность */
+            backdrop-filter: blur(1px); /* Минимальное размытие для чистоты фона */
+            -webkit-backdrop-filter: blur(1px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.12); 
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая грань */
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -143,10 +143,10 @@
         }
 
         .card { 
-            background: rgba(0,0,0,0.5); 
+            background: rgba(0,0,0,0.4); 
             border-radius: 12px; 
             padding: 8px; 
-            border: 1px solid rgba(255,255,255,0.05); 
+            border: 1px solid rgba(255,255,255,0.03); 
             text-align: center; 
         }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
