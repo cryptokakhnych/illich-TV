@@ -91,26 +91,45 @@
             padding: 3px; box-shadow: 0 0 15px rgba(0,0,0,0.5); gap: 5px;
         }
 
-        /* ОБНОВЛЕННЫЙ СТИЛЬ INPUT: добавлена рамка и внутренний отступ для видимости границ */
         .search-box input { 
             flex: 1; 
-            border: 1px solid #ddd; /* Видимая граница ввода */
+            border: 1px solid #ddd; 
             outline: none; 
             padding: 8px 15px; 
             font-size: 14px; 
             border-radius: 50px; 
             color: #000; 
             min-width: 0; 
-            background: #f9f9f9; /* Легкий тон для контраста */
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Внутренняя тень для объема */
+            background: #fff; /* Полоска теперь чисто белая */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
         }
         
         .search-box input:focus {
-            border-color: #00d4ff; /* Подсветка при клике */
+            border-color: #00d4ff; 
         }
 
-        .search-btn { background: #00d4ff; color: #fff; border: none; padding: 0 12px; border-radius: 50px; font-weight: bold; font-size: 11px; cursor: pointer; }
-        .back-btn { background: #ff4b4b; color: #fff; border: none; padding: 0 12px; border-radius: 50px; font-weight: bold; font-size: 11px; cursor: pointer; }
+        .search-btn { 
+            background: #00d4ff; 
+            color: #fff; 
+            border: none; 
+            padding: 0 12px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 11px; 
+            cursor: pointer;
+            text-shadow: 1px 1px 2px #000; /* Обводка текста кнопки */
+        }
+        .back-btn { 
+            background: #ff4b4b; 
+            color: #fff; 
+            border: none; 
+            padding: 0 12px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 11px; 
+            cursor: pointer;
+            text-shadow: 1px 1px 2px #000; /* Обводка текста кнопки */
+        }
 
         .menu-btn {
             width: 40px; height: 40px; background: rgba(0,0,0,0.7);
@@ -139,6 +158,7 @@
             align-items: center; 
             gap: 10px;
             background: rgba(255,255,255,0.03);
+            text-shadow: 1px 1px 2px #000; /* Обводка текста в меню */
         }
         .menu-item:active { background: rgba(0, 212, 255, 0.1); border-color: #00d4ff; }
 
@@ -182,6 +202,7 @@
             letter-spacing: 1.5px; 
             font-weight: bold;
             text-align: center;
+            text-shadow: 1px 1px 2px #000; /* Обводка для "История просмотров" и "Результаты поиска" */
         }
 
         #results { 
@@ -227,7 +248,7 @@
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
 <body onclick="hideMenu()">
@@ -262,10 +283,10 @@
             </div>
             
             <div id="auth-form" class="auth-container">
-                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px;">Вход</h4>
+                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px; text-shadow: 1px 1px 2px #000;">Вход</h4>
                 <input type="email" placeholder="Email" id="auth-email">
                 <input type="password" placeholder="Пароль" id="auth-pass">
-                <button id="auth-submit-btn" onclick="processAuth()">Подтвердить</button>
+                <button id="auth-submit-btn" onclick="processAuth()" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Подтвердить</button>
                 <div class="auth-back" onclick="resetMenu()">← Назад</div>
             </div>
 
