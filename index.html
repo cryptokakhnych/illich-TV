@@ -251,7 +251,6 @@
             flex: 1;
         }
         
-        /* КНОПКА ИЗБРАННОГО НА КАРТОЧКЕ */
         .fav-btn-card {
             background: #333; color: #fff;
             border: 1px solid rgba(255,255,255,0.3);
@@ -267,21 +266,61 @@
 
         /* ФОРУМ СТИЛИ */
         .forum-header-bar {
-            width: 100%; display: flex; gap: 10px; padding: 10px;
+            width: 100%; padding: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .forum-search {
-            flex: 1; border: 1px solid rgba(0,212,255,0.3); border-radius: 30px;
-            background: rgba(0,0,0,0.3); color: #fff; padding: 8px 15px; font-size: 13px; outline: none;
-            caret-color: #fff;
-        }
-        .forum-add-btn {
-            width: 35px; height: 35px; border-radius: 50%;
+        .forum-toolbar {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(0,0,0,0.3); /* Общая стеклянная панель */
             border: 1px solid rgba(0,212,255,0.3);
-            background: rgba(0,212,255,0.2); color: #fff; font-weight: bold;
+            border-radius: 30px;
+            padding: 4px;
+        }
+
+        .forum-search {
+            flex: 1; border: none; background: transparent; 
+            padding: 5px 10px; font-size: 13px; outline: none;
+        }
+        
+        /* Поиск белого цвета, как у аниме */
+        .forum-search-input {
+            flex: 1;
+            background: #fff; 
+            color: #000;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-size: 13px;
+            border: none;
+            outline: none;
+            caret-color: #000;
+        }
+
+        .forum-btn-group {
+            display: flex; gap: 5px;
+        }
+
+        .forum-add-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: none;
+            background: #00d4ff; /* Синяя кнопка */
+            color: #fff; font-weight: bold;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             text-shadow: 1px 1px 2px #000;
+            font-size: 16px;
         }
+
+        .forum-admin-del-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: none;
+            background: #ff4b4b; 
+            color: #fff; font-weight: bold;
+            display: none; /* Скрыто по умолчанию */
+            align-items: center; justify-content: center; cursor: pointer;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 16px;
+        }
+
+        .del-mode-active { border: 2px solid #fff; box-shadow: 0 0 10px red; }
         
         .new-topic-form {
             display: flex; flex-direction: column; gap: 10px; padding: 15px;
@@ -296,13 +335,18 @@
         }
 
         .topic-card {
-            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px;
+            background: rgba(0,0,0,0.3); /* Затемнение как у аниме иконок */
+            padding: 12px; border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
             display: flex; align-items: center; justify-content: space-between;
         }
         .topic-title { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
         .topic-select-btn {
             background: #00d4ff; color: #fff; border: none; padding: 5px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
+        }
+        .topic-delete-btn {
+            background: #ff4b4b; color: #fff; border: none; padding: 5px 10px;
             border-radius: 20px; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
         }
 
@@ -338,7 +382,8 @@
         }
         .profile-row {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px;
+            padding: 15px; background: rgba(0,0,0,0.3); /* Затемнение как у аниме */
+            border-radius: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
         .profile-label { color: #aaa; font-size: 13px; }
@@ -349,6 +394,26 @@
             padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
         }
         .anon-active { background: #00d4ff; color: #000; }
+        
+        .profile-btn {
+            background: #222; border: 1px solid #444; color: #fff;
+            padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;
+        }
+
+        /* Формы редактирования в профиле */
+        .edit-form-container {
+            padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .edit-inp {
+            width: 100%; padding: 8px; background: #fff; color: #000; 
+            border: none; border-radius: 5px; font-size: 13px; outline: none;
+        }
+        .save-btn {
+            background: #00d4ff; color: #000; font-weight: bold; padding: 8px; 
+            border-radius: 5px; border: none; cursor: pointer; width: 100%; margin-top: 5px;
+        }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
@@ -422,17 +487,23 @@
         let forumTopics = JSON.parse(localStorage.getItem('forumTopics')) || [
             { id: 1, title: 'Правила форума', messages: [{user: 'Admin', text: 'Добро пожаловать! Будьте вежливы.', time: '12.02.2024 10:00'}] }
         ];
+        // Дополненный профиль
         let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
             login: 'Пользователь',
+            email: '',
+            password: '',
             dob: '01.01.2000',
             nat: 'Планета Земля',
             isAnon: false
         };
 
+        const ADMIN_ID = "663587165"; 
+
         let isSearching = false;
-        let currentMode = 'history'; // history, search, favorites, forum, topic, profile
+        let currentMode = 'history'; 
         let currentTopicId = null;
         let searchTimeout;
+        let deleteMode = false; // Для админа
 
         window.addEventListener('load', () => { 
             renderHistory(); 
@@ -476,8 +547,15 @@
         }
 
         function processAuth() {
-            const email = document.getElementById('auth-email').value;
-            if(email) userProfile.login = email.split('@')[0];
+            const emailInp = document.getElementById('auth-email').value;
+            const passInp = document.getElementById('auth-pass').value;
+            
+            if(emailInp) {
+                userProfile.login = emailInp; // Используем ввод как логин/ID
+                userProfile.email = emailInp;
+            }
+            if(passInp) userProfile.password = passInp;
+            
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             
             document.getElementById('auth-form').style.display = 'none';
@@ -490,6 +568,7 @@
             document.getElementById('user-menu').style.display = 'none';
             document.getElementById('guest-menu').style.display = 'block';
             document.getElementById('auth-form').style.display = 'none';
+            deleteMode = false;
             goHome();
         }
 
@@ -510,10 +589,13 @@
 
         function goHome() {
             if(currentMode === 'topic') {
-                openForum(); // Если в теме, назад в форум
+                openForum(); 
                 return;
             }
-            // Иначе домой
+            if(currentMode === 'profile_edit') {
+                openProfile();
+                return;
+            }
             isSearching = false;
             currentMode = 'history';
             document.getElementById('sInp').value = '';
@@ -522,7 +604,7 @@
             renderHistory();
         }
 
-        // ОТРИСОВКА ИСТОРИИ И ПОИСКА
+        // ОТРИСОВКА ИСТОРИИ
         function renderHistory() {
             const res = document.getElementById('results');
             res.innerHTML = '';
@@ -592,23 +674,25 @@
         function toggleFav(e, id, title, img) {
             e.stopPropagation();
             const index = favorites.findIndex(f => f.id == id);
+            
+            // Логика переключения
             if(index > -1) {
                 favorites.splice(index, 1);
+                // Если мы в избранном, удаляем элемент визуально сразу
+                if(currentMode === 'favorites') {
+                    renderFavorites();
+                    return;
+                }
+                // Иначе меняем иконку на белую
+                e.target.innerText = '🤍';
+                e.target.classList.remove('fav-active');
             } else {
                 favorites.unshift({ id, title, img });
+                // Сразу краснеем
+                e.target.innerText = '❤️';
+                e.target.classList.add('fav-active');
             }
             localStorage.setItem('animeFavorites', JSON.stringify(favorites));
-            
-            // Перерисовка в зависимости от режима
-            if(currentMode === 'favorites') {
-                renderFavorites();
-            } else if(currentMode === 'history') {
-                renderHistory();
-            } else if(currentMode === 'search') {
-                // Если поиск, просто обновим иконку (сложнее, проще оставить как есть, при следующем поиске обновится)
-                e.target.innerText = (index > -1) ? '🤍' : '❤️';
-                e.target.classList.toggle('fav-active');
-            }
         }
 
         // ПРОФИЛЬ
@@ -639,8 +723,68 @@
                         <span class="profile-label">Режим форума</span>
                         <button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button>
                     </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Пароль</span>
+                        <button class="profile-btn" onclick="showChangePass()">Изменить</button>
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email</span>
+                        <button class="profile-btn" onclick="showChangeEmail()">Изменить</button>
+                    </div>
                 </div>
             `;
+        }
+
+        function showChangePass() {
+            currentMode = 'profile_edit';
+            const res = document.getElementById('results');
+            res.innerHTML = `
+                <div class="profile-view">
+                     <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">Смена пароля</h3>
+                     <div class="edit-form-container">
+                        <input type="password" class="edit-inp" placeholder="Введите старый пароль">
+                        <input type="password" id="new-pass" class="edit-inp" placeholder="Введите новый пароль">
+                        <button class="save-btn" onclick="saveNewPass()">Сохранить</button>
+                     </div>
+                     <button class="auth-back" onclick="openProfile()" style="background:none; border:none; margin-top:10px; color:#aaa;">Отмена</button>
+                </div>
+            `;
+        }
+
+        function saveNewPass() {
+            const newP = document.getElementById('new-pass').value;
+            if(newP) {
+                userProfile.password = newP;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                alert("Пароль сохранен");
+                openProfile();
+            }
+        }
+
+        function showChangeEmail() {
+            currentMode = 'profile_edit';
+            const res = document.getElementById('results');
+            res.innerHTML = `
+                <div class="profile-view">
+                     <h3 style="text-align:center; font-size:14px; margin-bottom:10px;">Смена Email</h3>
+                     <div class="edit-form-container">
+                        <input type="email" class="edit-inp" placeholder="Введите старый email">
+                        <input type="email" id="new-email" class="edit-inp" placeholder="Введите новый email">
+                        <button class="save-btn" onclick="saveNewEmail()">Сохранить</button>
+                     </div>
+                     <button class="auth-back" onclick="openProfile()" style="background:none; border:none; margin-top:10px; color:#aaa;">Отмена</button>
+                </div>
+            `;
+        }
+
+        function saveNewEmail() {
+            const newE = document.getElementById('new-email').value;
+            if(newE) {
+                userProfile.email = newE;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                alert("Email сохранен");
+                openProfile();
+            }
         }
 
         function toggleAnon() {
@@ -653,12 +797,23 @@
         function openForum() {
             hideMenu();
             currentMode = 'forum';
+            deleteMode = false; // сброс при входе
             document.getElementById('container-label').innerText = "Форум";
             const res = document.getElementById('results');
+            
+            // Проверка админа
+            const isAdmin = (userProfile.login === ADMIN_ID);
+            const displayAdminBtn = isAdmin ? 'flex' : 'none';
+
             res.innerHTML = `
                 <div class="forum-header-bar">
-                    <input type="text" class="forum-search" placeholder="Поиск темы..." oninput="filterTopics(this.value)">
-                    <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
+                    <div class="forum-toolbar">
+                        <input type="text" class="forum-search-input" placeholder="Поиск темы..." oninput="filterTopics(this.value)">
+                        <div class="forum-btn-group">
+                             <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
+                             <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${displayAdminBtn}" onclick="toggleDeleteMode()">-</div>
+                        </div>
+                    </div>
                 </div>
                 <div id="new-topic-area" style="display:none;">
                     <div class="new-topic-form">
@@ -669,6 +824,14 @@
                 <div id="topics-list" style="padding:10px;"></div>
             `;
             renderTopicsList();
+        }
+
+        function toggleDeleteMode() {
+            deleteMode = !deleteMode;
+            const btn = document.getElementById('adm-del-btn');
+            if(deleteMode) btn.classList.add('del-mode-active');
+            else btn.classList.remove('del-mode-active');
+            renderTopicsList(); // Перерисовка кнопок
         }
 
         function toggleTopicForm() {
@@ -703,12 +866,29 @@
             filtered.forEach(t => {
                 const d = document.createElement('div');
                 d.className = 'topic-card';
+                
+                let btnHtml = '';
+                if(deleteMode) {
+                    btnHtml = `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>`;
+                } else {
+                    btnHtml = `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`;
+                }
+
                 d.innerHTML = `
                     <span class="topic-title">${t.title}</span>
-                    <button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>
+                    ${btnHtml}
                 `;
                 list.appendChild(d);
             });
+        }
+
+        function deleteTopic(id) {
+            forumTopics = forumTopics.filter(t => t.id !== id);
+            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
+            deleteMode = false; // Отключаем режим после удаления 1 темы
+            const btn = document.getElementById('adm-del-btn');
+            if(btn) btn.classList.remove('del-mode-active');
+            renderTopicsList();
         }
 
         function openTopic(id) {
@@ -740,7 +920,6 @@
                 `;
                 container.appendChild(d);
             });
-            // Прокрутка вниз
             const scrollBox = document.getElementById('results');
             scrollBox.scrollTop = scrollBox.scrollHeight;
         }
@@ -764,7 +943,6 @@
             renderChatMessages(topic);
         }
 
-
         // ПЛЕЕР
         function play(id, title, img) {
             const entry = { id, title, img };
@@ -773,7 +951,6 @@
             if(history.length > 20) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
             
-            // Если мы в истории или поиске, обновляем вид
             if(currentMode === 'history') renderHistory();
 
             const layer = document.getElementById('player-layer');
