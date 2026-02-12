@@ -39,16 +39,15 @@
         }
 
         #loading-container {
-            margin-bottom: 80px; /* Поднимаем шкалу чуть выше центра */
+            margin-bottom: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Обновленная шкала */
         .progress-box { 
             width: 220px; 
-            height: 22px; /* Увеличили высоту для цифр */
+            height: 22px; 
             background: rgba(0,0,0,0.6); 
             border-radius: 20px; 
             overflow: hidden; 
@@ -57,7 +56,6 @@
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
         }
 
-        /* Цифры по середине шкалы */
         #perc { 
             position: absolute;
             width: 100%;
@@ -65,7 +63,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 5; /* Поверх синей полоски */
+            z-index: 5;
             color: #fff; 
             font-weight: 900; 
             font-size: 14px; 
@@ -86,7 +84,7 @@
             align-items: center; padding-top: 15px; position: relative; 
         }
         
-        .top-bar { width: 94%; display: flex; gap: 10px; align-items: center; z-index: 100; height: 50px; margin-bottom: 15px; }
+        .top-bar { width: 94%; display: flex; gap: 10px; align-items: center; z-index: 100; height: 50px; margin-bottom: 15px; flex-shrink: 0; }
 
         .search-box { 
             flex: 1; display: flex; background: #fff; border-radius: 50px; 
@@ -144,16 +142,22 @@
 
         .glass-container {
             width: 94%; 
-            height: 70vh;
-            margin-bottom: 20px; 
+            /* Изменено для растягивания до низа */
+            flex: 1; 
+            margin-bottom: 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            
             background: rgba(255, 255, 255, 0.05); 
-            border-radius: 20px; 
             border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-bottom: none; /* Убираем нижнюю границу */
             backdrop-filter: blur(5px);
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
-            min-height: 400px; 
+            min-height: 0; /* Важно для flex контейнера */
         }
 
         .container-header { 
@@ -162,6 +166,7 @@
             justify-content: center;
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
         }
         .container-title { 
             font-size: 13px; 
@@ -181,6 +186,7 @@
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
             flex: 1;
+            padding-bottom: 40px; /* Отступ снизу для удобства прокрутки */
         }
 
         .card { 
@@ -261,17 +267,17 @@
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
         let isSearching = false;
 
-        function lockHeight() {
-            const glass = document.getElementById('glass');
-            const currentHeight = window.innerHeight * 0.7; 
-            glass.style.height = currentHeight + 'px';
-        }
-
+        // При загрузке страницы проверяем авторизацию
         window.addEventListener('load', () => { 
             renderHistory(); 
-            lockHeight();
             const h = window.innerHeight;
             document.getElementById('bg-container').style.height = h + 'px';
+            
+            // Проверка сохраненной сессии
+            if(localStorage.getItem('illich_is_logged_in') === 'true') {
+                document.getElementById('guest-menu').style.display = 'none';
+                document.getElementById('user-menu').style.display = 'block';
+            }
         });
 
         function toggleMenu() {
@@ -290,16 +296,28 @@
 
         function resetMenu() {
             document.getElementById('auth-form').style.display = 'none';
-            document.getElementById('user-menu').style.display = 'none';
-            document.getElementById('guest-menu').style.display = 'block';
+            // Если мы разлогинены, показываем гостевое меню, если залогинены (нажали назад случайно) - проверяем
+            if(localStorage.getItem('illich_is_logged_in') === 'true') {
+                document.getElementById('user-menu').style.display = 'block';
+            } else {
+                document.getElementById('guest-menu').style.display = 'block';
+                document.getElementById('user-menu').style.display = 'none';
+            }
         }
 
         function processAuth() {
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('user-menu').style.display = 'block';
+            // Сохраняем состояние входа
+            localStorage.setItem('illich_is_logged_in', 'true');
         }
 
-        function logout() { resetMenu(); }
+        function logout() { 
+            localStorage.removeItem('illich_is_logged_in');
+            document.getElementById('user-menu').style.display = 'none';
+            document.getElementById('guest-menu').style.display = 'block';
+            document.getElementById('auth-form').style.display = 'none';
+        }
 
         function handleTyping(val) {
             if(val.trim().length > 0) {
