@@ -38,7 +38,7 @@
             opacity: 0.6;
         }
 
-        /* ЗАГРУЗОЧНЫЙ ЭКРАН (Без затемнения) */
+        /* ЗАГРУЗОЧНЫЙ ЭКРАН */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
@@ -107,26 +107,25 @@
         .search-btn { 
             background: #00d4ff; color: #fff; border: none; padding: 0 15px; 
             border-radius: 50px; font-weight: bold; font-size: 12px;
+            cursor: pointer;
         }
 
         .menu-btn {
             width: 40px; height: 40px; background: rgba(0,0,0,0.7);
             border: 1px solid #00d4ff33; border-radius: 50%;
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; gap: 4px; backdrop-filter: blur(5px);
+            align-items: center; gap: 4px;
         }
         .menu-btn span { width: 20px; height: 2px; background: #00d4ff; border-radius: 2px; }
 
-        /* УЛЬТРАПРОЗРАЧНАЯ СТЕКЛЯННАЯ ПАНЕЛЬ */
+        /* ПРОСТО ОБВОДКА БЕЗ БЛЮРА И ФОНА */
         .glass-container {
             flex: 1;
             width: 94%;
             margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.01); /* Почти полная прозрачность */
-            backdrop-filter: blur(1px); /* Минимальное размытие для чистоты фона */
-            -webkit-backdrop-filter: blur(1px);
+            background: transparent; /* Полностью прозрачный фон */
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Тонкая грань */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Только обводка */
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -146,7 +145,7 @@
             background: rgba(0,0,0,0.4); 
             border-radius: 12px; 
             padding: 8px; 
-            border: 1px solid rgba(255,255,255,0.03); 
+            border: 1px solid rgba(255,255,255,0.05); 
             text-align: center; 
         }
         .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; }
@@ -155,7 +154,11 @@
         /* ПЛЕЕР */
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; }
+        .close-btn { 
+            position: absolute; top: 40px; right: 20px; background: rgba(255,255,255,0.2); 
+            color: #fff; border: none; padding: 10px 20px; border-radius: 30px; 
+            font-weight: bold; backdrop-filter: blur(10px); z-index: 2100; 
+        }
     </style>
 </head>
 <body onclick="closeKeyboard(event)">
@@ -179,7 +182,7 @@
                 <input type="text" id="sInp" placeholder="Название аниме..." onkeypress="if(event.key === 'Enter') { search(); closeKeyboard(event); }">
                 <button class="search-btn" onclick="search(); closeKeyboard(event);">ПОИСК</button>
             </div>
-            <div class="menu-btn" onclick="alert('Меню в разработке')">
+            <div class="menu-btn">
                 <span></span><span></span><span></span>
             </div>
         </div>
