@@ -12,7 +12,7 @@
             width: 100%; 
             background: #000; 
             color: white; 
-            overflow: hidden;
+            overflow: hidden; /* Фиксируем страницу, чтобы она не скроллилась целиком */
             position: fixed;
             -webkit-text-size-adjust: 100%;
         }
@@ -90,25 +90,30 @@
         }
 
         .search-box { 
-            flex: 1; display: flex; background: #fff; border-radius: 50px; 
-            padding: 3px; box-shadow: 0 0 15px rgba(0,0,0,0.5); gap: 5px;
+            flex: 1; display: flex; background: transparent; border-radius: 50px; 
+            gap: 5px;
         }
 
-        .search-box input { 
+        /* СТИЛИ ДЛЯ ВСЕХ ИНПУТОВ (Темные, как просили) */
+        .search-box input, 
+        .forum-search-input, 
+        .chat-input, 
+        .new-topic-input,
+        .auth-container input { 
             flex: 1; 
-            border: 1px solid #ddd; 
+            border: 1px solid rgba(255,255,255,0.2); 
             outline: none; 
             padding: 8px 15px; 
             font-size: 14px; 
             border-radius: 50px; 
-            color: #000; 
+            color: #fff; /* Белый текст */
             min-width: 0; 
-            background: #fff; 
+            background: rgba(0,0,0,0.5); /* Темный фон как у иконок */
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
-            caret-color: #000; 
+            caret-color: #fff; 
         }
         
-        .search-box input:focus {
+        .search-box input:focus, .chat-input:focus, .forum-search-input:focus {
             border-color: #00d4ff; 
         }
 
@@ -167,11 +172,7 @@
         .menu-item:active { background: rgba(0, 212, 255, 0.1); border-color: #00d4ff; }
 
         .auth-container { display: none; flex-direction: column; gap: 10px; padding: 5px 0; }
-        .auth-container input { 
-            width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; 
-            background: #222; color: #fff; font-size: 13px; outline: none;
-            caret-color: #fff;
-        }
+        
         .auth-container button { 
             background: #00d4ff; color: #000; border: 1px solid #00d4ff; padding: 10px; 
             border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;
@@ -180,7 +181,7 @@
 
         .glass-container {
             width: 94%; 
-            height: 75vh; 
+            height: 75vh; /* Фиксированная высота */
             margin-top: 20px;
             margin-bottom: 25px; 
             background: rgba(0, 0, 0, 0.4); 
@@ -192,7 +193,6 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             flex-shrink: 0;
             position: relative;
-            transition: height 0.3s ease;
         }
 
         .container-header { 
@@ -226,7 +226,7 @@
             padding: 12px; 
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
-            flex: 1;
+            flex: 1; /* Занимает все доступное место до кнопки */
         }
 
         .card { 
@@ -282,22 +282,9 @@
         }
         .forum-toolbar {
             display: flex; align-items: center; gap: 5px;
-            background: rgba(0,0,0,0.4); 
-            border: 1px solid rgba(0,212,255,0.3);
-            border-radius: 30px;
+            background: transparent; /* УБРАН КВАДРАТ */
+            border: none; /* УБРАНЫ ГРАНИЦЫ */
             padding: 4px;
-        }
-
-        .forum-search-input {
-            flex: 1;
-            background: #fff; 
-            color: #000;
-            border-radius: 20px;
-            padding: 8px 12px;
-            font-size: 13px;
-            border: none;
-            outline: none;
-            caret-color: #000;
         }
 
         .forum-btn-group {
@@ -332,9 +319,7 @@
             background: rgba(0,0,0,0.6); border-radius: 10px; margin-bottom: 10px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .new-topic-input {
-            width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; outline: none;
-        }
+        
         .new-topic-btn {
             background: #00d4ff; color: #000; padding: 8px; border-radius: 8px; border: none; font-weight: bold;
         }
@@ -356,8 +341,13 @@
         }
 
         /* ЧАТ ТЕМЫ */
+        .chat-view-wrapper {
+            display: flex; flex-direction: column; height: 100%; overflow: hidden;
+        }
+        
         .chat-container {
-            display: flex; flex-direction: column; gap: 8px; padding-bottom: 20px;
+            display: flex; flex-direction: column; gap: 8px; padding: 10px;
+            flex: 1; overflow-y: auto; 
         }
         .chat-msg {
             background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
@@ -367,17 +357,17 @@
         .chat-text { font-size: 13px; color: #fff; }
         .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
         
-        .chat-input-area {
-            position: sticky; bottom: 0; left: 0; width: 100%;
-            background: transparent;
-            padding: 10px; display: flex; flex-direction: column; gap: 8px;
+        .chat-bottom-area {
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.8); /* Фон для области ввода */
+            display: flex; flex-direction: column; 
             z-index: 100;
         }
-        .chat-input-bar { display: flex; gap: 10px; align-items: center; }
-        .chat-input {
-            flex: 1; background: rgba(255,255,255,0.9); border: none; color: #000; 
-            padding: 10px 15px; border-radius: 20px; font-size: 14px; outline: none;
+
+        .chat-input-bar { 
+            display: flex; gap: 10px; align-items: center; padding: 10px;
         }
+
         .chat-send-btn {
             background: #00d4ff; color: #fff; border: none; width: 40px; height: 40px;
             border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -415,18 +405,22 @@
         }
 
         .save-profile-btn {
-            position: sticky; bottom: 10px; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
             border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
-            display: none; z-index: 100; margin-top: 10px;
+            display: none; z-index: 100;
         }
 
+        /* КНОПКА НАЗАД ВНИЗУ (Общая для всех) */
         .section-back-btn {
-            width: 100%; padding: 12px; background: #fff;
-            color: #ff4b4b; border: none; border-top: 1px solid rgba(0,0,0,0.1);
+            width: 100%; 
+            padding: 15px; 
+            background: #ff4b4b; /* КРАСНАЯ */
+            color: #fff; 
+            border: none; 
             font-weight: bold; cursor: pointer; flex-shrink: 0;
             font-size: 12px; text-align: center;
-            position: sticky; bottom: 0;
+            margin-top: auto; /* Прижимает к низу флекс контейнера */
         }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
@@ -487,7 +481,8 @@
             <div class="container-header">
                 <div id="container-label" class="container-title">История просмотров</div>
             </div>
-            <div id="results"></div>
+            <div id="results"></div> 
+            
             <button id="save-profile-btn" class="save-profile-btn" onclick="saveProfileChanges()">СОХРАНИТЬ</button>
             <button id="global-back-btn" class="section-back-btn" style="display:none" onclick="goHome()">НАЗАД</button>
         </div>
@@ -820,15 +815,21 @@
             currentTopicId = id;
             const topic = forumTopics.find(t => t.id === id);
             document.getElementById('container-label').innerText = topic.title;
+            // Прячем глобальную кнопку назад, так как она будет внутри области чата
             document.getElementById('global-back-btn').style.display = 'none';
+            
             const res = document.getElementById('results');
-            res.innerHTML = `<div class="chat-container" id="chat-msgs"></div>
-                <div class="chat-input-area">
-                    <div class="chat-input-bar">
-                        <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
-                        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+            // ВАЖНО: Структура для фиксации над клавиатурой
+            res.innerHTML = `
+                <div class="chat-view-wrapper">
+                    <div class="chat-container" id="chat-msgs"></div>
+                    <div class="chat-bottom-area">
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
+                            <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                        </div>
+                        <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
                     </div>
-                    <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
                 </div>`;
             renderChatMessages(topic);
         }
@@ -842,7 +843,7 @@
                 d.innerHTML = `<div class="chat-user">${m.user}</div><div class="chat-text">${m.text}</div><div class="chat-time">${m.time}</div>`;
                 container.appendChild(d);
             });
-            document.getElementById('results').scrollTop = document.getElementById('results').scrollHeight;
+            container.scrollTop = container.scrollHeight;
         }
 
         function sendMessage() {
