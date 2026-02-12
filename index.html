@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
     <title>Illich TV</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -12,7 +12,7 @@
             width: 100%; 
             background: #000; 
             color: white; 
-            overflow: hidden; /* Фиксируем страницу, чтобы она не скроллилась целиком */
+            overflow: hidden; 
             position: fixed;
             -webkit-text-size-adjust: 100%;
         }
@@ -94,7 +94,6 @@
             gap: 5px;
         }
 
-        /* СТИЛИ ДЛЯ ВСЕХ ИНПУТОВ (Темные, как просили) */
         .search-box input, 
         .forum-search-input, 
         .chat-input, 
@@ -106,9 +105,9 @@
             padding: 8px 15px; 
             font-size: 14px; 
             border-radius: 50px; 
-            color: #fff; /* Белый текст */
+            color: #fff; 
             min-width: 0; 
-            background: rgba(0,0,0,0.5); /* Темный фон как у иконок */
+            background: rgba(0,0,0,0.5); 
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
             caret-color: #fff; 
         }
@@ -117,27 +116,36 @@
             border-color: #00d4ff; 
         }
 
+        /* ИЗМЕНЕНО: Стеклянная синяя кнопка поиска */
         .search-btn { 
-            background: #00d4ff; 
+            background: rgba(0, 212, 255, 0.3); /* Полупрозрачный синий */
             color: #fff; 
-            border: none; 
+            border: 1px solid rgba(0, 212, 255, 0.3); 
             padding: 0 12px; 
             border-radius: 50px; 
             font-weight: bold; 
             font-size: 11px; 
             cursor: pointer;
             text-shadow: 1px 1px 2px #000; 
+            backdrop-filter: blur(10px); /* Эффект стекла */
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.1);
         }
+
+        /* ИЗМЕНЕНО: Стеклянная красная кнопка назад (верхняя) */
         .back-btn { 
-            background: #ff4b4b; 
+            background: rgba(255, 75, 75, 0.3); /* Полупрозрачный красный */
             color: #fff; 
-            border: none; 
+            border: 1px solid rgba(255, 75, 75, 0.3); 
             padding: 0 12px; 
             border-radius: 50px; 
             font-weight: bold; 
             font-size: 11px; 
             cursor: pointer;
             text-shadow: 1px 1px 2px #000; 
+            backdrop-filter: blur(10px); /* Эффект стекла */
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.1);
         }
 
         .menu-btn {
@@ -181,7 +189,7 @@
 
         .glass-container {
             width: 94%; 
-            height: 75vh; /* Фиксированная высота */
+            height: 75vh; 
             margin-top: 20px;
             margin-bottom: 25px; 
             background: rgba(0, 0, 0, 0.4); 
@@ -226,7 +234,7 @@
             padding: 12px; 
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
-            flex: 1; /* Занимает все доступное место до кнопки */
+            flex: 1; 
         }
 
         .card { 
@@ -282,8 +290,8 @@
         }
         .forum-toolbar {
             display: flex; align-items: center; gap: 5px;
-            background: transparent; /* УБРАН КВАДРАТ */
-            border: none; /* УБРАНЫ ГРАНИЦЫ */
+            background: transparent; 
+            border: none; 
             padding: 4px;
         }
 
@@ -359,7 +367,7 @@
         
         .chat-bottom-area {
             flex-shrink: 0;
-            background: rgba(0,0,0,0.8); /* Фон для области ввода */
+            background: rgba(0,0,0,0.8); 
             display: flex; flex-direction: column; 
             z-index: 100;
         }
@@ -411,16 +419,19 @@
             display: none; z-index: 100;
         }
 
-        /* КНОПКА НАЗАД ВНИЗУ (Общая для всех) */
+        /* ИЗМЕНЕНО: Стеклянная красная кнопка назад (внизу всех разделов) */
         .section-back-btn {
             width: 100%; 
             padding: 15px; 
-            background: #ff4b4b; /* КРАСНАЯ */
+            background: rgba(255, 75, 75, 0.3); /* Полупрозрачный красный */
             color: #fff; 
-            border: none; 
+            border: 1px solid rgba(255, 75, 75, 0.3); 
             font-weight: bold; cursor: pointer; flex-shrink: 0;
             font-size: 12px; text-align: center;
-            margin-top: auto; /* Прижимает к низу флекс контейнера */
+            margin-top: auto; 
+            backdrop-filter: blur(10px); /* Эффект стекла */
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 15px rgba(255, 75, 75, 0.1);
         }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
