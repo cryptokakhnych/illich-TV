@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Search App</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}:root{--fh:100vh}
 body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;position:fixed;-webkit-text-size-adjust:100%}
@@ -50,7 +51,7 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
     <div class="glass">
         <div class="search-header">
             <input type="text" id="sInp" placeholder="Введите запрос...">
-            <button class="btn-search" onclick="handleSearch()">ПОИСК</button>
+            <button class="btn-search" onclick="handleSearchWithAd()">ПОИСК</button>
         </div>
         
         <div id="res"></div>
@@ -61,6 +62,9 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 // Подключение к Supabase
 const S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G = i => document.getElementById(i);
+
+// Инициализация Adsgram
+const AdController = window.Adsgram.init({ blockId: "int-22923" });
 
 // Логика загрузки (шкала)
 let prg = 0;
@@ -81,17 +85,29 @@ let lI = setInterval(() => {
     G('perc').innerText = prg + '%';
 }, 30);
 
-// Функция поиска (пример работы с базой)
-async function handleSearch() {
+// Функция обертка: сначала реклама, потом поиск
+async function handleSearchWithAd() {
     const val = G('sInp').value.trim();
     if (!val) return;
 
+    try {
+        // Показ рекламы Adsgram
+        await AdController.show();
+        // Если реклама показана успешно или пропущена, переходим к поиску
+        performSearch(val);
+    } catch (err) {
+        // Если ошибка рекламы (нет сети, блок забит и т.д.), все равно ищем
+        console.warn("Adsgram error or skip:", err);
+        performSearch(val);
+    }
+}
+
+// Сама функция поиска в базе
+async function performSearch(val) {
     const resCont = G('res');
     resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Загрузка данных из Supabase...</p>';
     
     try {
-        // Пример запроса к любой вашей таблице в Supabase
-        // Замените 'your_table_name' на реальное имя таблицы
         const { data, error } = await S
             .from('profiles') 
             .select('*')
@@ -119,9 +135,12 @@ async function handleSearch() {
     }
 }
 
-// Поиск по Enter
-G('sInp').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSearch();
+// Отключаем поиск по Enter (оставляем поле активным, но без действия)
+G('sInp').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // Блокируем стандартное действие
+        return false;
+    }
 });
 </script>
 </body>
