@@ -38,7 +38,7 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .tab.active{background:#00d4ff26;color:#00d4ff;box-shadow:inset 0 -2px 0 #00d4ff}
 .glass{width:94%;height:calc(var(--fh) - 185px);margin:0 0 5px;background:#141414cc;border-radius:20px;border:1.5px solid #ffffff33;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px 0 #0000005e;flex-shrink:0;position:relative;transition:height .3s ease-out}
 .c-head{padding:15px;display:flex;justify-content:center;align-items:center;border-bottom:1px solid #ffffff1a;flex-shrink:0;min-height:45px;position:sticky;top:0;background:#00000033;z-index:10}
-.c-title{font-size:13px;color:#00d4ff;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;text-align:center;text-shadow:1px 1px 2px #000}
+.c-title{font-size:13px;color:#00d4ff;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;text-align:center;text-shadow:1px 1px 2px #000; width: 80%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 #res{width:100%;display:flex;flex-direction:column;gap:10px;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;transition:opacity .3s,transform .3s}
 .btm-nav{position:fixed;top:calc(var(--fh) - 80px);left:3%;width:94%;height:70px;background:#00000099;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border:1.5px solid #ffffff26;border-radius:20px;display:flex;justify-content:space-around;align-items:center;padding:0 5px;box-shadow:0 10px 30px #00000080;z-index:100}
 .n-btn{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;text-decoration:none;cursor:pointer;transition:.2s;flex:1}
@@ -89,11 +89,16 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
 .info-desc{font-size:14px; line-height:1.4; color:#fff; padding:0 5px; margin-bottom: 20px;}
 .info-desc a {color: #fff !important; text-decoration: none !important; pointer-events: none;}
-.info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
+.info-img{width:100%; height: auto; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33; display: block;}
 .lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
 .mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-bottom: 80px;}
 .info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
-.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a;}
+.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer;}
+#gal-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:3000;display:none;flex-direction:column;justify-content:center;align-items:center;}
+#gal-img{max-width:100%;max-height:80%;object-fit:contain;transition:transform .2s;}
+.gal-cls{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;padding:10px 15px;border-radius:50%;font-weight:bold;border:none;z-index:3010;cursor:pointer;}
+.gal-nav{position:absolute;top:50%;transform:translateY(-50%);background:#00000080;color:#fff;border:1px solid #fff;padding:15px;cursor:pointer;z-index:3010;border-radius:50%;}
+.g-prev{left:20px}.g-next{right:20px}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -141,13 +146,14 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 </div>
 </div>
 <div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
+<div id="gal-ov"><button class="gal-cls" onclick="clGal()">✕</button><button class="gal-nav g-prev" onclick="chGal(-1)">❮</button><img id="gal-img"><button class="gal-nav g-next" onclick="chGal(1)">❯</button></div>
 <script>
 const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
 let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
-let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru';
+let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru', galImgs=[], galIdx=0;
 
 const LANG = {
     ru: {
@@ -214,6 +220,16 @@ window.addEventListener('load',()=>{
             else if(cMode==='recommendations') loadHome('recommendations',1);
             else if(cMode==='new') loadHome('new',1);
         }
+    });
+    
+    // Swipe logic for gallery
+    let tS = 0;
+    const v = G('gal-img');
+    v.addEventListener('touchstart', e => tS = e.changedTouches[0].screenX);
+    v.addEventListener('touchend', e => {
+        let tE = e.changedTouches[0].screenX;
+        if (tS - tE > 50) chGal(1);
+        if (tE - tS > 50) chGal(-1);
     });
 });
 async function ldProf(mail){
@@ -307,7 +323,7 @@ async function opInfo(id) {
     G('t-bar').style.display='none';
     G('h-tabs').style.display='none';
     G('c-head').style.display='flex';
-    G('gl-back').style.display='block'; // Показываем закрепленную кнопку Назад
+    G('gl-back').style.display='block'; 
     G('c-lbl').innerText="Info";
     
     const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } } }`;
@@ -334,27 +350,30 @@ async function opInfo(id) {
             } catch (err) { console.log("Shiki error"); }
         }
 
+        // Set Title in Header
+        G('c-lbl').innerText = finalTitle;
+
         hist=hist.filter(i=>String(i.id)!==String(id));
         hist.unshift({id, title: finalTitle, img: a.coverImage.extraLarge});
         if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
 
         let galleryHtml = '';
+        galImgs = []; // Reset gallery images
         if(screenshots.length > 0){
             galleryHtml = '<div class="info-gallery">';
-            screenshots.slice(0, 8).forEach(s => {
-                galleryHtml += `<img src="https://shikimori.one${s.original}">`;
+            screenshots.forEach((s, i) => {
+                const fullUrl = 'https://shikimori.one' + s.original;
+                galImgs.push(fullUrl);
+                // Only show first 8 thumbnails but store all
+                if(i < 8) galleryHtml += `<img src="${fullUrl}" onclick="opGal(${i})">`;
             });
             galleryHtml += '</div>';
         }
 
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
-                <img src="${a.bannerImage || a.coverImage.extraLarge}" class="info-img">
+                <img src="${a.coverImage.extraLarge}" class="info-img">
                 ${galleryHtml}
-                <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
-                <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700; margin-bottom:10px;">
-                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
-                </div>
                 <div class="info-desc">${finalDesc}</div>
                 <div class="mini-player">
                     <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
@@ -365,6 +384,15 @@ async function opInfo(id) {
         res.scrollTop = 0;
         fade();
     } catch(e) { res.innerHTML = `<p style="text-align:center;padding:20px">${txt('err')}</p>`; }
+}
+
+function opGal(i){galIdx=i;G('gal-img').src=galImgs[galIdx];G('gal-ov').style.display='flex';}
+function clGal(){G('gal-ov').style.display='none';}
+function chGal(d){
+    galIdx+=d;
+    if(galIdx<0)galIdx=galImgs.length-1;
+    if(galIdx>=galImgs.length)galIdx=0;
+    G('gal-img').src=galImgs[galIdx];
 }
 
 async function search(q=null){
