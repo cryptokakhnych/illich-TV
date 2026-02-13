@@ -190,29 +190,30 @@
         }
         .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
 
-        /* ВКЛАДКИ РЕКОМЕНДАЦИИ / НОВИНКИ */
+        /* ВКЛАДКИ РЕКОМЕНДАЦИИ / НОВИНКИ / ИСТОРИЯ */
         .home-tabs {
             width: 94%;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: -10px;
             z-index: 10;
         }
         .tab-trigger {
             flex: 1;
-            padding: 10px;
+            padding: 10px 5px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 15px 15px 0 0;
             color: #fff;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             text-transform: uppercase;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            white-space: nowrap;
         }
         .tab-trigger.active {
             background: rgba(0, 212, 255, 0.3);
@@ -301,7 +302,15 @@
             flex: 1;
         }
         .nav-btn span { font-size: 9px; font-weight: bold; text-transform: uppercase; opacity: 0.8; }
-        .nav-btn i { font-style: normal; font-size: 20px; filter: drop-shadow(0 0 5px rgba(0,212,255,0.5)); }
+        .nav-btn i { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            filter: drop-shadow(0 0 5px rgba(0,212,255,0.5)); 
+        }
+        .nav-btn svg { width: 100%; height: 100%; fill: none; stroke: #00d4ff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .nav-btn:active { transform: scale(0.9); opacity: 0.6; }
 
         .nav-home-btn {
@@ -315,8 +324,8 @@
             align-items: center;
             margin-top: -30px;
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-            font-size: 26px !important;
         }
+        .nav-home-btn svg { fill: #00d4ff; stroke: none; width: 28px; height: 28px; }
 
         /* ЭФФЕКТ ПЕРЕХОДА */
         .fade-in { animation: fadeInAnim 0.4s ease-out forwards; }
@@ -614,6 +623,7 @@
         <div class="home-tabs" id="home-tabs-container">
             <div class="tab-trigger active" id="tab-rec" onclick="switchHomeTab('recommendations')">Рекомендации</div>
             <div class="tab-trigger" id="tab-new" onclick="switchHomeTab('new')">Новинки</div>
+            <div class="tab-trigger" id="tab-hist" onclick="switchHomeTab('history')">История</div>
         </div>
         
         <div class="glass-container" id="glass">
@@ -627,11 +637,27 @@
         </div>
 
         <div class="bottom-nav-bar" id="bottom-navigation">
-            <div class="nav-btn" onclick="openForum()"><i>🏮</i><span>Форум</span></div>
-            <div class="nav-btn" onclick="openAllAnime()"><i>🎬</i><span>Все</span></div>
-            <div class="nav-btn" onclick="goHome()"><i class="nav-home-btn">⛩️</i></div>
-            <div class="nav-btn" onclick="openProfile()"><i>🎎</i><span>Профиль</span></div>
-            <div class="nav-btn" onclick="openFavorites()"><i>💎</i><span>Избранные</span></div>
+            <div class="nav-btn" onclick="openForum()">
+                <i><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></i>
+                <span>Форум</span>
+            </div>
+            <div class="nav-btn" onclick="openAllAnime()">
+                <i><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></i>
+                <span>Все</span>
+            </div>
+            <div class="nav-btn" onclick="goHome()">
+                <div class="nav-home-btn">
+                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
+                </div>
+            </div>
+            <div class="nav-btn" onclick="openProfile()">
+                <i><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></i>
+                <span>Профиль</span>
+            </div>
+            <div class="nav-btn" onclick="openFavorites()">
+                <i><svg viewBox="0 0 24 24" style="fill:#00d4ff; stroke:none;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg></i>
+                <span>Избранные</span>
+            </div>
         </div>
     </div>
 
@@ -768,6 +794,7 @@
         function switchHomeTab(type) {
             document.getElementById('tab-rec').classList.toggle('active', type === 'recommendations');
             document.getElementById('tab-new').classList.toggle('active', type === 'new');
+            document.getElementById('tab-hist').classList.toggle('active', type === 'history');
             loadHomeContent(type);
         }
 
@@ -790,6 +817,19 @@
             currentMode = type;
             const res = document.getElementById('results');
             const label = document.getElementById('container-label');
+            
+            if (type === 'history') {
+                label.innerText = "История просмотров";
+                res.innerHTML = '';
+                if (history.length === 0) {
+                    res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Вы еще ничего не смотрели</p>';
+                } else {
+                    history.forEach(a => res.appendChild(createCard(a)));
+                }
+                applyFadeEffect();
+                return;
+            }
+
             label.innerText = type === 'recommendations' ? "Рекомендации" : "Новинки";
             res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
             
