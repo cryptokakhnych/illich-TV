@@ -147,8 +147,11 @@ if(window.visualViewport){
     window.visualViewport.addEventListener('resize', () => {
         const fix = document.querySelector('.c-fix');
         if(fix) {
-            const diff = window.innerHeight - window.visualViewport.height;
-            fix.style.bottom = (diff > 0 ? diff + 10 : 50) + 'px';
+            const kbHeight = window.innerHeight - window.visualViewport.height;
+            // Устанавливаем положение в зависимости от высоты клавиатуры
+            // Если клавиатура есть (kbHeight > 50), ставим ее впритык к ней
+            // Если нет, возвращаем стандартные 50px (высота кнопки НАЗАД)
+            fix.style.bottom = (kbHeight > 50 ? kbHeight : 50) + 'px';
         }
     });
 }
