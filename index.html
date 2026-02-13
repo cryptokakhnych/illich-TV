@@ -95,7 +95,9 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer; scroll-snap-align: start; flex-shrink: 0;}
 /* Overlay for full image view */
 #img-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;z-index:3000;justify-content:center;align-items:center;}
-#img-ov img{max-width:95%;max-height:90%;border-radius:10px;box-shadow:0 0 30px rgba(0,212,255,0.3);}
+#img-ov img{max-width:95%;max-height:90%;border-radius:10px;box-shadow:0 0 30px rgba(0,212,255,0.3); transition: transform 0.2s;}
+.ov-nav{position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,212,255,0.2); border:1px solid #00d4ff; color:#fff; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; z-index:3100;}
+#ov-prev{left:20px;} #ov-next{right:20px;}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -142,7 +144,12 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 </div>
 </div>
 <div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
-<div id="img-ov" onclick="this.style.display='none'"><img id="full-img" src=""></div>
+
+<div id="img-ov" onclick="if(event.target===this)this.style.display='none'">
+    <div class="ov-nav" id="ov-prev" onclick="event.stopPropagation();navImg(-1)">❮</div>
+    <img id="full-img" src="">
+    <div class="ov-nav" id="ov-next" onclick="event.stopPropagation();navImg(1)">❯</div>
+</div>
 
 <script>
 const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
@@ -151,15 +158,31 @@ let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeF
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
 let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
+let currentPhotos = [], currentPhotoIdx = 0;
 
-// IMAGE PROXY HELPER
 const imgP = (u, w) => {
     if(!u) return '';
     const cleanUrl = u.replace(/^https?:\/\//, '');
     return `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}${w ? '&w=' + w : ''}&output=webp&n=-1`;
 };
 
-function opImg(u){G('full-img').src=imgP(u);G('img-ov').style.display='flex';}
+function opImg(u, gallery = []){
+    currentPhotos = gallery.length ? gallery : [u];
+    currentPhotoIdx = currentPhotos.indexOf(u);
+    if(currentPhotoIdx === -1) currentPhotoIdx = 0;
+    
+    G('full-img').src = imgP(currentPhotos[currentPhotoIdx]);
+    G('img-ov').style.display='flex';
+    G('ov-prev').style.display = currentPhotos.length > 1 ? 'flex' : 'none';
+    G('ov-next').style.display = currentPhotos.length > 1 ? 'flex' : 'none';
+}
+
+function navImg(dir){
+    currentPhotoIdx += dir;
+    if(currentPhotoIdx < 0) currentPhotoIdx = currentPhotos.length - 1;
+    if(currentPhotoIdx >= currentPhotos.length) currentPhotoIdx = 0;
+    G('full-img').src = imgP(currentPhotos[currentPhotoIdx]);
+}
 
 const LANG = {
     ru: {
@@ -188,16 +211,6 @@ function applyLang(){
     G('a-back').innerText=t.bk;
 }
 function txt(k){return LANG.ru[k];}
-
-if(window.visualViewport){
-    window.visualViewport.addEventListener('resize', () => {
-        const fix = document.querySelector('.c-fix');
-        if(fix) {
-            const kbHeight = window.innerHeight - window.visualViewport.height;
-            fix.style.bottom = (kbHeight > 50 ? kbHeight : 50) + 'px';
-        }
-    });
-}
 
 window.addEventListener('load',()=>{
     document.documentElement.style.setProperty('--fh', window.innerHeight+'px');
@@ -255,8 +268,9 @@ async function AL(q, v) {
 }
 
 async function loadHome(t,app=0){
-    if(ldAll) return;
+    if(ldAll && !app) return;
     const res=G('res'),lbl=G('c-lbl');
+    const thisMode = t;
     cMode=t;
     if(t==='history'){lbl.innerText=txt('lbl_hst');res.innerHTML='';if(!hist.length)res.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
     lbl.innerText=t==='recommendations'?txt('lbl_rec'):txt('lbl_new');
@@ -273,10 +287,10 @@ async function loadHome(t,app=0){
     try{
         const d = await AL(Q, {p:p, s:s});
         const list = d.data.Page.media;
-        if(cMode !== t) { ldAll=false; return; }
+        if(cMode !== thisMode) { ldAll=false; return; }
         if(!app)res.innerHTML='';
         for(const a of list){
-            if(cMode !== t) break;
+            if(cMode !== thisMode) break;
             let tit = a.title.romaji || a.title.english;
             if(a.idMal){
                 try{
@@ -284,7 +298,7 @@ async function loadHome(t,app=0){
                     if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
                 }catch(e){}
             }
-            res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
+            if(cMode === thisMode) res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
         }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
     }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}
@@ -299,6 +313,7 @@ function mkCard(a){
 }
 
 async function opInfo(id) {
+    const thisMode = 'info';
     cMode = 'info';
     const res = G('res');
     res.innerHTML = `<p style="text-align:center;padding:20px">${txt('load')}</p>`;
@@ -314,7 +329,7 @@ async function opInfo(id) {
     try {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
-        if(cMode !== 'info') return;
+        if(cMode !== thisMode) return;
         
         let finalTitle = a.title.romaji || a.title.english;
         let finalDesc = a.description || "Нет описания.";
@@ -338,11 +353,12 @@ async function opInfo(id) {
         if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
 
         let galleryHtml = '';
+        let photoUrls = [];
         if(screenshots.length > 0){
+            photoUrls = screenshots.map(s => `https://shikimori.one${s.original}`);
             galleryHtml = '<div class="info-gallery">';
-            screenshots.forEach(s => {
-                const sUrl = `https://shikimori.one${s.original}`;
-                galleryHtml += `<img src="${imgP(sUrl, 300)}" onclick="opImg('${sUrl}')">`;
+            photoUrls.forEach(u => {
+                galleryHtml += `<img src="${imgP(u, 300)}" onclick="opImg('${u}', ${JSON.stringify(photoUrls)})">`;
             });
             galleryHtml += '</div>';
         }
@@ -369,16 +385,19 @@ async function opInfo(id) {
 }
 
 async function search(q=null){
+    const thisMode = 'search';
+    cMode = 'search';
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
     res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
     const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {s:v});
         const list = d.data.Page.media;
-        if(cMode !== 'search') return;
+        if(cMode !== thisMode) return;
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
+             if(cMode !== thisMode) break;
              let tit = a.title.romaji || a.title.english;
              if(a.idMal){
                 try{
@@ -397,17 +416,19 @@ function opAll(){
     if(!isAu())return;hideMenu();cMode='all-anime';aPg=1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_all');G('res').innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;ldAllAn();fade();
 }
 async function ldAllAn(app=0){
-    if(ldAll)return;ldAll=!0;
+    if(ldAll && !app)return;
+    const thisMode = 'all-anime';
+    ldAll=!0;
     const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:aPg});
         const list = d.data.Page.media;
-        if(cMode !== 'all-anime') { ldAll=false; return; }
+        if(cMode !== thisMode) { ldAll=false; return; }
         const res=G('res');
         if(!app)res.innerHTML='';
         if(list.length){
             for(const a of list){
-                if(cMode !== 'all-anime') break;
+                if(cMode !== thisMode) break;
                 let tit = a.title.romaji || a.title.english;
                 if(a.idMal){
                     try {
@@ -431,9 +452,8 @@ function tgFav(e,id,tit,img){e.stopPropagation();const i=fav.findIndex(f=>String
 function opProf(){
     if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_prof');
     const r=G('res'),an=uProf.isAnon?'Аноним':'Не аноним',ac=uProf.isAnon?'anon-act':'';
-    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">${txt('prof_log')}</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_dob')}</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_nat')}</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_ps')}</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_mod')}</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">${txt('prof_sv')}</button><div style="height:100px"></div></div>`;fade();
+    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">${txt('prof_log')}</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}"></div><div class="p-row"><span class="p-lbl">${txt('prof_dob')}</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}"></div><div class="p-row"><span class="p-lbl">${txt('prof_nat')}</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}"></div><div class="p-row"><span class="p-lbl">${txt('prof_ps')}</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}"></div><div class="p-row"><span class="p-lbl">${txt('prof_mod')}</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">${txt('prof_sv')}</button><div style="height:100px"></div></div>`;fade();
 }
-function pScr(on){const g=G('glass');if(on){g.style.height='calc(var(--fh) - 250px)';g.style.overflowY='auto';}else{setTimeout(()=>{g.style.height='calc(var(--fh) - 120px)';g.style.overflow='hidden';},100);}}
 async function svProf(){
     uProf.login=G('e-log').value;uProf.email=G('e-em').value;uProf.dob=G('e-dob').value;uProf.nat=G('e-nat').value;uProf.password=G('e-ps').value;
     await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
