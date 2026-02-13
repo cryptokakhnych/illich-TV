@@ -190,10 +190,40 @@
         }
         .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
 
+        /* ВКЛАДКИ РЕКОМЕНДАЦИИ / НОВИНКИ */
+        .home-tabs {
+            width: 94%;
+            display: flex;
+            gap: 10px;
+            margin-bottom: -10px;
+            z-index: 10;
+        }
+        .tab-trigger {
+            flex: 1;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px 15px 0 0;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-trigger.active {
+            background: rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+        }
+
         .glass-container {
             width: 94%; 
             height: 68vh; 
-            margin-top: 20px;
+            margin-top: 10px;
             margin-bottom: 15px; 
             background: rgba(0, 0, 0, 0.4); 
             border-radius: 20px;
@@ -271,7 +301,7 @@
             flex: 1;
         }
         .nav-btn span { font-size: 9px; font-weight: bold; text-transform: uppercase; opacity: 0.8; }
-        .nav-btn i { font-style: normal; font-size: 18px; }
+        .nav-btn i { font-style: normal; font-size: 20px; filter: drop-shadow(0 0 5px rgba(0,212,255,0.5)); }
         .nav-btn:active { transform: scale(0.9); opacity: 0.6; }
 
         .nav-home-btn {
@@ -285,7 +315,7 @@
             align-items: center;
             margin-top: -30px;
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-            font-size: 24px !important;
+            font-size: 26px !important;
         }
 
         /* ЭФФЕКТ ПЕРЕХОДА */
@@ -315,7 +345,7 @@
             border-radius: 6px; 
             display: block; 
             flex-shrink: 0;
-            filter: brightness(0.7);
+            filter: brightness(0.8);
         }
         .card div { 
             font-size: 14px; 
@@ -412,7 +442,6 @@
         }
         .topic-title { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
         
-        /* СТЕКЛЯННАЯ КНОПКА ВЫБРАТЬ */
         .topic-select-btn {
             background: rgba(0, 212, 255, 0.25); 
             color: #fff; 
@@ -508,11 +537,6 @@
         }
         .anon-active { background: rgba(0, 212, 255, 0.6); border-color: #00d4ff; }
         
-        .profile-btn {
-            background: #222; border: 1px solid #444; color: #fff;
-            padding: 5px 15px; border-radius: 15px; font-size: 12px; cursor: pointer;
-        }
-
         .save-profile-btn {
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
             background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
@@ -586,10 +610,15 @@
                 <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">🚪 Выход</div>
             </div>
         </div>
+
+        <div class="home-tabs" id="home-tabs-container">
+            <div class="tab-trigger active" id="tab-rec" onclick="switchHomeTab('recommendations')">Рекомендации</div>
+            <div class="tab-trigger" id="tab-new" onclick="switchHomeTab('new')">Новинки</div>
+        </div>
         
         <div class="glass-container" id="glass">
             <div class="container-header">
-                <div id="container-label" class="container-title">История просмотров</div>
+                <div id="container-label" class="container-title">Рекомендации</div>
             </div>
             <div id="results"></div> 
             
@@ -598,11 +627,11 @@
         </div>
 
         <div class="bottom-nav-bar" id="bottom-navigation">
-            <div class="nav-btn" onclick="openAllAnime()"><i>📺</i><span>Все</span></div>
-            <div class="nav-btn" onclick="openForum()"><i>💬</i><span>Форум</span></div>
-            <div class="nav-btn" onclick="goHome()"><i class="nav-home-btn">🏠</i></div>
-            <div class="nav-btn" onclick="openProfile()"><i>👤</i><span>Профиль</span></div>
-            <div class="nav-btn" onclick="openFavorites()"><i>⭐</i><span>Избранные</span></div>
+            <div class="nav-btn" onclick="openForum()"><i>🏮</i><span>Форум</span></div>
+            <div class="nav-btn" onclick="openAllAnime()"><i>🎬</i><span>Все</span></div>
+            <div class="nav-btn" onclick="goHome()"><i class="nav-home-btn">⛩️</i></div>
+            <div class="nav-btn" onclick="openProfile()"><i>🎎</i><span>Профиль</span></div>
+            <div class="nav-btn" onclick="openFavorites()"><i>💎</i><span>Избранные</span></div>
         </div>
     </div>
 
@@ -612,7 +641,6 @@
     </div>
 
     <script>
-        // Инициализация Supabase
         const _supabase = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
@@ -624,7 +652,7 @@
 
         const ADMIN_ID = "663587165"; 
         let isSearching = false;
-        let currentMode = 'history'; 
+        let currentMode = 'recommendations'; 
         let currentTopicId = null;
         let searchTimeout;
         let deleteMode = false;
@@ -632,7 +660,7 @@
         let isLoadingAll = false;
 
         window.addEventListener('load', () => { 
-            renderHistory(); 
+            loadHomeContent('recommendations'); 
             const glass = document.getElementById('glass');
             document.getElementById('bg-container').style.height = window.innerHeight + 'px';
             
@@ -697,7 +725,6 @@
             if(emailInp) { userProfile.login = emailInp; userProfile.email = emailInp; }
             if(passInp) userProfile.password = passInp;
             
-            // Сохранение в Supabase
             await _supabase.from('profiles').upsert({
                 id: userProfile.email,
                 login: userProfile.login,
@@ -729,6 +756,7 @@
                 backBtn.style.display = 'block';
                 isSearching = true;
                 currentMode = 'search';
+                document.getElementById('home-tabs-container').style.display = 'none';
                 document.getElementById('container-label').innerText = "Результаты поиска";
                 searchTimeout = setTimeout(() => search(), 300);
             } else {
@@ -737,23 +765,45 @@
             }
         }
 
+        function switchHomeTab(type) {
+            document.getElementById('tab-rec').classList.toggle('active', type === 'recommendations');
+            document.getElementById('tab-new').classList.toggle('active', type === 'new');
+            loadHomeContent(type);
+        }
+
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
             document.getElementById('glass').style.height = '68vh';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
+            document.getElementById('home-tabs-container').style.display = 'flex';
             if(currentMode === 'topic') { openForum(); return; }
             
-            const results = document.getElementById('results');
-            applyFadeEffect();
-            
             isSearching = false;
-            currentMode = 'history';
             document.getElementById('sInp').value = '';
-            document.getElementById('container-label').innerText = "История просмотров";
             closeKeyboard();
-            renderHistory();
+            switchHomeTab('recommendations');
+        }
+
+        async function loadHomeContent(type) {
+            currentMode = type;
+            const res = document.getElementById('results');
+            const label = document.getElementById('container-label');
+            label.innerText = type === 'recommendations' ? "Рекомендации" : "Новинки";
+            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
+            
+            let order = type === 'recommendations' ? 'popularity' : 'id';
+            try {
+                const r = await fetch(`https://shikimori.one/api/animes?limit=20&order=${order}`);
+                const data = await r.json();
+                res.innerHTML = '';
+                data.forEach(a => {
+                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                    res.appendChild(createCard(obj));
+                });
+                applyFadeEffect();
+            } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; }
         }
 
         function createCard(a) {
@@ -768,13 +818,6 @@
                 <button class="fav-btn-card ${favClass}" onclick="toggleFav(event, '${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${favIcon}</button>
             `;
             return d;
-        }
-
-        function renderHistory() {
-            const res = document.getElementById('results');
-            res.innerHTML = '';
-            if(history.length === 0) { res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">История пуста</p>'; return; }
-            history.forEach(a => res.appendChild(createCard(a)));
         }
 
         async function search(query = null) {
@@ -805,7 +848,8 @@
             allAnimePage = 1;
             document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'block';
+            document.getElementById('home-tabs-container').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Все аниме";
             const res = document.getElementById('results');
             res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка списка...</p>';
@@ -837,7 +881,8 @@
             currentMode = 'favorites';
             document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'block';
+            document.getElementById('home-tabs-container').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Избранные";
             renderFavorites();
             applyFadeEffect();
@@ -871,7 +916,8 @@
             currentMode = 'profile';
             document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'block';
+            document.getElementById('home-tabs-container').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Профиль";
             document.getElementById('save-profile-btn').style.display = 'none';
             const res = document.getElementById('results');
@@ -918,7 +964,6 @@
             userProfile.nat = document.getElementById('edit-nat').value;
             userProfile.password = document.getElementById('edit-pass').value;
             
-            // Сохранение в Supabase
             await _supabase.from('profiles').upsert({
                 id: userProfile.email,
                 login: userProfile.login,
@@ -947,7 +992,8 @@
             deleteMode = false;
             document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('global-back-btn').style.display = 'block';
+            document.getElementById('home-tabs-container').style.display = 'none';
+            document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Форум";
             const res = document.getElementById('results');
@@ -970,7 +1016,6 @@
                 <div id="topics-list" style="padding:10px;"></div>
             `;
             
-            // Загрузка тем из Supabase
             const { data } = await _supabase.from('forum_topics').select('*').order('created_at', { ascending: false });
             forumTopics = data || [];
             renderTopicsList();
@@ -997,7 +1042,6 @@
             currentTopicId = id;
             const topic = forumTopics.find(t => t.id === id);
             document.getElementById('container-label').innerText = topic.title;
-            document.getElementById('global-back-btn').style.display = 'none';
             
             const res = document.getElementById('results');
             res.innerHTML = `
@@ -1012,7 +1056,6 @@
                     </div>
                 </div>`;
             
-            // Загрузка сообщений из Supabase
             const { data } = await _supabase.from('forum_messages').select('*').eq('topic_id', id).order('created_at', { ascending: true });
             renderChatMessages(data || []);
             applyFadeEffect();
@@ -1045,7 +1088,7 @@
             });
 
             document.getElementById('chat-in').value = '';
-            openTopic(currentTopicId); // Перерендерим чат
+            openTopic(currentTopicId); 
         }
 
         function play(id, title, img) {
@@ -1053,7 +1096,6 @@
             history.unshift({ id, title, img });
             if(history.length > 20) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
-            if(currentMode === 'history') renderHistory();
             document.getElementById('player-layer').style.display = 'block';
             document.getElementById('player-iframe').src = `https://pizdec.pro/id/${id}`;
         }
