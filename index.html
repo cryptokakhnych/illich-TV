@@ -8,22 +8,19 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
-        /* Блокируем любые попытки скролла или изменения размера на уровне корня */
         :root {
-            --fixed-height: 100vh;
+            /* Переменная для хранения реальной высоты экрана */
+            --full-height: 100vh;
         }
 
         body, html { 
-            height: var(--fixed-height); 
+            height: 100%; 
             width: 100%; 
             background: #000; 
             color: white; 
             overflow: hidden; 
-            position: fixed; /* Фиксируем body намертво */
-            top: 0;
-            left: 0;
+            position: fixed;
             -webkit-text-size-adjust: 100%;
-            overscroll-behavior: none; /* Запрещаем тянуть страницу */
         }
         
         #bg-container { 
@@ -199,7 +196,7 @@
         }
         .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
 
-        /* ВКЛАДКИ */
+        /* ВКЛАДКИ (ИНТЕГРИРОВАНЫ В ПАНЕЛЬ) */
         .home-tabs {
             width: 100%;
             display: flex;
@@ -230,8 +227,8 @@
 
         .glass-container {
             width: 94%; 
-            /* Высота теперь управляется через JS переменную */
-            height: calc(var(--fixed-height) - 185px); 
+            /* Используем переменную высоты для стабильности */
+            height: calc(var(--full-height) - 185px); 
             margin-top: 0;
             margin-bottom: 5px; 
             background: rgba(20, 20, 20, 0.8); 
@@ -243,7 +240,9 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             flex-shrink: 0;
             position: relative;
-            transition: none; /* Убираем транзишн, чтобы не дергалось */
+            transition: height 0.3s ease-out;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
 
         .container-header { 
@@ -278,13 +277,14 @@
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch; 
             flex: 1; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ТЕПЕРЬ НАМЕРТВО ФИКСИРОВАНА ОТ ТОЧКИ TOP */
+        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ТЕПЕРЬ ФИКСИРОВАНА ПО ВЕРХУ */
         .bottom-nav-bar {
             position: fixed;
-            /* Используем top вместо bottom, чтобы клавиатура не толкала панель вверх */
-            top: calc(var(--fixed-height) - 80px);
+            /* Используем var(--full-height) чтобы координата не прыгала */
+            top: calc(var(--full-height) - 80px);
             left: 3%;
             width: 94%;
             height: 70px;
@@ -302,25 +302,43 @@
         }
 
         .nav-btn {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            color: #fff; text-decoration: none; cursor: pointer; transition: 0.2s; flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
         }
         .nav-btn span { font-size: 9px; font-weight: bold; text-transform: uppercase; opacity: 0.8; }
         .nav-btn i { 
-            display: flex; align-items: center; justify-content: center; width: 24px; height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
             filter: drop-shadow(0 0 5px rgba(0,212,255,0.5)); 
         }
         .nav-btn svg { width: 100%; height: 100%; fill: none; stroke: #00d4ff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .nav-btn:active { transform: scale(0.9); opacity: 0.6; }
 
         .nav-home-btn {
-            background: rgba(0, 212, 255, 0.2); border: 1px solid #00d4ff;
-            width: 55px; height: 55px; border-radius: 50%; display: flex;
-            justify-content: center; align-items: center; margin-top: -30px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -30px;
             box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
         }
         .nav-home-btn svg { fill: #00d4ff; stroke: none; width: 28px; height: 28px; }
 
+        /* ЭФФЕКТ ПЕРЕХОДА */
         .fade-in { animation: fadeInAnim 0.4s ease-out forwards; }
         @keyframes fadeInAnim {
             from { opacity: 0; transform: translateY(10px); }
@@ -328,60 +346,241 @@
         }
 
         .card { 
-            width: 100%; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 8px; 
-            border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; 
-            gap: 15px; transition: transform 0.2s; overflow: hidden; flex-shrink: 0; position: relative;
+            width: 100%;
+            background: rgba(0,0,0,0.5); border-radius: 12px; padding: 8px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            transition: transform 0.2s;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
         }
-        .card img { width: 50px; height: 70px; object-fit: cover; border-radius: 6px; filter: brightness(0.8); }
-        .card div { font-size: 14px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; flex: 1; }
+        .card:active { transform: scale(0.98); }
+        .card img { 
+            width: 50px; 
+            height: 70px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            display: block; 
+            flex-shrink: 0;
+            filter: brightness(0.8);
+        }
+        .card div { 
+            font-size: 14px; 
+            text-align: left;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            color: #fff; 
+            flex: 1;
+        }
         
         .fav-btn-card {
-            background: #333; color: #fff; border: 1px solid rgba(255,255,255,0.3);
-            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; z-index: 10; margin-left: auto; flex-shrink: 0;
+            background: #333; color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+            margin-left: auto;
+            flex-shrink: 0;
+            text-shadow: 1px 1px 2px #000;
         }
         .fav-active { color: #ff4b4b; border-color: #ff4b4b; }
 
-        .forum-header-bar { width: 100%; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 5; }
-        .forum-toolbar { display: flex; align-items: center; gap: 5px; }
+        /* ФОРУМ СТИЛИ */
+        .forum-header-bar {
+            width: 100%; padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky; top: 0; background: transparent; z-index: 5;
+        }
+        .forum-toolbar {
+            display: flex; align-items: center; gap: 5px;
+            background: transparent; 
+            border: none; 
+            padding: 4px;
+        }
+
+        .forum-btn-group {
+            display: flex; gap: 5px;
+        }
+
         .forum-add-btn {
-            width: 32px; height: 32px; border-radius: 50%; background: rgba(0, 212, 255, 0.3); 
-            border: 1px solid rgba(0, 212, 255, 0.4); color: #fff; font-weight: bold;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(0, 212, 255, 0.3); 
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: #fff; font-weight: bold;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.2s;
         }
+        .forum-add-btn:active {
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
+            background: rgba(0, 212, 255, 0.6);
+        }
+
         .forum-admin-del-btn {
-            width: 32px; height: 32px; border-radius: 50%; background: rgba(255, 75, 75, 0.3); 
-            border: 1px solid rgba(255, 75, 75, 0.4); color: #fff; display: none; 
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255, 75, 75, 0.3); 
+            border: 1px solid rgba(255, 75, 75, 0.4);
+            color: #fff; font-weight: bold;
+            display: none; 
             align-items: center; justify-content: center; cursor: pointer;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+        .forum-admin-del-btn:active {
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.8);
+            background: rgba(255, 75, 75, 0.6);
         }
 
-        .chat-view-wrapper { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-        .chat-container { display: flex; flex-direction: column; gap: 8px; padding: 10px; flex: 1; overflow-y: auto; }
-        .chat-msg { background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
-        .chat-user { font-size: 10px; color: #00d4ff; font-weight: bold; }
+        .del-mode-active { border: 2px solid #fff; box-shadow: 0 0 10px red; }
+        
+        .new-topic-form {
+            display: flex; flex-direction: column; gap: 10px; padding: 15px;
+            background: rgba(0,0,0,0.6); border-radius: 10px; margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .new-topic-btn {
+            background: #00d4ff; color: #000; padding: 8px; border-radius: 8px; border: none; font-weight: bold;
+        }
+
+        .topic-card {
+            background: rgba(0,0,0,0.5); 
+            padding: 12px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .topic-title { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
+        
+        .topic-select-btn {
+            background: rgba(0, 212, 255, 0.25); 
+            color: #fff; 
+            border: 1px solid rgba(0, 212, 255, 0.3); 
+            padding: 5px 12px;
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            text-shadow: 1px 1px 2px #000;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .topic-select-btn:active {
+            background: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
+        }
+
+        .topic-delete-btn {
+            background: #ff4b4b; color: #fff; border: none; padding: 5px 10px;
+            border-radius: 20px; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
+        }
+
+        /* ЧАТ ТЕМЫ */
+        .chat-view-wrapper {
+            display: flex; flex-direction: column; height: 100%; overflow: hidden;
+        }
+        
+        .chat-container {
+            display: flex; flex-direction: column; gap: 8px; padding: 10px;
+            flex: 1; overflow-y: auto; 
+        }
+        .chat-msg {
+            background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .chat-user { font-size: 10px; color: #00d4ff; margin-bottom: 2px; font-weight: bold; }
         .chat-text { font-size: 13px; color: #fff; }
-        .chat-time { font-size: 9px; color: #aaa; text-align: right; }
+        .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
         
-        .chat-bottom-area { flex-shrink: 0; display: flex; flex-direction: column; z-index: 100; }
-        .chat-input-bar { display: flex; gap: 10px; align-items: center; padding: 10px; }
-        .chat-send-btn {
-            background: rgba(0, 212, 255, 0.3); border: 1px solid rgba(0, 212, 255, 0.4);
-            color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        .chat-bottom-area {
+            flex-shrink: 0;
+            background: transparent; 
+            display: flex; flex-direction: column; 
+            z-index: 100;
         }
 
-        .profile-view { padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; flex: 1; }
-        .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); }
-        .profile-label { color: #fff; font-size: 13px; }
-        .profile-val { color: #fff; font-weight: bold; font-size: 14px; }
-        .profile-input-edit { background: transparent; border: none; border-bottom: 1px solid #00d4ff; color: #fff; text-align: right; width: 60%; }
-        
-        .save-profile-btn { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: #00d4ff; color: #000; padding: 12px 40px; border-radius: 30px; display: none; z-index: 100; font-weight: bold; border:none; }
+        .chat-input-bar { 
+            display: flex; gap: 10px; align-items: center; padding: 10px;
+        }
 
-        .section-back-btn { width: 100%; padding: 15px; background: rgba(255, 75, 75, 0.3); color: #fff; border: 1px solid rgba(255, 75, 75, 0.3); font-weight: bold; cursor: pointer; text-align: center; }
+        .chat-send-btn {
+            background: rgba(0, 212, 255, 0.3); 
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: #fff; width: 40px; height: 40px;
+            border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+            transition: all 0.2s;
+        }
+        .chat-send-btn:active { background: rgba(0, 212, 255, 0.6); }
+
+        /* ПРОФИЛЬ */
+        .profile-view {
+            padding: 20px; display: flex; flex-direction: column; gap: 15px; color: #fff;
+            overflow-y: auto; flex: 1;
+        }
+        .profile-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: rgba(0,0,0,0.5); 
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+        .profile-label { color: #fff; font-size: 13px; }
+        .profile-val { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; }
+        .profile-input-edit {
+            background: transparent; border: none; border-bottom: 1px solid #00d4ff; color: #fff;
+            text-align: right; font-weight: bold; font-size: 14px; outline: none; width: 60%;
+        }
+        
+        .anon-toggle-btn {
+            background: rgba(0, 212, 255, 0.2); 
+            border: 1px solid rgba(0, 212, 255, 0.4); 
+            color: #fff;
+            padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-shadow: 1px 1px 2px #000;
+            transition: all 0.3s;
+        }
+        .anon-active { background: rgba(0, 212, 255, 0.6); border-color: #00d4ff; }
+        
+        .save-profile-btn {
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+            background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
+            border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+            display: none; z-index: 100;
+        }
+
+        .section-back-btn {
+            width: 100%; 
+            padding: 15px; 
+            background: rgba(255, 75, 75, 0.3); 
+            color: #fff; 
+            border: 1px solid rgba(255, 75, 75, 0.3); 
+            font-weight: bold; cursor: pointer; flex-shrink: 0;
+            font-size: 12px; text-align: center;
+            margin-top: auto; 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 -4px 15px rgba(255, 75, 75, 0.1);
+        }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
         #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; }
+        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
 <body onclick="hideMenu()">
@@ -416,10 +615,10 @@
             </div>
             
             <div id="auth-form" class="auth-container">
-                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px;">Вход</h4>
+                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px; text-shadow: 1px 1px 2px #000;">Вход</h4>
                 <input type="email" placeholder="Email" id="auth-email">
                 <input type="password" placeholder="Пароль" id="auth-pass">
-                <button id="auth-submit-btn" onclick="processAuth()">Подтвердить</button>
+                <button id="auth-submit-btn" onclick="processAuth()" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Подтвердить</button>
                 <div class="auth-back" onclick="resetMenu()">← Назад</div>
             </div>
 
@@ -479,17 +678,6 @@
     </div>
 
     <script>
-        // ФИКСАЦИЯ ВЫСОТЫ
-        function lockViewport() {
-            const h = window.innerHeight;
-            document.documentElement.style.setProperty('--fixed-height', h + 'px');
-            document.body.style.height = h + 'px';
-        }
-        
-        window.addEventListener('load', lockViewport);
-        window.addEventListener('orientationchange', () => setTimeout(lockViewport, 200));
-
-        // Основная логика
         const _supabase = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
@@ -511,7 +699,14 @@
         let isLoadingAll = false;
 
         window.addEventListener('load', () => { 
+            // ФИКСАЦИЯ ВЫСОТЫ: записываем реальную высоту при загрузке
+            const actualHeight = window.innerHeight;
+            document.documentElement.style.setProperty('--full-height', actualHeight + 'px');
+
             loadHomeContent('recommendations'); 
+            const glass = document.getElementById('glass');
+            document.getElementById('bg-container').style.height = actualHeight + 'px';
+            
             if(localStorage.getItem('illich_is_logged_in') === 'true') {
                 document.getElementById('guest-menu').style.display = 'none';
                 document.getElementById('user-menu').style.display = 'block';
@@ -576,8 +771,13 @@
             if(passInp) userProfile.password = passInp;
             
             await _supabase.from('profiles').upsert({
-                id: userProfile.email, login: userProfile.login, email: userProfile.email,
-                password: userProfile.password, dob: userProfile.dob, nat: userProfile.nat, is_anon: userProfile.isAnon
+                id: userProfile.email,
+                login: userProfile.login,
+                email: userProfile.email,
+                password: userProfile.password,
+                dob: userProfile.dob,
+                nat: userProfile.nat,
+                is_anon: userProfile.isAnon
             });
 
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
@@ -590,6 +790,7 @@
             localStorage.removeItem('illich_is_logged_in');
             document.getElementById('user-menu').style.display = 'none';
             document.getElementById('guest-menu').style.display = 'block';
+            document.getElementById('auth-form').style.display = 'none';
             goHome();
         }
 
@@ -605,7 +806,7 @@
                 document.getElementById('container-label').innerText = "Результаты поиска";
                 searchTimeout = setTimeout(() => search(), 300);
             } else {
-                backBtn.style.display = 'none';
+                backBtn.style.none = 'none';
                 goHome();
             }
         }
@@ -621,12 +822,15 @@
 
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
+            // Используем var(--full-height)
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 185px)';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'flex';
             document.getElementById('container-header').style.display = 'none';
             if(currentMode === 'topic') { openForum(); return; }
+            
             isSearching = false;
             document.getElementById('sInp').value = '';
             closeKeyboard();
@@ -637,6 +841,7 @@
             currentMode = type;
             const res = document.getElementById('results');
             const label = document.getElementById('container-label');
+            
             if (type === 'history') {
                 label.innerText = "История просмотров";
                 res.innerHTML = '';
@@ -645,13 +850,20 @@
                 } else {
                     history.forEach(a => res.appendChild(createCard(a)));
                 }
-                applyFadeEffect(); return;
+                applyFadeEffect();
+                return;
             }
+
             label.innerText = type === 'recommendations' ? "Рекомендации" : "Новинки";
-            if (!append) res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
-            else isLoadingAll = true;
+            if (!append) {
+                res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
+            } else {
+                isLoadingAll = true;
+            }
+            
             let order = type === 'recommendations' ? 'popularity' : 'id';
             let page = type === 'recommendations' ? recPage : newPage;
+
             try {
                 const r = await fetch(`https://shikimori.one/api/animes?limit=20&order=${order}&page=${page}`);
                 const data = await r.json();
@@ -662,7 +874,9 @@
                 });
                 if (type === 'recommendations') recPage++; else newPage++;
                 if (!append) applyFadeEffect();
-            } catch(e) { if (!append) res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; }
+            } catch(e) { 
+                if (!append) res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; 
+            }
             isLoadingAll = false;
         }
 
@@ -708,13 +922,19 @@
 
         function openAllAnime() {
             if(!isAuth()) return;
-            hideMenu(); currentMode = 'all-anime'; allAnimePage = 1;
+            hideMenu();
+            currentMode = 'all-anime';
+            allAnimePage = 1;
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Все аниме";
-            loadAllAnime(); applyFadeEffect();
+            const res = document.getElementById('results');
+            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка списка...</p>';
+            loadAllAnime();
+            applyFadeEffect();
         }
 
         async function loadAllAnime(append = false) {
@@ -725,24 +945,29 @@
                 const data = await r.json();
                 const res = document.getElementById('results');
                 if (!append) res.innerHTML = '';
-                data.forEach(a => {
-                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
-                    res.appendChild(createCard(obj));
-                });
-                allAnimePage++;
+                if (data.length > 0) {
+                    data.forEach(a => {
+                        const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
+                        res.appendChild(createCard(obj));
+                    });
+                    allAnimePage++;
+                }
             } catch(e) {}
             isLoadingAll = false;
         }
 
         function openFavorites() {
             if(!isAuth()) return;
-            hideMenu(); currentMode = 'favorites';
+            hideMenu();
+            currentMode = 'favorites';
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
             document.getElementById('container-label').innerText = "Избранные";
-            renderFavorites(); applyFadeEffect();
+            renderFavorites();
+            applyFadeEffect();
         }
 
         function renderFavorites() {
@@ -755,14 +980,24 @@
         function toggleFav(e, id, title, img) {
             e.stopPropagation();
             const index = favorites.findIndex(f => String(f.id) === String(id));
-            if(index > -1) { favorites.splice(index, 1); e.target.innerText = '🤍'; e.target.classList.remove('fav-active'); if(currentMode === 'favorites') renderFavorites(); }
-            else { favorites.unshift({ id, title, img }); e.target.innerText = '❤️'; e.target.classList.add('fav-active'); }
+            if(index > -1) {
+                favorites.splice(index, 1);
+                e.target.innerText = '🤍';
+                e.target.classList.remove('fav-active');
+                if(currentMode === 'favorites') renderFavorites();
+            } else {
+                favorites.unshift({ id, title, img });
+                e.target.innerText = '❤️';
+                e.target.classList.add('fav-active');
+            }
             localStorage.setItem('animeFavorites', JSON.stringify(favorites));
         }
 
         function openProfile() {
             if(!isAuth()) return;
-            hideMenu(); currentMode = 'profile';
+            hideMenu();
+            currentMode = 'profile';
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
@@ -772,39 +1007,75 @@
             const res = document.getElementById('results');
             const anonState = userProfile.isAnon ? 'Аноним' : 'Не аноним';
             const anonClass = userProfile.isAnon ? 'anon-active' : '';
+
             res.innerHTML = `
-                <div class="profile-view">
-                    <div class="profile-row"><span class="profile-label">Логин</span><input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()"></div>
-                    <div class="profile-row"><span class="profile-label">Email</span><input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}" oninput="showSaveBtn()"></div>
-                    <div class="profile-row"><span class="profile-label">Дата рождения</span><input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}" oninput="showSaveBtn()"></div>
-                    <div class="profile-row"><span class="profile-label">Национальность</span><input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}" oninput="showSaveBtn()"></div>
-                    <div class="profile-row"><span class="profile-label">Пароль</span><input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}" oninput="showSaveBtn()"></div>
-                    <div class="profile-row"><span class="profile-label">Режим форума</span><button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button></div>
-                </div>`;
+                <div class="profile-view" id="profile-scroll-box" style="overflow-y:auto; flex:1;">
+                    <div class="profile-row">
+                        <span class="profile-label">Логин</span>
+                        <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Email</span>
+                        <input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}" oninput="showSaveBtn()">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Дата рождения</span>
+                        <input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}" oninput="showSaveBtn()">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Национальность</span>
+                        <input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}" oninput="showSaveBtn()">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Пароль</span>
+                        <input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}" oninput="showSaveBtn()">
+                    </div>
+                    <div class="profile-row">
+                        <span class="profile-label">Режим форума</span>
+                        <button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button>
+                    </div>
+                </div>
+            `;
             applyFadeEffect();
         }
 
         function showSaveBtn() { document.getElementById('save-profile-btn').style.display = 'block'; }
+
         async function saveProfileChanges() {
             userProfile.login = document.getElementById('edit-login').value;
             userProfile.email = document.getElementById('edit-email').value;
             userProfile.dob = document.getElementById('edit-dob').value;
             userProfile.nat = document.getElementById('edit-nat').value;
             userProfile.password = document.getElementById('edit-pass').value;
-            await _supabase.from('profiles').upsert({ id: userProfile.email, login: userProfile.login, email: userProfile.email, password: userProfile.password, dob: userProfile.dob, nat: userProfile.nat, is_anon: userProfile.isAnon });
+            
+            await _supabase.from('profiles').upsert({
+                id: userProfile.email,
+                login: userProfile.login,
+                email: userProfile.email,
+                password: userProfile.password,
+                dob: userProfile.dob,
+                nat: userProfile.nat,
+                is_anon: userProfile.isAnon
+            });
+
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             document.getElementById('save-profile-btn').style.display = 'none';
             alert("Профиль сохранен");
         }
+
         async function toggleAnon() {
             userProfile.isAnon = !userProfile.isAnon;
             await _supabase.from('profiles').upsert({ id: userProfile.email, is_anon: userProfile.isAnon });
-            localStorage.setItem('userProfile', JSON.stringify(userProfile)); openProfile();
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            openProfile();
         }
 
         async function openForum() {
             if(!isAuth()) return;
-            hideMenu(); currentMode = 'forum'; deleteMode = false;
+            hideMenu();
+            currentMode = 'forum';
+            deleteMode = false;
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
@@ -813,36 +1084,76 @@
             document.getElementById('container-label').innerText = "Форум";
             const res = document.getElementById('results');
             const isAdmin = (userProfile.login === ADMIN_ID);
-            res.innerHTML = `<div class="forum-header-bar"><div class="forum-toolbar"><input type="text" id="forum-s-inp" class="forum-search-input" placeholder="Поиск темы..."><div class="forum-btn-group"><div class="search-btn" style="padding: 0 10px; display:flex; align-items:center;" onclick="filterTopics(document.getElementById('forum-s-inp').value)">ПОИСК</div><div class="forum-add-btn" onclick="toggleTopicForm()">+</div><div class="forum-admin-del-btn" id="adm-del-btn" style="display:${isAdmin ? 'flex' : 'none'}" onclick="toggleDeleteMode()">-</div></div></div></div><div id="new-topic-area" style="display:none;"><div class="new-topic-form"><input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы"><button class="new-topic-btn" onclick="createTopic()">Создать тему</button></div></div><div id="topics-list" style="padding:10px;"></div>`;
+            res.innerHTML = `
+                <div class="forum-header-bar">
+                    <div class="forum-toolbar">
+                        <input type="text" id="forum-s-inp" class="forum-search-input" placeholder="Поиск темы...">
+                        <div class="forum-btn-group">
+                             <div class="search-btn" style="padding: 0 10px; display:flex; align-items:center;" onclick="filterTopics(document.getElementById('forum-s-inp').value)">ПОИСК</div>
+                             <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
+                             <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${isAdmin ? 'flex' : 'none'}" onclick="toggleDeleteMode()">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="new-topic-area" style="display:none;"><div class="new-topic-form">
+                    <input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы">
+                    <button class="new-topic-btn" onclick="createTopic()">Создать тему</button>
+                </div></div>
+                <div id="topics-list" style="padding:10px;"></div>
+            `;
+            
             const { data } = await _supabase.from('forum_topics').select('*').order('created_at', { ascending: false });
-            forumTopics = data || []; renderTopicsList(); applyFadeEffect();
+            forumTopics = data || [];
+            renderTopicsList();
+            applyFadeEffect();
         }
 
         function filterTopics(val) { renderTopicsList(val); }
+
         function renderTopicsList(filter = '') {
-            const list = document.getElementById('topics-list'); list.innerHTML = '';
+            const list = document.getElementById('topics-list');
+            list.innerHTML = '';
             const filtered = forumTopics.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()));
             filtered.forEach(t => {
-                const d = document.createElement('div'); d.className = 'topic-card';
-                d.innerHTML = `<span class="topic-title">${t.title}</span>` + (deleteMode ? `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>` : `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`);
+                const d = document.createElement('div');
+                d.className = 'topic-card';
+                d.innerHTML = `<span class="topic-title">${t.title}</span>` + 
+                    (deleteMode ? `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>` : `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`);
                 list.appendChild(d);
             });
         }
 
         async function openTopic(id) {
-            currentMode = 'topic'; currentTopicId = id;
+            currentMode = 'topic';
+            currentTopicId = id;
+            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
             const topic = forumTopics.find(t => t.id === id);
             document.getElementById('container-label').innerText = topic.title;
+            
             const res = document.getElementById('results');
-            res.innerHTML = `<div class="chat-view-wrapper"><div class="chat-container" id="chat-msgs"></div><div class="chat-bottom-area"><div class="chat-input-bar"><input type="text" id="chat-in" class="chat-input" placeholder="Сообщение..."><button class="chat-send-btn" onclick="sendMessage()">➤</button></div><button class="section-back-btn" onclick="openForum()">НАЗАД</button></div></div>`;
+            res.innerHTML = `
+                <div class="chat-view-wrapper">
+                    <div class="chat-container" id="chat-msgs"></div>
+                    <div class="chat-bottom-area">
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
+                            <button class="chat-send-btn" onclick="sendMessage()">➤</button>
+                        </div>
+                        <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
+                    </div>
+                </div>`;
+            
             const { data } = await _supabase.from('forum_messages').select('*').eq('topic_id', id).order('created_at', { ascending: true });
-            renderChatMessages(data || []); applyFadeEffect();
+            renderChatMessages(data || []);
+            applyFadeEffect();
         }
 
         function renderChatMessages(msgs) {
-            const container = document.getElementById('chat-msgs'); container.innerHTML = '';
+            const container = document.getElementById('chat-msgs');
+            container.innerHTML = '';
             msgs.forEach(m => {
-                const d = document.createElement('div'); d.className = 'chat-msg';
+                const d = document.createElement('div');
+                d.className = 'chat-msg';
                 d.innerHTML = `<div class="chat-user">${m.user}</div><div class="chat-text">${m.text}</div><div class="chat-time">${m.time}</div>`;
                 container.appendChild(d);
             });
@@ -850,27 +1161,56 @@
         }
 
         async function sendMessage() {
-            const txt = document.getElementById('chat-in').value; if(!txt.trim()) return;
-            const now = new Date(); const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
+            const txt = document.getElementById('chat-in').value;
+            if(!txt.trim()) return;
+            const now = new Date();
+            const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
             const user = userProfile.isAnon ? 'Аноним' : userProfile.login;
-            await _supabase.from('forum_messages').insert({ topic_id: currentTopicId, user: user, text: txt, time: timeStr });
-            document.getElementById('chat-in').value = ''; openTopic(currentTopicId); 
+
+            await _supabase.from('forum_messages').insert({
+                topic_id: currentTopicId,
+                user: user,
+                text: txt,
+                time: timeStr
+            });
+
+            document.getElementById('chat-in').value = '';
+            openTopic(currentTopicId); 
         }
 
         function play(id, title, img) {
             history = history.filter(item => String(item.id) !== String(id)); 
-            history.unshift({ id, title, img }); if(history.length > 20) history.pop(); 
+            history.unshift({ id, title, img });
+            if(history.length > 20) history.pop(); 
             localStorage.setItem('animeHistory', JSON.stringify(history));
             document.getElementById('player-layer').style.display = 'block';
             document.getElementById('player-iframe').src = `https://pizdec.pro/id/${id}`;
         }
 
         function closeVideo() { document.getElementById('player-layer').style.display = 'none'; document.getElementById('player-iframe').src = ''; }
-        function closeKeyboard() { document.activeElement.blur(); }
+        function closeKeyboard() { document.getElementById('sInp').blur(); }
         function toggleTopicForm() { const a = document.getElementById('new-topic-area'); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
-        function toggleDeleteMode() { deleteMode = !deleteMode; document.getElementById('adm-del-btn').classList.toggle('del-mode-active'); renderTopicsList(); }
-        async function deleteTopic(id) { await _supabase.from('forum_topics').delete().eq('id', id); forumTopics = forumTopics.filter(t => t.id !== id); deleteMode = false; renderTopicsList(); }
-        async function createTopic() { const t = document.getElementById('new-topic-title').value; if(!t.trim()) return; await _supabase.from('forum_topics').insert({ title: t }); openForum(); }
+        
+        function toggleDeleteMode() { 
+            deleteMode = !deleteMode; 
+            document.getElementById('adm-del-btn').classList.toggle('del-mode-active'); 
+            renderTopicsList(); 
+        }
+        
+        async function deleteTopic(id) { 
+            await _supabase.from('forum_topics').delete().eq('id', id);
+            forumTopics = forumTopics.filter(t => t.id !== id); 
+            deleteMode = false;
+            document.getElementById('adm-del-btn').classList.remove('del-mode-active');
+            renderTopicsList(); 
+        }
+
+        async function createTopic() { 
+            const t = document.getElementById('new-topic-title').value; 
+            if(!t.trim()) return; 
+            await _supabase.from('forum_topics').insert({ title: t });
+            openForum(); 
+        }
 
         let prog = 0;
         let loadInt = setInterval(() => {
