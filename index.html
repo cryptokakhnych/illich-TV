@@ -1,1245 +1,269 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-    <title>Illich TV</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        :root {
-            /* Переменная для хранения реальной высоты экрана */
-            --full-height: 100vh;
-        }
-
-        body, html { 
-            height: 100%; 
-            width: 100%; 
-            background: #000; 
-            color: white; 
-            overflow: hidden; 
-            position: fixed;
-            -webkit-text-size-adjust: 100%;
-        }
-        
-        #bg-container { 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: -1; background: #000;
-        }
-
-        .background-fixed {
-            width: 100%; height: 100%;
-            background-image: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp');
-            background-position: center center; background-repeat: no-repeat; background-size: 100% 100%; 
-            opacity: 0.6;
-        }
-
-        /* ЗАГРУЗОЧНЫЙ ЭКРАН */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000;
-            transition: opacity 0.4s ease-out;
-        }
-
-        #loading-container {
-            margin-bottom: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .progress-box { 
-            width: 220px; 
-            height: 22px; 
-            background: rgba(0,0,0,0.6); 
-            border-radius: 20px; 
-            overflow: hidden; 
-            border: 1px solid rgba(0,212,255,0.4); 
-            position: relative;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-        }
-
-        #perc { 
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 5;
-            color: #fff; 
-            font-weight: 900; 
-            font-size: 14px; 
-            text-shadow: 1px 1px 2px #000;
-            pointer-events: none;
-        }
-
-        #bar {
-            height: 100%;
-            background: #00d4ff;
-            width: 0%;
-        }
-
-        /* КОНТЕНТ */
-        #main-content { 
-            display: none; width: 100%; height: 100%; flex-direction: column; 
-            align-items: center; padding-top: 15px; position: relative; 
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        .top-bar { 
-            width: 94%; display: flex; gap: 10px; align-items: center; z-index: 100; height: 50px; margin-bottom: 15px; flex-shrink: 0; 
-            position: sticky; top: 0;
-        }
-
-        .search-box { 
-            flex: 1; display: flex; background: transparent; border-radius: 50px; 
-            gap: 5px;
-        }
-
-        .search-box input, 
-        .forum-search-input, 
-        .chat-input, 
-        .new-topic-input,
-        .auth-container input { 
-            flex: 1; 
-            border: 1px solid rgba(255,255,255,0.2); 
-            outline: none; 
-            padding: 8px 15px; 
-            font-size: 14px; 
-            border-radius: 50px; 
-            color: #fff; 
-            min-width: 0; 
-            background: rgba(0,0,0,0.5); 
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); 
-            caret-color: #fff; 
-        }
-        
-        .search-box input:focus, .chat-input:focus, .forum-search-input:focus {
-            border-color: #00d4ff; 
-        }
-
-        .search-btn { 
-            background: rgba(0, 212, 255, 0.3); 
-            color: #fff; 
-            border: 1px solid rgba(0, 212, 255, 0.3); 
-            padding: 0 12px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 11px; 
-            cursor: pointer;
-            text-shadow: 1px 1px 2px #000; 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.1);
-            transition: all 0.2s;
-        }
-        .search-btn:active { background: rgba(0, 212, 255, 0.5); }
-
-        .back-btn { 
-            display: none; 
-            background: rgba(255, 75, 75, 0.3); 
-            color: #fff; 
-            border: 1px solid rgba(255, 75, 75, 0.3); 
-            padding: 0 12px; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            font-size: 11px; 
-            cursor: pointer;
-            text-shadow: 1px 1px 2px #000; 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.1);
-        }
-
-        .menu-btn {
-            width: 40px; height: 40px; background: rgba(0,0,0,0.7);
-            border: 1px solid #00d4ff33; border-radius: 50%;
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; gap: 4px; cursor: pointer;
-        }
-        .menu-btn span { width: 20px; height: 2px; background: #00d4ff; border-radius: 2px; }
-
-        #menu-overlay {
-            display: none; position: fixed; top: 70px; right: 3%; width: 260px;
-            background: rgba(15, 15, 15, 0.95); border: 1px solid rgba(0, 212, 255, 0.4);
-            border-radius: 15px; padding: 15px; z-index: 500; backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-        }
-        
-        .menu-item { 
-            padding: 12px; 
-            margin-bottom: 8px;
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer; 
-            font-size: 14px; 
-            transition: all 0.3s;
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            background: rgba(255,255,255,0.03);
-            text-shadow: 1px 1px 2px #000; 
-        }
-        .menu-item:active { background: rgba(0, 212, 255, 0.1); border-color: #00d4ff; }
-        .menu-item svg { width: 20px; height: 20px; stroke: #00d4ff; fill: none; stroke-width: 2; }
-
-        .auth-container { display: none; flex-direction: column; gap: 10px; padding: 5px 0; }
-        
-        .auth-container button { 
-            background: #00d4ff; color: #000; border: 1px solid #00d4ff; padding: 10px; 
-            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px;
-        }
-        .auth-back { font-size: 11px; text-align: center; color: #888; cursor: pointer; margin-top: 5px; }
-
-        /* ВКЛАДКИ (ИНТЕГРИРОВАНЫ В ПАНЕЛЬ) */
-        .home-tabs {
-            width: 100%;
-            display: flex;
-            z-index: 10;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .tab-trigger {
-            flex: 1;
-            padding: 15px 5px;
-            background: rgba(255, 255, 255, 0.03);
-            color: #fff;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        .tab-trigger:first-child { border-radius: 20px 0 0 0; }
-        .tab-trigger:last-child { border-radius: 0 20px 0 0; }
-        
-        .tab-trigger.active {
-            background: rgba(0, 212, 255, 0.15);
-            color: #00d4ff;
-            box-shadow: inset 0 -2px 0 #00d4ff;
-        }
-
-        .glass-container {
-            width: 94%; 
-            /* Высота фиксирована через calc, чтобы не сжималась при открытии клавиатуры */
-            height: calc(var(--full-height) - 185px); 
-            margin-top: 0;
-            margin-bottom: 5px; 
-            background: rgba(20, 20, 20, 0.8); 
-            border-radius: 20px;
-            border: 1.5px solid rgba(255, 255, 255, 0.2); 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            flex-shrink: 0;
-            position: relative;
-            transition: height 0.3s ease-out;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-        }
-
-        .container-header { 
-            padding: 15px; 
-            display: flex; 
-            justify-content: center;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-            min-height: 45px;
-            position: sticky;
-            top: 0;
-            background: rgba(0,0,0,0.2);
-            z-index: 10;
-        }
-        .container-title { 
-            font-size: 13px; 
-            color: #00d4ff; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 1px 1px 2px #000; 
-        }
-
-        #results { 
-            width: 100%; 
-            display: flex;
-            flex-direction: column;
-            gap: 10px; 
-            padding: 12px; 
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; 
-            flex: 1; 
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ */
-        .bottom-nav-bar {
-            position: fixed;
-            top: calc(var(--full-height) - 80px);
-            left: 3%;
-            width: 94%;
-            height: 70px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 5px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 100;
-        }
-
-        .nav-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #fff;
-            text-decoration: none;
-            cursor: pointer;
-            transition: 0.2s;
-            flex: 1;
-        }
-        .nav-btn span { font-size: 9px; font-weight: bold; text-transform: uppercase; opacity: 0.8; }
-        .nav-btn i { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            filter: drop-shadow(0 0 5px rgba(0,212,255,0.5)); 
-        }
-        .nav-btn svg { width: 100%; height: 100%; fill: none; stroke: #00d4ff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .nav-btn:active { transform: scale(0.9); opacity: 0.6; }
-
-        .nav-home-btn {
-            background: rgba(0, 212, 255, 0.2);
-            border: 1px solid #00d4ff;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: -30px;
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
-        }
-        .nav-home-btn svg { fill: #00d4ff; stroke: none; width: 28px; height: 28px; }
-
-        /* ЭФФЕКТ ПЕРЕХОДА */
-        .fade-in { animation: fadeInAnim 0.4s ease-out forwards; }
-        @keyframes fadeInAnim {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card { 
-            width: 100%;
-            background: rgba(0,0,0,0.5); border-radius: 12px; padding: 8px; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            display: flex; 
-            align-items: center; 
-            gap: 15px;
-            transition: transform 0.2s;
-            overflow: hidden;
-            flex-shrink: 0;
-            position: relative;
-        }
-        .card:active { transform: scale(0.98); }
-        .card img { 
-            width: 50px; 
-            height: 70px; 
-            object-fit: cover; 
-            border-radius: 6px; 
-            display: block; 
-            flex-shrink: 0;
-            filter: brightness(0.8);
-        }
-        .card div { 
-            font-size: 14px; 
-            text-align: left;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            color: #fff; 
-            flex: 1;
-        }
-        
-        .fav-btn-card {
-            background: #333; color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 10;
-            margin-left: auto;
-            flex-shrink: 0;
-            text-shadow: 1px 1px 2px #000;
-        }
-        .fav-active { color: #ff4b4b; border-color: #ff4b4b; }
-
-        /* ФОРУМ СТИЛИ */
-        .forum-header-bar {
-            width: 100%; padding: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            position: sticky; top: 0; background: transparent; z-index: 5;
-        }
-        .forum-toolbar {
-            display: flex; align-items: center; gap: 5px;
-            background: transparent; 
-            border: none; 
-            padding: 4px;
-        }
-
-        .forum-btn-group {
-            display: flex; gap: 5px;
-        }
-
-        .forum-add-btn {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: rgba(0, 212, 255, 0.3); 
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            color: #fff; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            text-shadow: 1px 1px 2px #000;
-            font-size: 16px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.2s;
-        }
-        .forum-add-btn:active {
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.8);
-            background: rgba(0, 212, 255, 0.6);
-        }
-
-        .forum-admin-del-btn {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: rgba(255, 75, 75, 0.3); 
-            border: 1px solid rgba(255, 75, 75, 0.4);
-            color: #fff; font-weight: bold;
-            display: none; 
-            align-items: center; justify-content: center; cursor: pointer;
-            text-shadow: 1px 1px 2px #000;
-            font-size: 16px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.2s;
-        }
-        .forum-admin-del-btn:active {
-            box-shadow: 0 0 15px rgba(255, 75, 75, 0.8);
-            background: rgba(255, 75, 75, 0.6);
-        }
-
-        .del-mode-active { border: 2px solid #fff; box-shadow: 0 0 10px red; }
-        
-        .new-topic-form {
-            display: flex; flex-direction: column; gap: 10px; padding: 15px;
-            background: rgba(0,0,0,0.6); border-radius: 10px; margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .new-topic-btn {
-            background: #00d4ff; color: #000; padding: 8px; border-radius: 8px; border: none; font-weight: bold;
-        }
-
-        .topic-card {
-            background: rgba(0,0,0,0.5); 
-            padding: 12px; border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .topic-title { font-size: 14px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
-        
-        .topic-select-btn {
-            background: rgba(0, 212, 255, 0.25); 
-            color: #fff; 
-            border: 1px solid rgba(0, 212, 255, 0.3); 
-            padding: 5px 12px;
-            border-radius: 20px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            text-shadow: 1px 1px 2px #000;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .topic-select-btn:active {
-            background: rgba(0, 212, 255, 0.5);
-            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
-        }
-
-        .topic-delete-btn {
-            background: #ff4b4b; color: #fff; border: none; padding: 5px 10px;
-            border-radius: 20px; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000;
-        }
-
-        /* ЧАТ ТЕМЫ */
-        .chat-view-wrapper {
-            display: flex; flex-direction: column; height: 100%; position: relative;
-        }
-        
-        .chat-container {
-            display: flex; flex-direction: column; gap: 8px; padding: 10px;
-            flex: 1; overflow-y: auto; 
-            /* Отступ снизу для поля ввода */
-            padding-bottom: 80px; 
-        }
-        .chat-msg {
-            background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .chat-user { font-size: 10px; color: #00d4ff; margin-bottom: 2px; font-weight: bold; }
-        .chat-text { font-size: 13px; color: #fff; }
-        .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
-        
-        /* Измененный стиль для строки ввода - фиксирован к вьюпорту */
-        .chat-input-bar-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 3%;
-            width: 94%;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(15px);
-            z-index: 200;
-            padding: 10px;
-            display: flex; gap: 10px; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-radius: 15px 15px 0 0;
-        }
-
-        .chat-send-btn {
-            background: rgba(0, 212, 255, 0.3); 
-            border: 1px solid rgba(0, 212, 255, 0.4);
-            color: #fff; width: 40px; height: 40px;
-            border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .chat-send-btn:active { background: rgba(0, 212, 255, 0.6); }
-
-        /* ПРОФИЛЬ */
-        .profile-view {
-            padding: 20px; display: flex; flex-direction: column; gap: 15px; color: #fff;
-            overflow-y: auto; flex: 1;
-            /* Большой отступ снизу, чтобы можно было выскроллить контент над клавиатурой */
-            padding-bottom: 300px; 
-        }
-        .profile-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: rgba(0,0,0,0.5); 
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
-        }
-        .profile-label { color: #fff; font-size: 13px; }
-        .profile-val { color: #fff; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; }
-        .profile-input-edit {
-            background: transparent; border: none; border-bottom: 1px solid #00d4ff; color: #fff;
-            text-align: right; font-weight: bold; font-size: 14px; outline: none; width: 60%;
-        }
-        
-        .anon-toggle-btn {
-            background: rgba(0, 212, 255, 0.2); 
-            border: 1px solid rgba(0, 212, 255, 0.4); 
-            color: #fff;
-            padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            text-shadow: 1px 1px 2px #000;
-            transition: all 0.3s;
-        }
-        .anon-active { background: rgba(0, 212, 255, 0.6); border-color: #00d4ff; }
-        
-        .save-profile-btn {
-            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
-            background: #00d4ff; color: #000; font-weight: bold; padding: 12px 40px; 
-            border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
-            display: none; z-index: 100;
-        }
-
-        .section-back-btn {
-            width: 100%; 
-            padding: 15px; 
-            background: rgba(255, 75, 75, 0.3); 
-            color: #fff; 
-            border: 1px solid rgba(255, 75, 75, 0.3); 
-            font-weight: bold; cursor: pointer; flex-shrink: 0;
-            font-size: 12px; text-align: center;
-            /* Позиционируем абсолютно внутри стеклянного контейнера, который сохраняет высоту */
-            position: absolute; bottom: 0; left: 0;
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 -4px 15px rgba(255, 75, 75, 0.1);
-            z-index: 10;
-        }
-
-        #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
-        #player-iframe { width: 100%; height: 100%; border: none; }
-        .close-btn { position: absolute; top: 40px; right: 20px; background: #ff4b4b; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; z-index: 2100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-shadow: 1px 1px 2px #000; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Illich TV</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}:root{--fh:100vh}
+body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;position:fixed;-webkit-text-size-adjust:100%}
+#bg-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:#000}
+.bg-fix{width:100%;height:100%;background:url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/100% 100% no-repeat;opacity:.6}
+#splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;transition:opacity .4s ease-out}
+#load-c{margin-bottom:80px;display:flex;flex-direction:column;align-items:center}
+.p-box{width:220px;height:22px;background:#00000099;border-radius:20px;overflow:hidden;border:1px solid #00d4ff66;position:relative;box-shadow:0 0 15px #00d4ff33}
+#perc{position:absolute;width:100%;height:100%;display:flex;justify-content:center;align-items:center;z-index:5;color:#fff;font-weight:900;font-size:14px;text-shadow:1px 1px 2px #000;pointer-events:none}
+#bar{height:100%;background:#00d4ff;width:0%}
+#main{display:none;width:100%;height:100%;flex-direction:column;align-items:center;padding-top:15px;position:relative;opacity:0;transition:opacity .3s ease-in-out}
+.top-bar{width:94%;display:flex;gap:10px;align-items:center;z-index:100;height:50px;margin-bottom:15px;flex-shrink:0;position:sticky;top:0}
+.s-box{flex:1;display:flex;background:0 0;border-radius:50px;gap:5px}
+.s-box input,.f-inp,.chat-inp,.new-top-inp,.auth-c input{flex:1;border:1px solid #ffffff33;outline:0;padding:8px 15px;font-size:14px;border-radius:50px;color:#fff;min-width:0;background:#00000080;box-shadow:inset 0 1px 3px #0000001a;caret-color:#fff}
+.s-box input:focus,.chat-inp:focus,.f-inp:focus{border-color:#00d4ff}
+.btn{background:#00d4ff4d;color:#fff;border:1px solid #00d4ff4d;padding:0 12px;border-radius:50px;font-weight:700;font-size:11px;cursor:pointer;text-shadow:1px 1px 2px #000;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 15px #00d4ff1a;transition:all .2s}
+.btn:active{background:#00d4ff80}
+.back-btn{display:none;background:#ff4b4b4d;color:#fff;border:1px solid #ff4b4b4d;padding:0 12px;border-radius:50px;font-weight:700;font-size:11px;cursor:pointer;text-shadow:1px 1px 2px #000;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 15px #ff4b4b1a}
+.menu-btn{width:40px;height:40px;background:#000000b3;border:1px solid #00d4ff33;border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;cursor:pointer}
+.menu-btn span{width:20px;height:2px;background:#00d4ff;border-radius:2px}
+#menu-ov{display:none;position:fixed;top:70px;right:3%;width:260px;background:#0f0f0ff2;border:1px solid #00d4ff66;border-radius:15px;padding:15px;z-index:500;backdrop-filter:blur(15px);box-shadow:0 10px 30px #000000b3}
+.m-item{padding:12px;margin-bottom:8px;border:1px solid #00d4ff4d;border-radius:10px;cursor:pointer;font-size:14px;transition:all .3s;display:flex;align-items:center;gap:10px;background:#ffffff08;text-shadow:1px 1px 2px #000}
+.m-item:active{background:#00d4ff1a;border-color:#00d4ff}
+.m-item svg{width:20px;height:20px;stroke:#00d4ff;fill:none;stroke-width:2}
+.auth-c{display:none;flex-direction:column;gap:10px;padding:5px 0}
+.auth-c button{background:#00d4ff;color:#000;border:1px solid #00d4ff;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:5px}
+.auth-bk{font-size:11px;text-align:center;color:#888;cursor:pointer;margin-top:5px}
+.tabs{width:100%;display:flex;z-index:10;border-bottom:1px solid #ffffff1a}
+.tab{flex:1;padding:15px 5px;background:#ffffff08;color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;text-align:center;cursor:pointer;transition:all .3s;white-space:nowrap}
+.tab:first-child{border-radius:20px 0 0 0}.tab:last-child{border-radius:0 20px 0 0}
+.tab.active{background:#00d4ff26;color:#00d4ff;box-shadow:inset 0 -2px 0 #00d4ff}
+.glass{width:94%;height:calc(var(--fh) - 185px);margin:0 0 5px;background:#141414cc;border-radius:20px;border:1.5px solid #ffffff33;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px 0 #0000005e;flex-shrink:0;position:relative;transition:height .3s ease-out}
+.c-head{padding:15px;display:flex;justify-content:center;align-items:center;border-bottom:1px solid #ffffff1a;flex-shrink:0;min-height:45px;position:sticky;top:0;background:#00000033;z-index:10}
+.c-title{font-size:13px;color:#00d4ff;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;text-align:center;text-shadow:1px 1px 2px #000}
+#res{width:100%;display:flex;flex-direction:column;gap:10px;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;transition:opacity .3s,transform .3s}
+.btm-nav{position:fixed;top:calc(var(--fh) - 80px);left:3%;width:94%;height:70px;background:#00000099;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border:1.5px solid #ffffff26;border-radius:20px;display:flex;justify-content:space-around;align-items:center;padding:0 5px;box-shadow:0 10px 30px #00000080;z-index:100}
+.n-btn{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;text-decoration:none;cursor:pointer;transition:.2s;flex:1}
+.n-btn span{font-size:9px;font-weight:700;text-transform:uppercase;opacity:.8}
+.n-btn i{display:flex;align-items:center;justify-content:center;width:24px;height:24px;filter:drop-shadow(0 0 5px #00d4ff80)}
+.n-btn svg{width:100%;height:100%;fill:none;stroke:#00d4ff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.n-btn:active{transform:scale(.9);opacity:.6}
+.n-home{background:#00d4ff33;border:1px solid #00d4ff;width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;margin-top:-30px;box-shadow:0 0 15px #00d4ff66}
+.n-home svg{fill:#00d4ff;stroke:none;width:28px;height:28px}
+.fade{animation:f .4s ease-out forwards}@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{width:100%;background:#00000080;border-radius:12px;padding:8px;border:1px solid #ffffff1a;display:flex;align-items:center;gap:15px;transition:transform .2s;overflow:hidden;flex-shrink:0;position:relative}
+.card:active{transform:scale(.98)}
+.card img{width:50px;height:70px;object-fit:cover;border-radius:6px;display:block;flex-shrink:0;filter:brightness(.8)}
+.card div{font-size:14px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff;flex:1}
+.fav-btn{background:#333;color:#fff;border:1px solid #ffffff4d;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;margin-left:auto;flex-shrink:0;text-shadow:1px 1px 2px #000}
+.fav-act{color:#ff4b4b;border-color:#ff4b4b}
+.f-head{width:100%;padding:10px;border-bottom:1px solid #ffffff1a;position:sticky;top:0;background:0 0;z-index:5}
+.f-tool{display:flex;align-items:center;gap:5px;background:0 0;border:none;padding:4px}
+.f-grp{display:flex;gap:5px}
+.f-add,.f-del{width:32px;height:32px;border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;text-shadow:1px 1px 2px #000;font-size:16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:all .2s}
+.f-add{background:#00d4ff4d;border:1px solid #00d4ff66}.f-add:active{box-shadow:0 0 15px #00d4ffcc;background:#00d4ff99}
+.f-del{display:none;background:#ff4b4b4d;border:1px solid #ff4b4b66}.f-del:active{box-shadow:0 0 15px #ff4b4bcc;background:#ff4b4b99}
+.del-act{border:2px solid #fff;box-shadow:0 0 10px red}
+.nt-form{display:flex;flex-direction:column;gap:10px;padding:15px;background:#00000099;border-radius:10px;margin-bottom:10px;border:1px solid #ffffff1a}
+.nt-btn{background:#00d4ff;color:#000;padding:8px;border-radius:8px;border:none;font-weight:700}
+.t-card{background:#00000080;padding:12px;border-radius:10px;border:1px solid #ffffff1a;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.t-tit{font-size:14px;font-weight:700;color:#fff;text-shadow:1px 1px 2px #000}
+.t-sel{background:#00d4ff40;color:#fff;border:1px solid #00d4ff4d;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-shadow:1px 1px 2px #000;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:all .2s}
+.t-sel:active{background:#00d4ff80;box-shadow:0 0 10px #00d4ff66}
+.t-del{background:#ff4b4b;color:#fff;border:none;padding:5px 10px;border-radius:20px;font-size:10px;font-weight:700;text-shadow:1px 1px 2px #000}
+.chat-wrp{display:flex;flex-direction:column;height:100%;position:relative}
+.chat-c{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1;overflow-y:auto;padding-bottom:80px}
+.c-msg{background:#00000080;padding:8px 12px;border-radius:8px;border:1px solid #ffffff0d}
+.c-usr{font-size:10px;color:#00d4ff;margin-bottom:2px;font-weight:700}.c-txt{font-size:13px;color:#fff}.c-tm{font-size:9px;color:#aaa;text-align:right;margin-top:4px}
+.c-fix{position:fixed;bottom:0;left:3%;width:94%;background:#141414f2;backdrop-filter:blur(15px);z-index:200;padding:10px;display:flex;gap:10px;align-items:center;border-top:1px solid #ffffff33;border-radius:15px 15px 0 0}
+.c-snd{background:#00d4ff4d;border:1px solid #00d4ff66;color:#fff;width:40px;height:40px;border-radius:50%;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 15px #00d4ff33;transition:all .2s;flex-shrink:0}
+.c-snd:active{background:#00d4ff99}
+.p-view{padding:20px;display:flex;flex-direction:column;gap:15px;color:#fff;overflow-y:auto;flex:1;padding-bottom:300px}
+.p-row{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#00000080;border-radius:10px;border:1px solid #ffffff1a;flex-shrink:0}
+.p-lbl{color:#fff;font-size:13px}.p-val{color:#fff;font-weight:700;font-size:14px;text-shadow:1px 1px 2px #000}
+.p-inp{background:0 0;border:none;border-bottom:1px solid #00d4ff;color:#fff;text-align:right;font-weight:700;font-size:14px;outline:0;width:60%}
+.anon-btn{background:#00d4ff33;border:1px solid #00d4ff66;color:#fff;padding:8px 15px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:1px 1px 2px #000;transition:all .3s}
+.anon-act{background:#00d4ff99;border-color:#00d4ff}
+.sv-btn{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:#00d4ff;color:#000;font-weight:700;padding:12px 40px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 4px 15px #00d4ff4d;display:none;z-index:100}
+.sec-back{width:100%;padding:15px;background:#ff4b4b4d;color:#fff;border:1px solid #ff4b4b4d;font-weight:700;cursor:pointer;flex-shrink:0;font-size:12px;text-align:center;position:absolute;bottom:0;left:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 -4px 15px #ff4b4b1a;z-index:10}
+#plr{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:2000}
+#ifr{width:100%;height:100%;border:none}
+.cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
+</style>
 </head>
 <body onclick="hideMenu()">
-
-    <div id="bg-container"><div class="background-fixed"></div></div>
-
-    <div id="splash-screen">
-        <div id="loading-container">
-            <div class="progress-box">
-                <div id="perc">0%</div>
-                <div id="bar"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="main-content">
-        <div class="top-bar" id="top-search-bar">
-            <div class="search-box" onclick="event.stopPropagation()">
-                <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="handleTyping(this.value)">
-                <button class="search-btn" onclick="search(); closeKeyboard();">ПОИСК</button>
-                <button class="back-btn" id="main-back-btn" onclick="goHome();">НАЗАД</button>
-            </div>
-            <div class="menu-btn" onclick="event.stopPropagation(); toggleMenu()">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-
-        <div id="menu-overlay" onclick="event.stopPropagation()">
-            <div id="guest-menu">
-                <div class="menu-item" onclick="openAuth('login')">🔑 Вход</div>
-                <div class="menu-item" onclick="openAuth('reg')">📝 Регистрация</div>
-            </div>
-            
-            <div id="auth-form" class="auth-container">
-                <h4 id="auth-title" style="text-align:center; margin-bottom:5px; font-size:14px; text-shadow: 1px 1px 2px #000;">Вход</h4>
-                <input type="email" placeholder="Email" id="auth-email">
-                <input type="password" placeholder="Пароль" id="auth-pass">
-                <button id="auth-submit-btn" onclick="processAuth()" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Подтвердить</button>
-                <div class="auth-back" onclick="resetMenu()">← Назад</div>
-            </div>
-
-            <div id="user-menu" style="display:none">
-                <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">
-                    <svg viewBox="0 0 24 24" style="stroke:#ff4b4b"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    Выход
-                </div>
-            </div>
-        </div>
-        
-        <div class="glass-container" id="glass">
-            <div class="home-tabs" id="home-tabs-container">
-                <div class="tab-trigger active" id="tab-rec" onclick="switchHomeTab('recommendations')">Рекомендации</div>
-                <div class="tab-trigger" id="tab-new" onclick="switchHomeTab('new')">Новинки</div>
-                <div class="tab-trigger" id="tab-hist" onclick="switchHomeTab('history')">История</div>
-            </div>
-
-            <div class="container-header" id="container-header" style="display:none">
-                <div id="container-label" class="container-title">Рекомендации</div>
-            </div>
-
-            <div id="results"></div> 
-            
-            <button id="save-profile-btn" class="save-profile-btn" onclick="saveProfileChanges()">СОХРАНИТЬ</button>
-            <button id="global-back-btn" class="section-back-btn" style="display:none" onclick="goHome()">НАЗАД</button>
-        </div>
-
-        <div class="bottom-nav-bar" id="bottom-navigation">
-            <div class="nav-btn" onclick="openForum()">
-                <i><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></i>
-                <span>Форум</span>
-            </div>
-            <div class="nav-btn" onclick="openAllAnime()">
-                <i><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></i>
-                <span>Все</span>
-            </div>
-            <div class="nav-btn" onclick="goHome()">
-                <div class="nav-home-btn">
-                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
-                </div>
-            </div>
-            <div class="nav-btn" onclick="openProfile()">
-                <i><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></i>
-                <span>Профиль</span>
-            </div>
-            <div class="nav-btn" onclick="openFavorites()">
-                <i><svg viewBox="0 0 24 24" style="fill:#00d4ff; stroke:none;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg></i>
-                <span>Избранные</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="player-layer">
-        <button class="close-btn" onclick="closeVideo()">✕ ЗАКРЫТЬ</button>
-        <iframe id="player-iframe" allowfullscreen></iframe>
-    </div>
-
-    <script>
-        const _supabase = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
-
-        let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
-        let favorites = JSON.parse(localStorage.getItem('animeFavorites')) || [];
-        let forumTopics = []; 
-        let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
-            login: 'Пользователь', email: '', password: '', dob: '01.01.2000', nat: 'Планета Земля', isAnon: false
-        };
-
-        const ADMIN_ID = "663587165"; 
-        let isSearching = false;
-        let currentMode = 'recommendations'; 
-        let currentTopicId = null;
-        let searchTimeout;
-        let deleteMode = false;
-        let allAnimePage = 1;
-        let recPage = 1;
-        let newPage = 1;
-        let isLoadingAll = false;
-
-        window.addEventListener('load', () => { 
-            // ФИКСАЦИЯ ВЫСОТЫ: записываем реальную высоту при загрузке
-            const actualHeight = window.innerHeight;
-            document.documentElement.style.setProperty('--full-height', actualHeight + 'px');
-
-            loadHomeContent('recommendations'); 
-            const glass = document.getElementById('glass');
-            document.getElementById('bg-container').style.height = actualHeight + 'px';
-            
-            if(localStorage.getItem('illich_is_logged_in') === 'true') {
-                document.getElementById('guest-menu').style.display = 'none';
-                document.getElementById('user-menu').style.display = 'block';
-                loadProfileFromDB();
-            }
-
-            document.getElementById('results').addEventListener('scroll', function() {
-                if (!isLoadingAll) {
-                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 100) {
-                        if (currentMode === 'all-anime') loadAllAnime(true);
-                        else if (currentMode === 'recommendations') loadHomeContent('recommendations', true);
-                        else if (currentMode === 'new') loadHomeContent('new', true);
-                    }
-                }
-            });
-        });
-
-        async function loadProfileFromDB() {
-            if(!userProfile.email) return;
-            const { data } = await _supabase.from('profiles').select('*').eq('id', userProfile.email).single();
-            if(data) {
-                userProfile = data;
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            }
+<div id="bg-container"><div class="bg-fix"></div></div>
+<div id="splash"><div id="load-c"><div class="p-box"><div id="perc">0%</div><div id="bar"></div></div></div></div>
+<div id="main">
+<div class="top-bar" id="t-bar">
+<div class="s-box" onclick="event.stopPropagation()">
+<input type="text" id="sInp" placeholder="Поиск аниме..." oninput="hTyp(this.value)">
+<button class="btn" onclick="search();cKey();">ПОИСК</button>
+<button class="back-btn" id="m-back" onclick="goHome()">НАЗАД</button>
+</div>
+<div class="menu-btn" onclick="event.stopPropagation();tgMenu()"><span></span><span></span><span></span></div>
+</div>
+<div id="menu-ov" onclick="event.stopPropagation()">
+<div id="g-menu"><div class="m-item" onclick="opAuth('login')">🔑 Вход</div><div class="m-item" onclick="opAuth('reg')">📝 Регистрация</div></div>
+<div id="a-frm" class="auth-c">
+<h4 id="a-tit" style="text-align:center;margin-bottom:5px;font-size:14px;text-shadow:1px 1px 2px #000">Вход</h4>
+<input type="email" placeholder="Email" id="a-em"><input type="password" placeholder="Пароль" id="a-ps">
+<button id="a-sub" onclick="pAuth()" style="text-shadow:1px 1px 2px #00000080">Подтвердить</button>
+<div class="auth-bk" onclick="rstMenu()">← Назад</div>
+</div>
+<div id="u-menu" style="display:none">
+<div class="m-item" style="color:#ff4b4b;border-color:#ff4b4b66" onclick="logout()">
+<svg viewBox="0 0 24 24" style="stroke:#ff4b4b"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Выход</div>
+</div>
+</div>
+<div class="glass" id="glass">
+<div class="tabs" id="h-tabs">
+<div class="tab active" id="t-rec" onclick="swTab('recommendations')">Рекомендации</div>
+<div class="tab" id="t-new" onclick="swTab('new')">Новинки</div>
+<div class="tab" id="t-hst" onclick="swTab('history')">История</div>
+</div>
+<div class="c-head" id="c-head" style="display:none"><div id="c-lbl" class="c-title">Рекомендации</div></div>
+<div id="res"></div>
+<button id="sv-p-btn" class="sv-btn" onclick="svProf()">СОХРАНИТЬ</button>
+<button id="gl-back" class="sec-back" style="display:none" onclick="goHome()">НАЗАД</button>
+</div>
+<div class="btm-nav" id="b-nav">
+<div class="n-btn" onclick="opForum()"><i><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></i><span>Форум</span></div>
+<div class="n-btn" onclick="opAll()"><i><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></i><span>Все</span></div>
+<div class="n-btn" onclick="goHome()"><div class="n-home"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg></div></div>
+<div class="n-btn" onclick="opProf()"><i><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></i><span>Профиль</span></div>
+<div class="n-btn" onclick="opFav()"><i><svg viewBox="0 0 24 24" style="fill:#00d4ff;stroke:none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg></i><span>Избранные</span></div>
+</div>
+</div>
+<div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
+<script>
+const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
+const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
+let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
+uProf=J.parse(LS.getItem('userProfile'))||{login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
+const ADMIN="663587165";
+let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
+window.addEventListener('load',()=>{
+    document.documentElement.style.setProperty('--fh', window.innerHeight+'px');
+    loadHome('recommendations'); G('bg-container').style.height=window.innerHeight+'px';
+    if(LS.getItem('illich_is_logged_in')==='true'){G('g-menu').style.display='none';G('u-menu').style.display='block';ldProf();}
+    G('res').addEventListener('scroll',function(){
+        if(!ldAll && this.scrollTop+this.clientHeight>=this.scrollHeight-100){
+            if(cMode==='all-anime') ldAllAn(1);
+            else if(cMode==='recommendations') loadHome('recommendations',1);
+            else if(cMode==='new') loadHome('new',1);
         }
-
-        function applyFadeEffect() {
-            const res = document.getElementById('results');
-            res.classList.remove('fade-in');
-            void res.offsetWidth; 
-            res.classList.add('fade-in');
-        }
-
-        function toggleMenu() {
-            const m = document.getElementById('menu-overlay');
-            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
-        }
-        function hideMenu() { document.getElementById('menu-overlay').style.display = 'none'; }
-
-        function openAuth(mode) {
-            document.getElementById('guest-menu').style.display = 'none';
-            document.getElementById('auth-form').style.display = 'flex';
-            const title = document.getElementById('auth-title');
-            document.getElementById('auth-submit-btn').innerText = mode === 'login' ? 'Войти' : 'Создать';
-            title.innerText = mode === 'login' ? 'ВХОД' : 'РЕГИСТРАЦИЯ';
-        }
-
-        function resetMenu() {
-            document.getElementById('auth-form').style.display = 'none';
-            if(localStorage.getItem('illich_is_logged_in') === 'true') {
-                document.getElementById('user-menu').style.display = 'block';
-            } else {
-                document.getElementById('guest-menu').style.display = 'block';
-                document.getElementById('user-menu').style.display = 'none';
-            }
-        }
-
-        async function processAuth() {
-            const emailInp = document.getElementById('auth-email').value;
-            const passInp = document.getElementById('auth-pass').value;
-            if(emailInp) { userProfile.login = emailInp; userProfile.email = emailInp; }
-            if(passInp) userProfile.password = passInp;
-            
-            await _supabase.from('profiles').upsert({
-                id: userProfile.email,
-                login: userProfile.login,
-                email: userProfile.email,
-                password: userProfile.password,
-                dob: userProfile.dob,
-                nat: userProfile.nat,
-                is_anon: userProfile.isAnon
-            });
-
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            document.getElementById('auth-form').style.display = 'none';
-            document.getElementById('user-menu').style.display = 'block';
-            localStorage.setItem('illich_is_logged_in', 'true');
-        }
-
-        function logout() { 
-            localStorage.removeItem('illich_is_logged_in');
-            document.getElementById('user-menu').style.display = 'none';
-            document.getElementById('guest-menu').style.display = 'block';
-            document.getElementById('auth-form').style.display = 'none';
-            goHome();
-        }
-
-        function handleTyping(val) {
-            clearTimeout(searchTimeout);
-            const backBtn = document.getElementById('main-back-btn');
-            if(val.trim().length > 0) {
-                backBtn.style.display = 'block';
-                isSearching = true;
-                currentMode = 'search';
-                document.getElementById('home-tabs-container').style.display = 'none';
-                document.getElementById('container-header').style.display = 'flex';
-                document.getElementById('container-label').innerText = "Результаты поиска";
-                searchTimeout = setTimeout(() => search(), 300);
-            } else {
-                backBtn.style.none = 'none';
-                goHome();
-            }
-        }
-
-        function switchHomeTab(type) {
-            document.getElementById('tab-rec').classList.toggle('active', type === 'recommendations');
-            document.getElementById('tab-new').classList.toggle('active', type === 'new');
-            document.getElementById('tab-hist').classList.toggle('active', type === 'history');
-            if(type === 'recommendations') recPage = 1;
-            if(type === 'new') newPage = 1;
-            loadHomeContent(type);
-        }
-
-        function goHome() {
-            document.getElementById('main-back-btn').style.display = 'none';
-            // Используем var(--full-height)
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 185px)';
-            document.getElementById('save-profile-btn').style.display = 'none';
-            document.getElementById('top-search-bar').style.display = 'flex';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('home-tabs-container').style.display = 'flex';
-            document.getElementById('container-header').style.display = 'none';
-            if(currentMode === 'topic') { openForum(); return; }
-            
-            isSearching = false;
-            document.getElementById('sInp').value = '';
-            closeKeyboard();
-            switchHomeTab('recommendations');
-        }
-
-        async function loadHomeContent(type, append = false) {
-            currentMode = type;
-            const res = document.getElementById('results');
-            const label = document.getElementById('container-label');
-            
-            if (type === 'history') {
-                label.innerText = "История просмотров";
-                res.innerHTML = '';
-                if (history.length === 0) {
-                    res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Вы еще ничего не смотрели</p>';
-                } else {
-                    history.forEach(a => res.appendChild(createCard(a)));
-                }
-                applyFadeEffect();
-                return;
-            }
-
-            label.innerText = type === 'recommendations' ? "Рекомендации" : "Новинки";
-            if (!append) {
-                res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
-            } else {
-                isLoadingAll = true;
-            }
-            
-            let order = type === 'recommendations' ? 'popularity' : 'id';
-            let page = type === 'recommendations' ? recPage : newPage;
-
-            try {
-                const r = await fetch(`https://shikimori.one/api/animes?limit=20&order=${order}&page=${page}`);
-                const data = await r.json();
-                if (!append) res.innerHTML = '';
-                data.forEach(a => {
-                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
-                    res.appendChild(createCard(obj));
-                });
-                if (type === 'recommendations') recPage++; else newPage++;
-                if (!append) applyFadeEffect();
-            } catch(e) { 
-                if (!append) res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; 
-            }
-            isLoadingAll = false;
-        }
-
-        function createCard(a) {
-            const d = document.createElement('div');
-            d.className = 'card';
-            const isFav = favorites.some(f => String(f.id) === String(a.id));
-            const favIcon = isFav ? '❤️' : '🤍';
-            const favClass = isFav ? 'fav-active' : '';
-            d.innerHTML = `
-                <img src="${a.img}" onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">
-                <div onclick="play('${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${a.title}</div>
-                <button class="fav-btn-card ${favClass}" onclick="toggleFav(event, '${a.id}', '${a.title.replace(/'/g, "\\'")}', '${a.img}')">${favIcon}</button>
-            `;
-            return d;
-        }
-
-        async function search(query = null) {
-            const q = query || document.getElementById('sInp').value;
-            if(!q && !query) return;
-            const res = document.getElementById('results');
-            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
-            try {
-                const r = await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(q)}&limit=20`);
-                const data = await r.json();
-                res.innerHTML = '';
-                if(data.length === 0) { res.innerHTML = '<p style="text-align:center; padding:20px;">Не найдено</p>'; return; }
-                data.forEach(a => {
-                    const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
-                    res.appendChild(createCard(obj));
-                });
-                applyFadeEffect();
-            } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка</p>'; }
-        }
-
-        function isAuth() {
-            if(localStorage.getItem('illich_is_logged_in') !== 'true') {
-                alert("Раздел доступен только авторизованным пользователям.");
-                return false;
-            }
-            return true;
-        }
-
-        function openAllAnime() {
-            if(!isAuth()) return;
-            hideMenu();
-            currentMode = 'all-anime';
-            allAnimePage = 1;
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
-            document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('home-tabs-container').style.display = 'none';
-            document.getElementById('container-header').style.display = 'flex';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('container-label').innerText = "Все аниме";
-            const res = document.getElementById('results');
-            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка списка...</p>';
-            loadAllAnime();
-            applyFadeEffect();
-        }
-
-        async function loadAllAnime(append = false) {
-            if (isLoadingAll) return;
-            isLoadingAll = true;
-            try {
-                const r = await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity&page=${allAnimePage}`);
-                const data = await r.json();
-                const res = document.getElementById('results');
-                if (!append) res.innerHTML = '';
-                if (data.length > 0) {
-                    data.forEach(a => {
-                        const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
-                        res.appendChild(createCard(obj));
-                    });
-                    allAnimePage++;
-                }
-            } catch(e) {}
-            isLoadingAll = false;
-        }
-
-        function openFavorites() {
-            if(!isAuth()) return;
-            hideMenu();
-            currentMode = 'favorites';
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
-            document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('home-tabs-container').style.display = 'none';
-            document.getElementById('container-header').style.display = 'flex';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('container-label').innerText = "Избранные";
-            renderFavorites();
-            applyFadeEffect();
-        }
-
-        function renderFavorites() {
-            const res = document.getElementById('results');
-            res.innerHTML = '';
-            if(favorites.length === 0) { res.innerHTML = '<p style="text-align:center; padding:40px; opacity:0.3; font-size:12px;">Нет избранных</p>'; return; }
-            favorites.forEach(a => res.appendChild(createCard(a)));
-        }
-
-        function toggleFav(e, id, title, img) {
-            e.stopPropagation();
-            const index = favorites.findIndex(f => String(f.id) === String(id));
-            if(index > -1) {
-                favorites.splice(index, 1);
-                e.target.innerText = '🤍';
-                e.target.classList.remove('fav-active');
-                if(currentMode === 'favorites') renderFavorites();
-            } else {
-                favorites.unshift({ id, title, img });
-                e.target.innerText = '❤️';
-                e.target.classList.add('fav-active');
-            }
-            localStorage.setItem('animeFavorites', JSON.stringify(favorites));
-        }
-
-        function openProfile() {
-            if(!isAuth()) return;
-            hideMenu();
-            currentMode = 'profile';
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
-            document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('home-tabs-container').style.display = 'none';
-            document.getElementById('container-header').style.display = 'flex';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('container-label').innerText = "Профиль";
-            document.getElementById('save-profile-btn').style.display = 'none';
-            const res = document.getElementById('results');
-            const anonState = userProfile.isAnon ? 'Аноним' : 'Не аноним';
-            const anonClass = userProfile.isAnon ? 'anon-active' : '';
-
-            res.innerHTML = `
-                <div class="profile-view" id="profile-scroll-box">
-                    <div class="profile-row">
-                        <span class="profile-label">Логин</span>
-                        <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()">
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Email</span>
-                        <input type="email" id="edit-email" class="profile-input-edit" value="${userProfile.email}" oninput="showSaveBtn()">
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Дата рождения</span>
-                        <input type="text" id="edit-dob" class="profile-input-edit" value="${userProfile.dob}" oninput="showSaveBtn()">
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Национальность</span>
-                        <input type="text" id="edit-nat" class="profile-input-edit" value="${userProfile.nat}" oninput="showSaveBtn()">
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Пароль</span>
-                        <input type="password" id="edit-pass" class="profile-input-edit" value="${userProfile.password}" oninput="showSaveBtn()">
-                    </div>
-                    <div class="profile-row">
-                        <span class="profile-label">Режим форума</span>
-                        <button class="anon-toggle-btn ${anonClass}" onclick="toggleAnon()">${anonState}</button>
-                    </div>
-                </div>
-            `;
-            applyFadeEffect();
-        }
-
-        function showSaveBtn() { document.getElementById('save-profile-btn').style.display = 'block'; }
-
-        async function saveProfileChanges() {
-            userProfile.login = document.getElementById('edit-login').value;
-            userProfile.email = document.getElementById('edit-email').value;
-            userProfile.dob = document.getElementById('edit-dob').value;
-            userProfile.nat = document.getElementById('edit-nat').value;
-            userProfile.password = document.getElementById('edit-pass').value;
-            
-            await _supabase.from('profiles').upsert({
-                id: userProfile.email,
-                login: userProfile.login,
-                email: userProfile.email,
-                password: userProfile.password,
-                dob: userProfile.dob,
-                nat: userProfile.nat,
-                is_anon: userProfile.isAnon
-            });
-
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            document.getElementById('save-profile-btn').style.display = 'none';
-            alert("Профиль сохранен");
-        }
-
-        async function toggleAnon() {
-            userProfile.isAnon = !userProfile.isAnon;
-            await _supabase.from('profiles').upsert({ id: userProfile.email, is_anon: userProfile.isAnon });
-            localStorage.setItem('userProfile', JSON.stringify(userProfile));
-            openProfile();
-        }
-
-        async function openForum() {
-            if(!isAuth()) return;
-            hideMenu();
-            currentMode = 'forum';
-            deleteMode = false;
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
-            document.getElementById('top-search-bar').style.display = 'none';
-            document.getElementById('home-tabs-container').style.display = 'none';
-            document.getElementById('container-header').style.display = 'flex';
-            document.getElementById('global-back-btn').style.display = 'none';
-            document.getElementById('save-profile-btn').style.display = 'none';
-            document.getElementById('container-label').innerText = "Форум";
-            const res = document.getElementById('results');
-            const isAdmin = (userProfile.login === ADMIN_ID);
-            res.innerHTML = `
-                <div class="forum-header-bar">
-                    <div class="forum-toolbar">
-                        <input type="text" id="forum-s-inp" class="forum-search-input" placeholder="Поиск темы...">
-                        <div class="forum-btn-group">
-                             <div class="search-btn" style="padding: 0 10px; display:flex; align-items:center;" onclick="filterTopics(document.getElementById('forum-s-inp').value)">ПОИСК</div>
-                             <div class="forum-add-btn" onclick="toggleTopicForm()">+</div>
-                             <div class="forum-admin-del-btn" id="adm-del-btn" style="display:${isAdmin ? 'flex' : 'none'}" onclick="toggleDeleteMode()">-</div>
-                        </div>
-                    </div>
-                </div>
-                <div id="new-topic-area" style="display:none;"><div class="new-topic-form">
-                    <input type="text" id="new-topic-title" class="new-topic-input" placeholder="Название темы">
-                    <button class="new-topic-btn" onclick="createTopic()">Создать тему</button>
-                </div></div>
-                <div id="topics-list" style="padding:10px;"></div>
-            `;
-            
-            const { data } = await _supabase.from('forum_topics').select('*').order('created_at', { ascending: false });
-            forumTopics = data || [];
-            renderTopicsList();
-            applyFadeEffect();
-        }
-
-        function filterTopics(val) { renderTopicsList(val); }
-
-        function renderTopicsList(filter = '') {
-            const list = document.getElementById('topics-list');
-            list.innerHTML = '';
-            const filtered = forumTopics.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()));
-            filtered.forEach(t => {
-                const d = document.createElement('div');
-                d.className = 'topic-card';
-                d.innerHTML = `<span class="topic-title">${t.title}</span>` + 
-                    (deleteMode ? `<button class="topic-delete-btn" onclick="deleteTopic(${t.id})">🗑️</button>` : `<button class="topic-select-btn" onclick="openTopic(${t.id})">Выбрать</button>`);
-                list.appendChild(d);
-            });
-        }
-
-        async function openTopic(id) {
-            currentMode = 'topic';
-            currentTopicId = id;
-            document.getElementById('glass').style.height = 'calc(var(--full-height) - 120px)';
-            const topic = forumTopics.find(t => t.id === id);
-            document.getElementById('container-label').innerText = topic.title;
-            
-            const res = document.getElementById('results');
-            // Переработанная структура для фиксации инпута и кнопки назад
-            res.innerHTML = `
-                <div class="chat-view-wrapper">
-                    <div class="chat-container" id="chat-msgs"></div>
-                    
-                    <div class="chat-input-bar-fixed">
-                        <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
-                        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
-                    </div>
-
-                    <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
-                </div>`;
-            
-            const { data } = await _supabase.from('forum_messages').select('*').eq('topic_id', id).order('created_at', { ascending: true });
-            renderChatMessages(data || []);
-            applyFadeEffect();
-        }
-
-        function renderChatMessages(msgs) {
-            const container = document.getElementById('chat-msgs');
-            container.innerHTML = '';
-            msgs.forEach(m => {
-                const d = document.createElement('div');
-                d.className = 'chat-msg';
-                d.innerHTML = `<div class="chat-user">${m.user}</div><div class="chat-text">${m.text}</div><div class="chat-time">${m.time}</div>`;
-                container.appendChild(d);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function sendMessage() {
-            const txt = document.getElementById('chat-in').value;
-            if(!txt.trim()) return;
-            const now = new Date();
-            const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
-            const user = userProfile.isAnon ? 'Аноним' : userProfile.login;
-
-            await _supabase.from('forum_messages').insert({
-                topic_id: currentTopicId,
-                user: user,
-                text: txt,
-                time: timeStr
-            });
-
-            document.getElementById('chat-in').value = '';
-            openTopic(currentTopicId); 
-        }
-
-        function play(id, title, img) {
-            history = history.filter(item => String(item.id) !== String(id)); 
-            history.unshift({ id, title, img });
-            if(history.length > 20) history.pop(); 
-            localStorage.setItem('animeHistory', JSON.stringify(history));
-            document.getElementById('player-layer').style.display = 'block';
-            document.getElementById('player-iframe').src = `https://pizdec.pro/id/${id}`;
-        }
-
-        function closeVideo() { document.getElementById('player-layer').style.display = 'none'; document.getElementById('player-iframe').src = ''; }
-        function closeKeyboard() { document.getElementById('sInp').blur(); }
-        function toggleTopicForm() { const a = document.getElementById('new-topic-area'); a.style.display = a.style.display === 'none' ? 'block' : 'none'; }
-        
-        function toggleDeleteMode() { 
-            deleteMode = !deleteMode; 
-            document.getElementById('adm-del-btn').classList.toggle('del-mode-active'); 
-            renderTopicsList(); 
-        }
-        
-        async function deleteTopic(id) { 
-            await _supabase.from('forum_topics').delete().eq('id', id);
-            forumTopics = forumTopics.filter(t => t.id !== id); 
-            deleteMode = false;
-            document.getElementById('adm-del-btn').classList.remove('del-mode-active');
-            renderTopicsList(); 
-        }
-
-        async function createTopic() { 
-            const t = document.getElementById('new-topic-title').value; 
-            if(!t.trim()) return; 
-            await _supabase.from('forum_topics').insert({ title: t });
-            openForum(); 
-        }
-
-        let prog = 0;
-        let loadInt = setInterval(() => {
-            prog += 1;
-            if (prog >= 100) {
-                clearInterval(loadInt);
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                setTimeout(() => { 
-                    splash.style.display = 'none'; 
-                    const main = document.getElementById('main-content');
-                    main.style.display = 'flex';
-                    setTimeout(() => { main.style.opacity = '1'; }, 50);
-                }, 400);
-            }
-            document.getElementById('bar').style.width = prog + '%';
-            document.getElementById('perc').innerText = prog + '%';
-        }, 22);
-    </script>
+    });
+});
+async function ldProf(){
+    if(!uProf.email)return;
+    const{data}=await S.from('profiles').select('*').eq('id',uProf.email).single();
+    if(data){uProf=data;LS.setItem('userProfile',J.stringify(uProf));}
+}
+function fade(){const r=G('res');r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');}
+function tgMenu(){const m=G('menu-ov');m.style.display=(m.style.display==='block')?'none':'block';}
+function hideMenu(){G('menu-ov').style.display='none';}
+function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?'Войти':'Создать';G('a-tit').innerText=m==='login'?'ВХОД':'РЕГИСТРАЦИЯ';}
+function rstMenu(){G('a-frm').style.display='none';if(LS.getItem('illich_is_logged_in')==='true')G('u-menu').style.display='block';else{G('g-menu').style.display='block';G('u-menu').style.display='none';}}
+async function pAuth(){
+    const e=G('a-em').value, p=G('a-ps').value;
+    if(e){uProf.login=e;uProf.email=e;} if(p)uProf.password=p;
+    await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
+    LS.setItem('userProfile',J.stringify(uProf));G('a-frm').style.display='none';G('u-menu').style.display='block';LS.setItem('illich_is_logged_in','true');
+}
+function logout(){LS.removeItem('illich_is_logged_in');G('u-menu').style.display='none';G('g-menu').style.display='block';G('a-frm').style.display='none';goHome();}
+function hTyp(v){
+    clearTimeout(sTm);const b=G('m-back');
+    if(v.trim().length>0){b.style.display='block';isS=!0;cMode='search';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Результаты поиска";sTm=setTimeout(()=>search(),300);}
+    else{b.style.none='none';goHome();}
+}
+function swTab(t){
+    G('t-rec').classList.toggle('active',t==='recommendations');G('t-new').classList.toggle('active',t==='new');G('t-hst').classList.toggle('active',t==='history');
+    if(t==='recommendations')rPg=1;if(t==='new')nPg=1;loadHome(t);
+}
+function goHome(){
+    G('m-back').style.display='none';G('glass').style.height='calc(var(--fh) - 185px)';G('sv-p-btn').style.display='none';G('t-bar').style.display='flex';G('gl-back').style.display='none';G('h-tabs').style.display='flex';G('c-head').style.display='none';
+    if(cMode==='topic'){opForum();return;}
+    isS=!1;G('sInp').value='';cKey();swTab('recommendations');
+}
+async function loadHome(t,app=0){
+    cMode=t;const res=G('res'),lbl=G('c-lbl');
+    if(t==='history'){lbl.innerText="История просмотров";res.innerHTML='';if(!hist.length)res.innerHTML='<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">Вы еще ничего не смотрели</p>';else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
+    lbl.innerText=t==='recommendations'?"Рекомендации":"Новинки";
+    if(!app)res.innerHTML='<p style="text-align:center;padding:20px">Загрузка...</p>';else ldAll=!0;
+    let o=t==='recommendations'?'popularity':'id',p=t==='recommendations'?rPg:nPg;
+    try{
+        const r=await fetch(`https://shikimori.one/api/animes?limit=20&order=${o}&page=${p}`),data=await r.json();
+        if(!app)res.innerHTML='';data.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));
+        if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
+    }catch(e){if(!app)res.innerHTML='<p style="text-align:center;padding:20px">Ошибка сети</p>';}ldAll=!1;
+}
+function mkCard(a){
+    const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
+    d.className='card';
+    d.innerHTML=`<img src="${a.img}" onclick="play('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')"><div onclick="play('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    return d;
+}
+async function search(q=null){
+    const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
+    res.innerHTML='<p style="text-align:center;padding:20px">Загрузка...</p>';
+    try{const r=await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(v)}&limit=20`),d=await r.json();res.innerHTML='';if(!d.length){res.innerHTML='<p style="text-align:center;padding:20px">Не найдено</p>';return;}d.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));fade();}catch(e){res.innerHTML='<p style="text-align:center;padding:20px">Ошибка</p>';}
+}
+function isAu(){if(LS.getItem('illich_is_logged_in')!=='true'){alert("Раздел доступен только авторизованным пользователям.");return 0;}return 1;}
+function opAll(){
+    if(!isAu())return;hideMenu();cMode='all-anime';aPg=1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Все аниме";G('res').innerHTML='<p style="text-align:center;padding:20px">Загрузка списка...</p>';ldAllAn();fade();
+}
+async function ldAllAn(app=0){
+    if(ldAll)return;ldAll=!0;try{const r=await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity&page=${aPg}`),d=await r.json(),res=G('res');if(!app)res.innerHTML='';if(d.length){d.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));aPg++;}}catch(e){}ldAll=!1;
+}
+function opFav(){
+    if(!isAu())return;hideMenu();cMode='favorites';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Избранные";renFav();fade();
+}
+function renFav(){const r=G('res');r.innerHTML='';if(!fav.length){r.innerHTML='<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">Нет избранных</p>';return;}fav.forEach(a=>r.appendChild(mkCard(a)));}
+function tgFav(e,id,tit,img){e.stopPropagation();const i=fav.findIndex(f=>String(f.id)===String(id));if(i>-1){fav.splice(i,1);e.target.innerText='🤍';e.target.classList.remove('fav-act');if(cMode==='favorites')renFav();}else{fav.unshift({id,title:tit,img});e.target.innerText='❤️';e.target.classList.add('fav-act');}LS.setItem('animeFavorites',J.stringify(fav));}
+function opProf(){
+    if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Профиль";G('sv-p-btn').style.display='none';
+    const r=G('res'),an=uProf.isAnon?'Аноним':'Не аноним',ac=uProf.isAnon?'anon-act':'';
+    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">Логин</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Дата рождения</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Национальность</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Пароль</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Режим форума</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div></div>`;fade();
+}
+function shSv(){G('sv-p-btn').style.display='block';}
+async function svProf(){
+    uProf.login=G('e-log').value;uProf.email=G('e-em').value;uProf.dob=G('e-dob').value;uProf.nat=G('e-nat').value;uProf.password=G('e-ps').value;
+    await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
+    LS.setItem('userProfile',J.stringify(uProf));G('sv-p-btn').style.display='none';alert("Профиль сохранен");
+}
+async function tgAnon(){uProf.isAnon=!uProf.isAnon;await S.from('profiles').upsert({id:uProf.email,is_anon:uProf.isAnon});LS.setItem('userProfile',J.stringify(uProf));opProf();}
+async function opForum(){
+    if(!isAu())return;hideMenu();cMode='forum';delMode=!1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('sv-p-btn').style.display='none';G('c-lbl').innerText="Форум";
+    const r=G('res'),adm=(uProf.login===ADMIN);
+    r.innerHTML=`<div class="f-head"><div class="f-tool"><input type="text" id="f-s-inp" class="f-inp" placeholder="Поиск темы..."><div class="f-grp"><div class="btn" style="padding:0 10px;display:flex;align-items:center" onclick="fltTop(G('f-s-inp').value)">ПОИСК</div><div class="f-add" onclick="tgTopF()">+</div><div class="f-del" id="adm-del" style="display:${adm?'flex':'none'}" onclick="tgDel()">-</div></div></div></div><div id="nt-area" style="display:none"><div class="nt-form"><input type="text" id="nt-tit" class="new-top-inp" placeholder="Название темы"><button class="nt-btn" onclick="crTop()">Создать тему</button></div></div><div id="t-list" style="padding:10px"></div>`;
+    const{data}=await S.from('forum_topics').select('*').order('created_at',{ascending:!1});fTops=data||[];rnTop();fade();
+}
+function fltTop(v){rnTop(v);}
+function rnTop(f=''){
+    const l=G('t-list');l.innerHTML='';const fd=fTops.filter(t=>t.title.toLowerCase().includes(f.toLowerCase()));
+    fd.forEach(t=>{const d=document.createElement('div');d.className='t-card';d.innerHTML=`<span class="t-tit">${t.title}</span>`+(delMode?`<button class="t-del" onclick="delTop(${t.id})">🗑️</button>`:`<button class="t-sel" onclick="opTop(${t.id})">Выбрать</button>`);l.appendChild(d);});
+}
+async function opTop(id){
+    cMode='topic';cTId=id;G('glass').style.height='calc(var(--fh) - 120px)';
+    const t=fTops.find(x=>x.id===id);G('c-lbl').innerText=t.title;
+    G('res').innerHTML=`<div class="chat-wrp"><div class="chat-c" id="c-msgs"></div><div class="c-fix"><input type="text" id="chat-in" class="chat-inp" placeholder="Сообщение..."><button class="c-snd" onclick="sndMsg()">➤</button></div><button class="sec-back" onclick="opForum()">НАЗАД</button></div>`;
+    const{data}=await S.from('forum_messages').select('*').eq('topic_id',id).order('created_at',{ascending:!0});rnChat(data||[]);fade();
+}
+function rnChat(m){const c=G('c-msgs');c.innerHTML='';m.forEach(x=>{const d=document.createElement('div');d.className='c-msg';d.innerHTML=`<div class="c-usr">${x.user}</div><div class="c-txt">${x.text}</div><div class="c-tm">${x.time}</div>`;c.appendChild(d);});c.scrollTop=c.scrollHeight;}
+async function sndMsg(){
+    const tx=G('chat-in').value;if(!tx.trim())return;const n=new Date(),ts=n.toLocaleDateString()+' '+n.toLocaleTimeString().slice(0,5),usr=uProf.isAnon?'Аноним':uProf.login;
+    await S.from('forum_messages').insert({topic_id:cTId,user:usr,text:tx,time:ts});G('chat-in').value='';opTop(cTId);
+}
+function play(id,t,img){hist=hist.filter(i=>String(i.id)!==String(id));hist.unshift({id,title:t,img});if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));G('plr').style.display='block';G('ifr').src=`https://pizdec.pro/id/${id}`;}
+function clVid(){G('plr').style.display='none';G('ifr').src='';}
+function cKey(){G('sInp').blur();}
+function tgTopF(){const a=G('nt-area');a.style.display=a.style.display==='none'?'block':'none';}
+function tgDel(){delMode=!delMode;G('adm-del').classList.toggle('del-act');rnTop();}
+async function delTop(id){await S.from('forum_topics').delete().eq('id',id);fTops=fTops.filter(t=>t.id!==id);delMode=!1;G('adm-del').classList.remove('del-act');rnTop();}
+async function crTop(){const t=G('nt-tit').value;if(!t.trim())return;await S.from('forum_topics').insert({title:t});opForum();}
+let prg=0,lI=setInterval(()=>{
+    prg+=1;if(prg>=100){clearInterval(lI);const s=G('splash');s.style.opacity='0';setTimeout(()=>{s.style.display='none';const m=G('main');m.style.display='flex';setTimeout(()=>{m.style.opacity='1'},50)},400)}
+    G('bar').style.width=prg+'%';G('perc').innerText=prg+'%';
+},22);
+</script>
 </body>
 </html>
