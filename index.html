@@ -69,20 +69,20 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .t-sel{background:#00d4ff40;color:#fff;border:1px solid #00d4ff4d;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;text-shadow:1px 1px 2px #000;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:all .2s}
 .t-sel:active{background:#00d4ff80;box-shadow:0 0 10px #00d4ff66}
 .t-del{background:#ff4b4b;color:#fff;border:none;padding:5px 10px;border-radius:20px;font-size:10px;font-weight:700;text-shadow:1px 1px 2px #000}
-.chat-wrp{display:flex;flex-direction:column;height:100%;position:relative}
-.chat-c{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1;overflow-y:auto;padding-bottom:80px}
+.chat-wrp{display:flex;flex-direction:column;height:100%;position:relative;overflow:hidden}
+.chat-c{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1;overflow-y:auto;padding-bottom:120px}
 .c-msg{background:#00000080;padding:8px 12px;border-radius:8px;border:1px solid #ffffff0d}
 .c-usr{font-size:10px;color:#00d4ff;margin-bottom:2px;font-weight:700}.c-txt{font-size:13px;color:#fff}.c-tm{font-size:9px;color:#aaa;text-align:right;margin-top:4px}
-.c-fix{position:fixed;bottom:0;left:3%;width:94%;background:#141414f2;backdrop-filter:blur(15px);z-index:200;padding:10px;display:flex;gap:10px;align-items:center;border-top:1px solid #ffffff33;border-radius:15px 15px 0 0}
+.c-fix{position:absolute;bottom:50px;left:0;width:100%;background:#141414f2;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);z-index:200;padding:10px;display:flex;gap:10px;align-items:center;border-top:1px solid #ffffff33}
 .c-snd{background:#00d4ff4d;border:1px solid #00d4ff66;color:#fff;width:40px;height:40px;border-radius:50%;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 15px #00d4ff33;transition:all .2s;flex-shrink:0}
 .c-snd:active{background:#00d4ff99}
-.p-view{padding:20px;display:flex;flex-direction:column;gap:15px;color:#fff;overflow-y:auto;flex:1;padding-bottom:300px}
+.p-view{padding:20px;display:flex;flex-direction:column;gap:15px;color:#fff;overflow-y:auto;flex:1}
 .p-row{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#00000080;border-radius:10px;border:1px solid #ffffff1a;flex-shrink:0}
 .p-lbl{color:#fff;font-size:13px}.p-val{color:#fff;font-weight:700;font-size:14px;text-shadow:1px 1px 2px #000}
 .p-inp{background:0 0;border:none;border-bottom:1px solid #00d4ff;color:#fff;text-align:right;font-weight:700;font-size:14px;outline:0;width:60%}
 .anon-btn{background:#00d4ff33;border:1px solid #00d4ff66;color:#fff;padding:8px 15px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:1px 1px 2px #000;transition:all .3s}
 .anon-act{background:#00d4ff99;border-color:#00d4ff}
-.sv-btn{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:#00d4ff;color:#000;font-weight:700;padding:12px 40px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 4px 15px #00d4ff4d;display:none;z-index:100}
+.sv-btn{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);background:#00d4ff;color:#000;font-weight:700;padding:12px 40px;border-radius:30px;border:none;cursor:pointer;box-shadow:0 4px 15px #00d4ff4d;display:none;z-index:110}
 .sec-back{width:100%;padding:15px;background:#ff4b4b4d;color:#fff;border:1px solid #ff4b4b4d;font-weight:700;cursor:pointer;flex-shrink:0;font-size:12px;text-align:center;position:absolute;bottom:0;left:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 -4px 15px #ff4b4b1a;z-index:10}
 #plr{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:2000}
 #ifr{width:100%;height:100%;border:none}
@@ -138,13 +138,13 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
 let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
-uProf=J.parse(LS.getItem('userProfile'))||{login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
+uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
 let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
 window.addEventListener('load',()=>{
     document.documentElement.style.setProperty('--fh', window.innerHeight+'px');
     loadHome('recommendations'); G('bg-container').style.height=window.innerHeight+'px';
-    if(LS.getItem('illich_is_logged_in')==='true'){G('g-menu').style.display='none';G('u-menu').style.display='block';ldProf();}
+    if(LS.getItem('illich_is_logged_in')==='true'){G('g-menu').style.display='none';G('u-menu').style.display='block';ldProf(LS.getItem('user_email'));}
     G('res').addEventListener('scroll',function(){
         if(!ldAll && this.scrollTop+this.clientHeight>=this.scrollHeight-100){
             if(cMode==='all-anime') ldAllAn(1);
@@ -153,10 +153,10 @@ window.addEventListener('load',()=>{
         }
     });
 });
-async function ldProf(){
-    if(!uProf.email)return;
-    const{data}=await S.from('profiles').select('*').eq('id',uProf.email).single();
-    if(data){uProf=data;LS.setItem('userProfile',J.stringify(uProf));}
+async function ldProf(mail){
+    if(!mail)return;
+    const{data}=await S.from('profiles').select('*').eq('id',mail).single();
+    if(data){uProf=data;}
 }
 function fade(){const r=G('res');r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');}
 function tgMenu(){const m=G('menu-ov');m.style.display=(m.style.display==='block')?'none':'block';}
@@ -164,23 +164,24 @@ function hideMenu(){G('menu-ov').style.display='none';}
 function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?'Войти':'Создать';G('a-tit').innerText=m==='login'?'ВХОД':'РЕГИСТРАЦИЯ';}
 function rstMenu(){G('a-frm').style.display='none';if(LS.getItem('illich_is_logged_in')==='true')G('u-menu').style.display='block';else{G('g-menu').style.display='block';G('u-menu').style.display='none';}}
 async function pAuth(){
-    const e=G('a-em').value, p=G('a-ps').value;
-    if(e){uProf.login=e;uProf.email=e;} if(p)uProf.password=p;
-    await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
-    LS.setItem('userProfile',J.stringify(uProf));G('a-frm').style.display='none';G('u-menu').style.display='block';LS.setItem('illich_is_logged_in','true');
+    const e=G('a-em').value, p=G('a-ps').value; if(!e) return;
+    const {data}=await S.from('profiles').select('*').eq('id',e).single();
+    if(data){uProf=data;}else{uProf.login=e;uProf.email=e;uProf.password=p;}
+    await S.from('profiles').upsert({id:e,login:uProf.login,email:e,password:p,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
+    LS.setItem('user_email',e);LS.setItem('illich_is_logged_in','true');G('a-frm').style.display='none';G('u-menu').style.display='block';
 }
-function logout(){LS.removeItem('illich_is_logged_in');G('u-menu').style.display='none';G('g-menu').style.display='block';G('a-frm').style.display='none';goHome();}
+function logout(){LS.removeItem('illich_is_logged_in');LS.removeItem('user_email');G('u-menu').style.display='none';G('g-menu').style.display='block';G('a-frm').style.display='none';goHome();}
 function hTyp(v){
     clearTimeout(sTm);const b=G('m-back');
     if(v.trim().length>0){b.style.display='block';isS=!0;cMode='search';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Результаты поиска";sTm=setTimeout(()=>search(),300);}
-    else{b.style.none='none';goHome();}
+    else{b.style.display='none';goHome();}
 }
 function swTab(t){
     G('t-rec').classList.toggle('active',t==='recommendations');G('t-new').classList.toggle('active',t==='new');G('t-hst').classList.toggle('active',t==='history');
     if(t==='recommendations')rPg=1;if(t==='new')nPg=1;loadHome(t);
 }
 function goHome(){
-    G('m-back').style.display='none';G('glass').style.height='calc(var(--fh) - 185px)';G('sv-p-btn').style.display='none';G('t-bar').style.display='flex';G('gl-back').style.display='none';G('h-tabs').style.display='flex';G('c-head').style.display='none';
+    G('m-back').style.display='none';G('glass').style.height='calc(var(--fh) - 185px)';G('glass').style.overflow='hidden';G('sv-p-btn').style.display='none';G('t-bar').style.display='flex';G('gl-back').style.display='none';G('h-tabs').style.display='flex';G('c-head').style.display='none';
     if(cMode==='topic'){opForum();return;}
     isS=!1;G('sInp').value='';cKey();swTab('recommendations');
 }
@@ -222,22 +223,22 @@ function tgFav(e,id,tit,img){e.stopPropagation();const i=fav.findIndex(f=>String
 function opProf(){
     if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Профиль";G('sv-p-btn').style.display='none';
     const r=G('res'),an=uProf.isAnon?'Аноним':'Не аноним',ac=uProf.isAnon?'anon-act':'';
-    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">Логин</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Дата рождения</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Национальность</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Пароль</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" oninput="shSv()"></div><div class="p-row"><span class="p-lbl">Режим форума</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div></div>`;fade();
+    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">Логин</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" oninput="shSv()" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" oninput="shSv()" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Дата рождения</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" oninput="shSv()" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Национальность</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" oninput="shSv()" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Пароль</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" oninput="shSv()" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Режим форума</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><div style="height:100px"></div></div>`;fade();
 }
+function pScr(on){const g=G('glass');if(on){g.style.height='calc(var(--fh) - 250px)';g.style.overflowY='auto';}else{setTimeout(()=>{g.style.height='calc(var(--fh) - 120px)';g.style.overflow='hidden';},100);}}
 function shSv(){G('sv-p-btn').style.display='block';}
 async function svProf(){
     uProf.login=G('e-log').value;uProf.email=G('e-em').value;uProf.dob=G('e-dob').value;uProf.nat=G('e-nat').value;uProf.password=G('e-ps').value;
     await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
-    LS.setItem('userProfile',J.stringify(uProf));G('sv-p-btn').style.display='none';alert("Профиль сохранен");
+    G('sv-p-btn').style.display='none';alert("Профиль сохранен");
 }
-async function tgAnon(){uProf.isAnon=!uProf.isAnon;await S.from('profiles').upsert({id:uProf.email,is_anon:uProf.isAnon});LS.setItem('userProfile',J.stringify(uProf));opProf();}
+async function tgAnon(){uProf.isAnon=!uProf.isAnon;await S.from('profiles').upsert({id:uProf.email,is_anon:uProf.isAnon});opProf();}
 async function opForum(){
     if(!isAu())return;hideMenu();cMode='forum';delMode=!1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('sv-p-btn').style.display='none';G('c-lbl').innerText="Форум";
     const r=G('res'),adm=(uProf.login===ADMIN);
     r.innerHTML=`<div class="f-head"><div class="f-tool"><input type="text" id="f-s-inp" class="f-inp" placeholder="Поиск темы..."><div class="f-grp"><div class="btn" style="padding:0 10px;display:flex;align-items:center" onclick="fltTop(G('f-s-inp').value)">ПОИСК</div><div class="f-add" onclick="tgTopF()">+</div><div class="f-del" id="adm-del" style="display:${adm?'flex':'none'}" onclick="tgDel()">-</div></div></div></div><div id="nt-area" style="display:none"><div class="nt-form"><input type="text" id="nt-tit" class="new-top-inp" placeholder="Название темы"><button class="nt-btn" onclick="crTop()">Создать тему</button></div></div><div id="t-list" style="padding:10px"></div>`;
     const{data}=await S.from('forum_topics').select('*').order('created_at',{ascending:!1});fTops=data||[];rnTop();fade();
 }
-function fltTop(v){rnTop(v);}
 function rnTop(f=''){
     const l=G('t-list');l.innerHTML='';const fd=fTops.filter(t=>t.title.toLowerCase().includes(f.toLowerCase()));
     fd.forEach(t=>{const d=document.createElement('div');d.className='t-card';d.innerHTML=`<span class="t-tit">${t.title}</span>`+(delMode?`<button class="t-del" onclick="delTop(${t.id})">🗑️</button>`:`<button class="t-sel" onclick="opTop(${t.id})">Выбрать</button>`);l.appendChild(d);});
