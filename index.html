@@ -192,9 +192,9 @@
 
         .glass-container {
             width: 94%; 
-            height: 75vh; 
+            height: 68vh; 
             margin-top: 20px;
-            margin-bottom: 25px; 
+            margin-bottom: 15px; 
             background: rgba(0, 0, 0, 0.4); 
             border-radius: 20px;
             border: 1.5px solid rgba(255, 255, 255, 0.2); 
@@ -240,6 +240,52 @@
             -webkit-overflow-scrolling: touch; 
             flex: 1; 
             transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ */
+        .bottom-nav-bar {
+            width: 94%;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .nav-btn span { font-size: 9px; font-weight: bold; text-transform: uppercase; opacity: 0.8; }
+        .nav-btn i { font-style: normal; font-size: 18px; }
+        .nav-btn:active { transform: scale(0.9); opacity: 0.6; }
+
+        .nav-home-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -30px;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            font-size: 24px !important;
         }
 
         /* ЭФФЕКТ ПЕРЕХОДА */
@@ -550,6 +596,14 @@
             <button id="save-profile-btn" class="save-profile-btn" onclick="saveProfileChanges()">СОХРАНИТЬ</button>
             <button id="global-back-btn" class="section-back-btn" style="display:none" onclick="goHome()">НАЗАД</button>
         </div>
+
+        <div class="bottom-nav-bar" id="bottom-navigation">
+            <div class="nav-btn" onclick="openAllAnime()"><i>📺</i><span>Все</span></div>
+            <div class="nav-btn" onclick="openForum()"><i>💬</i><span>Форум</span></div>
+            <div class="nav-btn" onclick="goHome()"><i class="nav-home-btn">🏠</i></div>
+            <div class="nav-btn" onclick="openProfile()"><i>👤</i><span>Профиль</span></div>
+            <div class="nav-btn" onclick="openFavorites()"><i>⭐</i><span>Избранные</span></div>
+        </div>
     </div>
 
     <div id="player-layer">
@@ -685,7 +739,7 @@
 
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
-            document.getElementById('glass').style.height = '75vh';
+            document.getElementById('glass').style.height = '68vh';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
@@ -749,7 +803,7 @@
             hideMenu();
             currentMode = 'all-anime';
             allAnimePage = 1;
-            document.getElementById('glass').style.height = '85vh';
+            document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Все аниме";
@@ -781,7 +835,7 @@
         function openFavorites() {
             hideMenu();
             currentMode = 'favorites';
-            document.getElementById('glass').style.height = '85vh';
+            document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Избранные";
@@ -815,7 +869,7 @@
         function openProfile() {
             hideMenu();
             currentMode = 'profile';
-            document.getElementById('glass').style.height = '85vh';
+            document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('container-label').innerText = "Профиль";
@@ -891,7 +945,7 @@
             hideMenu();
             currentMode = 'forum';
             deleteMode = false;
-            document.getElementById('glass').style.height = '85vh';
+            document.getElementById('glass').style.height = '78vh';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('global-back-btn').style.display = 'block';
             document.getElementById('save-profile-btn').style.display = 'none';
