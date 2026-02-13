@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
     <title>Illich TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
@@ -557,11 +558,12 @@
     </div>
 
     <script>
+        // Инициализация Supabase
+        const _supabase = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
+
         let history = JSON.parse(localStorage.getItem('animeHistory')) || [];
         let favorites = JSON.parse(localStorage.getItem('animeFavorites')) || [];
-        let forumTopics = JSON.parse(localStorage.getItem('forumTopics')) || [
-            { id: 1, title: 'Правила форума', messages: [{user: 'Admin', text: 'Добро пожаловать! Будьте вежливы.', time: '12.02.2024 10:00'}] }
-        ];
+        let forumTopics = []; 
         let userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
             login: 'Пользователь', email: '', password: '', dob: '01.01.2000', nat: 'Планета Земля', isAnon: false
         };
@@ -583,6 +585,7 @@
             if(localStorage.getItem('illich_is_logged_in') === 'true') {
                 document.getElementById('guest-menu').style.display = 'none';
                 document.getElementById('user-menu').style.display = 'block';
+                loadProfileFromDB();
             }
 
             document.getElementById('results').addEventListener('scroll', function() {
@@ -594,10 +597,19 @@
             });
         });
 
+        async function loadProfileFromDB() {
+            if(!userProfile.email) return;
+            const { data } = await _supabase.from('profiles').select('*').eq('id', userProfile.email).single();
+            if(data) {
+                userProfile = data;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+        }
+
         function applyFadeEffect() {
             const res = document.getElementById('results');
             res.classList.remove('fade-in');
-            void res.offsetWidth; // Триггер рефлоу для перезапуска анимации
+            void res.offsetWidth; 
             res.classList.add('fade-in');
         }
 
@@ -621,15 +633,27 @@
                 document.getElementById('user-menu').style.display = 'block';
             } else {
                 document.getElementById('guest-menu').style.display = 'block';
-                document.getElementById('user-menu').style.display = 'none';
+                document.getElementById('user-menu').style.none = 'none';
             }
         }
 
-        function processAuth() {
+        async function processAuth() {
             const emailInp = document.getElementById('auth-email').value;
             const passInp = document.getElementById('auth-pass').value;
             if(emailInp) { userProfile.login = emailInp; userProfile.email = emailInp; }
             if(passInp) userProfile.password = passInp;
+            
+            // Сохранение в Supabase
+            await _supabase.from('profiles').upsert({
+                id: userProfile.email,
+                login: userProfile.login,
+                email: userProfile.email,
+                password: userProfile.password,
+                dob: userProfile.dob,
+                nat: userProfile.nat,
+                is_anon: userProfile.isAnon
+            });
+
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             document.getElementById('auth-form').style.display = 'none';
             document.getElementById('user-menu').style.display = 'block';
@@ -833,24 +857,37 @@
 
         function showSaveBtn() { document.getElementById('save-profile-btn').style.display = 'block'; }
 
-        function saveProfileChanges() {
+        async function saveProfileChanges() {
             userProfile.login = document.getElementById('edit-login').value;
             userProfile.email = document.getElementById('edit-email').value;
             userProfile.dob = document.getElementById('edit-dob').value;
             userProfile.nat = document.getElementById('edit-nat').value;
             userProfile.password = document.getElementById('edit-pass').value;
+            
+            // Сохранение в Supabase
+            await _supabase.from('profiles').upsert({
+                id: userProfile.email,
+                login: userProfile.login,
+                email: userProfile.email,
+                password: userProfile.password,
+                dob: userProfile.dob,
+                nat: userProfile.nat,
+                is_anon: userProfile.isAnon
+            });
+
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             document.getElementById('save-profile-btn').style.display = 'none';
             alert("Профиль сохранен");
         }
 
-        function toggleAnon() {
+        async function toggleAnon() {
             userProfile.isAnon = !userProfile.isAnon;
+            await _supabase.from('profiles').upsert({ id: userProfile.email, is_anon: userProfile.isAnon });
             localStorage.setItem('userProfile', JSON.stringify(userProfile));
             openProfile();
         }
 
-        function openForum() {
+        async function openForum() {
             hideMenu();
             currentMode = 'forum';
             deleteMode = false;
@@ -878,6 +915,10 @@
                 </div></div>
                 <div id="topics-list" style="padding:10px;"></div>
             `;
+            
+            // Загрузка тем из Supabase
+            const { data } = await _supabase.from('forum_topics').select('*').order('created_at', { ascending: false });
+            forumTopics = data || [];
             renderTopicsList();
             applyFadeEffect();
         }
@@ -897,7 +938,7 @@
             });
         }
 
-        function openTopic(id) {
+        async function openTopic(id) {
             currentMode = 'topic';
             currentTopicId = id;
             const topic = forumTopics.find(t => t.id === id);
@@ -916,14 +957,17 @@
                         <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
                     </div>
                 </div>`;
-            renderChatMessages(topic);
+            
+            // Загрузка сообщений из Supabase
+            const { data } = await _supabase.from('forum_messages').select('*').eq('topic_id', id).order('created_at', { ascending: true });
+            renderChatMessages(data || []);
             applyFadeEffect();
         }
 
-        function renderChatMessages(topic) {
+        function renderChatMessages(msgs) {
             const container = document.getElementById('chat-msgs');
             container.innerHTML = '';
-            topic.messages.forEach(m => {
+            msgs.forEach(m => {
                 const d = document.createElement('div');
                 d.className = 'chat-msg';
                 d.innerHTML = `<div class="chat-user">${m.user}</div><div class="chat-text">${m.text}</div><div class="chat-time">${m.time}</div>`;
@@ -932,15 +976,22 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function sendMessage() {
+        async function sendMessage() {
             const txt = document.getElementById('chat-in').value;
             if(!txt.trim()) return;
-            const topic = forumTopics.find(t => t.id === currentTopicId);
             const now = new Date();
-            topic.messages.push({ user: userProfile.isAnon ? 'Аноним' : userProfile.login, text: txt, time: now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5) });
-            localStorage.setItem('forumTopics', JSON.stringify(forumTopics));
+            const timeStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString().slice(0,5);
+            const user = userProfile.isAnon ? 'Аноним' : userProfile.login;
+
+            await _supabase.from('forum_messages').insert({
+                topic_id: currentTopicId,
+                user: user,
+                text: txt,
+                time: timeStr
+            });
+
             document.getElementById('chat-in').value = '';
-            renderChatMessages(topic);
+            openTopic(currentTopicId); // Перерендерим чат
         }
 
         function play(id, title, img) {
@@ -963,19 +1014,22 @@
             renderTopicsList(); 
         }
         
-        function deleteTopic(id) { 
+        async function deleteTopic(id) { 
+            await _supabase.from('forum_topics').delete().eq('id', id);
             forumTopics = forumTopics.filter(t => t.id !== id); 
-            localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); 
             deleteMode = false;
             document.getElementById('adm-del-btn').classList.remove('del-mode-active');
             renderTopicsList(); 
         }
 
-        function createTopic() { const t = document.getElementById('new-topic-title').value; if(!t.trim()) return; forumTopics.unshift({ id: Date.now(), title: t, messages: [] }); localStorage.setItem('forumTopics', JSON.stringify(forumTopics)); openForum(); }
+        async function createTopic() { 
+            const t = document.getElementById('new-topic-title').value; 
+            if(!t.trim()) return; 
+            await _supabase.from('forum_topics').insert({ title: t });
+            openForum(); 
+        }
 
-        // ЗАГРУЗКА ПРИЛОЖЕНИЯ 2.2 СЕКУНДЫ
         let prog = 0;
-        // 2200мс / 100 шагов = 22мс на 1%
         let loadInt = setInterval(() => {
             prog += 1;
             if (prog >= 100) {
