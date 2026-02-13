@@ -90,10 +90,9 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .info-desc{font-size:14px; line-height:1.4; color:#fff; padding:0 5px; margin-bottom: 20px;}
 .info-desc a {color: #fff !important; text-decoration: none !important; pointer-events: none;}
 .info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33; cursor: pointer;}
-.lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
 .mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-bottom: 80px;}
-.info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
-.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer;}
+.info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;}
+.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer; scroll-snap-align: start; flex-shrink: 0;}
 /* Overlay for full image view */
 #img-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;z-index:3000;justify-content:center;align-items:center;}
 #img-ov img{max-width:95%;max-height:90%;border-radius:10px;box-shadow:0 0 30px rgba(0,212,255,0.3);}
@@ -112,7 +111,6 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 <div class="menu-btn" onclick="event.stopPropagation();tgMenu()"><span></span><span></span><span></span></div>
 </div>
 <div id="menu-ov" onclick="event.stopPropagation()">
-<div class="lang-btn" onclick="toggleLang()">🌐 <span id="l-txt">RU</span></div>
 <div id="g-menu"><div class="m-item" id="m-login" onclick="opAuth('login')">🔑 Вход</div><div class="m-item" id="m-reg" onclick="opAuth('reg')">📝 Регистрация</div></div>
 <div id="a-frm" class="auth-c">
 <h4 id="a-tit" style="text-align:center;margin-bottom:5px;font-size:14px;text-shadow:1px 1px 2px #000">Вход</h4>
@@ -152,10 +150,14 @@ const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
 let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
-let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru';
+let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
 
 // IMAGE PROXY HELPER
-const imgP = (u, w) => u ? `https://wsrv.nl/?url=${encodeURIComponent(u.replace(/^https?:\/\//, ''))}${w ? '&w=' + w : ''}&output=webp` : '';
+const imgP = (u, w) => {
+    if(!u) return '';
+    const cleanUrl = u.replace(/^https?:\/\//, '');
+    return `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}${w ? '&w=' + w : ''}&output=webp&n=-1`;
+};
 
 function opImg(u){G('full-img').src=imgP(u);G('img-ov').style.display='flex';}
 
@@ -174,34 +176,18 @@ const LANG = {
         prof_ps: "Пароль", prof_mod: "Режим форума", prof_sv: "СОХРАНИТЬ",
         f_s_ph: "Поиск темы...", f_s_btn: "ПОИСК", f_nt_ph: "Название темы", f_nt_btn: "Создать тему",
         msg_ph: "Сообщение..."
-    },
-    uk: {
-        search_ph: "Пошук аніме...", search_btn: "ПОШУК", back: "НАЗАД",
-        login: "🔑 Вхід", reg: "📝 Реєстрація", exit: "Вихід",
-        tab_rec: "Рекомендації", tab_new: "Новинки", tab_hst: "Історія",
-        lbl_rec: "Рекомендації", lbl_new: "Новинки", lbl_hst: "Історія переглядів",
-        lbl_res: "Результати пошуку", lbl_all: "Всі аніме", lbl_fav: "Обрані",
-        lbl_prof: "Профіль", lbl_forum: "Форум", load: "Завантаження...", net_err: "Помилка мережі",
-        empty_hst: "Ви ще нічого не дивилися", not_found: "Не знайдено", err: "Помилка",
-        n_forum: "Форум", n_all: "Всі", n_prof: "Профіль", n_fav: "Обрані",
-        login_tit: "ВХІД", reg_tit: "РЕЄСТРАЦІЯ", btn_ent: "Увійти", btn_crt: "Створити",
-        bk: "← Назад", prof_log: "Логін", prof_dob: "Дата народження", prof_nat: "Національність",
-        prof_ps: "Пароль", prof_mod: "Режим форуму", prof_sv: "ЗБЕРЕГТИ",
-        f_s_ph: "Пошук теми...", f_s_btn: "ПОШУК", f_nt_ph: "Назва теми", f_nt_btn: "Створити тему",
-        msg_ph: "Повідомлення..."
     }
 };
 
-function toggleLang(){cLang=(cLang==='ru'?'uk':'ru');G('l-txt').innerText=cLang.toUpperCase();applyLang();if(cMode==='recommendations'||cMode==='new')loadHome(cMode);}
 function applyLang(){
-    const t=LANG[cLang];
+    const t=LANG.ru;
     G('sInp').placeholder=t.search_ph;G('btn-search').innerText=t.search_btn;G('m-back').innerText=t.back;G('gl-back').innerText=t.back;
     G('m-login').innerHTML=t.login;G('m-reg').innerHTML=t.reg;G('m-exit').innerText=t.exit;
     G('t-rec').innerText=t.tab_rec;G('t-new').innerText=t.tab_new;G('t-hst').innerText=t.tab_hst;
     G('n-forum').innerText=t.n_forum;G('n-all').innerText=t.n_all;G('n-prof').innerText=t.n_prof;G('n-fav').innerText=t.n_fav;
     G('a-back').innerText=t.bk;
 }
-function txt(k){return LANG[cLang][k];}
+function txt(k){return LANG.ru[k];}
 
 if(window.visualViewport){
     window.visualViewport.addEventListener('resize', () => {
@@ -234,7 +220,7 @@ async function ldProf(mail){
 function fade(){const r=G('res');r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');}
 function tgMenu(){const m=G('menu-ov');m.style.display=(m.style.display==='block')?'none':'block';}
 function hideMenu(){G('menu-ov').style.display='none';}
-function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?LANG[cLang].btn_ent:LANG[cLang].btn_crt;G('a-tit').innerText=m==='login'?LANG[cLang].login_tit:LANG[cLang].reg_tit;}
+function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?LANG.ru.btn_ent:LANG.ru.btn_crt;G('a-tit').innerText=m==='login'?LANG.ru.login_tit:LANG.ru.reg_tit;}
 function rstMenu(){G('a-frm').style.display='none';if(LS.getItem('illich_is_logged_in')==='true')G('u-menu').style.display='block';else{G('g-menu').style.display='block';G('u-menu').style.display='none';}}
 async function pAuth(){
     const e=G('a-em').value, p=G('a-ps').value; if(!e) return;
@@ -269,26 +255,28 @@ async function AL(q, v) {
 }
 
 async function loadHome(t,app=0){
-    cMode=t;const res=G('res'),lbl=G('c-lbl');
+    if(ldAll) return;
+    const res=G('res'),lbl=G('c-lbl');
+    cMode=t;
     if(t==='history'){lbl.innerText=txt('lbl_hst');res.innerHTML='';if(!hist.length)res.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
     lbl.innerText=t==='recommendations'?txt('lbl_rec'):txt('lbl_new');
-    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;else ldAll=!0;
+    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
     
+    ldAll=true;
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
     let filter = '';
-    if (t==='new') {
-        s='START_DATE_DESC';
-        filter = ', episodes_greater: 0, status_in: [RELEASING, FINISHED]';
-    }
+    if (t==='new') { s='START_DATE_DESC'; filter = ', episodes_greater: 0, status_in: [RELEASING, FINISHED]'; }
 
     const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME ${filter}) { id idMal title { romaji english } coverImage { large } } } }`;
     
     try{
         const d = await AL(Q, {p:p, s:s});
         const list = d.data.Page.media;
+        if(cMode !== t) { ldAll=false; return; }
         if(!app)res.innerHTML='';
         for(const a of list){
+            if(cMode !== t) break;
             let tit = a.title.romaji || a.title.english;
             if(a.idMal){
                 try{
@@ -299,13 +287,14 @@ async function loadHome(t,app=0){
             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
         }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
-    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}ldAll=!1;
+    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}
+    ldAll=false;
 }
 
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
-    d.innerHTML=`<img src="${imgP(a.img, 150)}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    d.innerHTML=`<img src="${imgP(a.img, 150)}" onclick="opInfo('${a.id}')" onerror="this.src='https://via.placeholder.com/50x70?text=?'"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
 
@@ -318,16 +307,17 @@ async function opInfo(id) {
     G('h-tabs').style.display='none';
     G('c-head').style.display='flex';
     G('gl-back').style.display='block';
-    G('c-lbl').innerText="Info";
+    G('c-lbl').innerText="Инфо";
     
     const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } } }`;
 
     try {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
+        if(cMode !== 'info') return;
         
         let finalTitle = a.title.romaji || a.title.english;
-        let finalDesc = a.description || "No description.";
+        let finalDesc = a.description || "Нет описания.";
         let screenshots = [];
 
         if (a.idMal) {
@@ -337,11 +327,10 @@ async function opInfo(id) {
                     const sD = await sR.json();
                     if (sD.russian) finalTitle = sD.russian;
                     if (sD.description_html) finalDesc = sD.description_html;
-                    
                     const scrR = await fetch(`https://shikimori.one/api/animes/${a.idMal}/screenshots`);
                     if(scrR.ok) screenshots = await scrR.json();
                 }
-            } catch (err) { console.log("Shiki error"); }
+            } catch (err) {}
         }
 
         hist=hist.filter(i=>String(i.id)!==String(id));
@@ -351,7 +340,7 @@ async function opInfo(id) {
         let galleryHtml = '';
         if(screenshots.length > 0){
             galleryHtml = '<div class="info-gallery">';
-            screenshots.slice(0, 8).forEach(s => {
+            screenshots.forEach(s => {
                 const sUrl = `https://shikimori.one${s.original}`;
                 galleryHtml += `<img src="${imgP(sUrl, 300)}" onclick="opImg('${sUrl}')">`;
             });
@@ -359,20 +348,19 @@ async function opInfo(id) {
         }
 
         const bnr = a.bannerImage || a.coverImage.extraLarge;
-
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
-                <img src="${imgP(bnr)}" class="info-img" onclick="opImg('${bnr}')">
+                <img src="${imgP(bnr)}" class="info-img" onclick="opImg('${bnr}')" onerror="this.src='https://via.placeholder.com/400x200?text=Photo'">
                 ${galleryHtml}
                 <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
                 <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700; margin-bottom:10px;">
-                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
+                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} эп.</span><span>📅 ${a.startDate.year || '?'}</span>
                 </div>
                 <div class="info-desc">${finalDesc}</div>
                 <div class="mini-player">
                     <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
-                <div style="height:20px"></div>
+                <div style="height:40px"></div>
             </div>
         `;
         res.scrollTop = 0;
@@ -387,6 +375,7 @@ async function search(q=null){
     try{
         const d = await AL(Q, {s:v});
         const list = d.data.Page.media;
+        if(cMode !== 'search') return;
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
@@ -413,16 +402,18 @@ async function ldAllAn(app=0){
     try{
         const d = await AL(Q, {p:aPg});
         const list = d.data.Page.media;
+        if(cMode !== 'all-anime') { ldAll=false; return; }
         const res=G('res');
         if(!app)res.innerHTML='';
         if(list.length){
             for(const a of list){
+                if(cMode !== 'all-anime') break;
                 let tit = a.title.romaji || a.title.english;
                 if(a.idMal){
-                    try{
+                    try {
                         const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
                         if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
-                    }catch(e){}
+                    } catch(e){}
                 }
                 res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}));
             }
