@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Illich TV</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -227,7 +227,7 @@
 
         .glass-container {
             width: 94%; 
-            /* Используем переменную высоты для стабильности */
+            /* Высота фиксирована через calc, чтобы не сжималась при открытии клавиатуры */
             height: calc(var(--full-height) - 185px); 
             margin-top: 0;
             margin-bottom: 5px; 
@@ -280,10 +280,9 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ТЕПЕРЬ ФИКСИРОВАНА ПО ВЕРХУ */
+        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ */
         .bottom-nav-bar {
             position: fixed;
-            /* Используем var(--full-height) чтобы координата не прыгала */
             top: calc(var(--full-height) - 80px);
             left: 3%;
             width: 94%;
@@ -488,12 +487,14 @@
 
         /* ЧАТ ТЕМЫ */
         .chat-view-wrapper {
-            display: flex; flex-direction: column; height: 100%; overflow: hidden;
+            display: flex; flex-direction: column; height: 100%; position: relative;
         }
         
         .chat-container {
             display: flex; flex-direction: column; gap: 8px; padding: 10px;
             flex: 1; overflow-y: auto; 
+            /* Отступ снизу для поля ввода */
+            padding-bottom: 80px; 
         }
         .chat-msg {
             background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 8px;
@@ -503,19 +504,19 @@
         .chat-text { font-size: 13px; color: #fff; }
         .chat-time { font-size: 9px; color: #aaa; text-align: right; margin-top: 4px; }
         
-        .chat-bottom-area {
-            flex-shrink: 0;
-            background: transparent; 
-            display: flex; flex-direction: column; 
-            z-index: 100;
-        }
-
-        .chat-input-bar { 
-            display: flex; gap: 10px; align-items: center; padding: 10px;
-            transition: transform 0.1s ease-out;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        /* Измененный стиль для строки ввода - фиксирован к вьюпорту */
+        .chat-input-bar-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 3%;
+            width: 94%;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 200;
+            padding: 10px;
+            display: flex; gap: 10px; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            border-radius: 15px 15px 0 0;
         }
 
         .chat-send-btn {
@@ -527,6 +528,7 @@
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
             transition: all 0.2s;
+            flex-shrink: 0;
         }
         .chat-send-btn:active { background: rgba(0, 212, 255, 0.6); }
 
@@ -534,6 +536,8 @@
         .profile-view {
             padding: 20px; display: flex; flex-direction: column; gap: 15px; color: #fff;
             overflow-y: auto; flex: 1;
+            /* Большой отступ снизу, чтобы можно было выскроллить контент над клавиатурой */
+            padding-bottom: 300px; 
         }
         .profile-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -576,10 +580,12 @@
             border: 1px solid rgba(255, 75, 75, 0.3); 
             font-weight: bold; cursor: pointer; flex-shrink: 0;
             font-size: 12px; text-align: center;
-            margin-top: auto; 
+            /* Позиционируем абсолютно внутри стеклянного контейнера, который сохраняет высоту */
+            position: absolute; bottom: 0; left: 0;
             backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
             box-shadow: 0 -4px 15px rgba(255, 75, 75, 0.1);
+            z-index: 10;
         }
 
         #player-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; z-index: 2000; }
@@ -726,34 +732,6 @@
                     }
                 }
             });
-
-            // ОБРАБОТКА ВИЗУАЛЬНОГО ВЬЮПОРТА (КЛАВИАТУРА)
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
-                    const vh = window.visualViewport.height;
-                    const fullH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--full-height'));
-                    const diff = fullH - vh;
-                    const glass = document.getElementById('glass');
-                    const chatInBar = document.getElementById('chat-input-container');
-
-                    if (diff > 100) { // Клавиатура открыта
-                        // Уменьшаем панель, чтобы внутри появился скролл
-                        glass.style.height = (vh - 120) + 'px';
-                        
-                        // Если в теме, поднимаем ввод сообщения
-                        if (currentMode === 'topic' && chatInBar) {
-                            chatInBar.style.transform = `translateY(-${diff - 80}px)`;
-                        }
-                    } else { // Клавиатура закрыта
-                        if (currentMode === 'recommendations' || currentMode === 'new' || currentMode === 'history' || currentMode === 'search') {
-                            glass.style.height = 'calc(var(--full-height) - 185px)';
-                        } else {
-                            glass.style.height = 'calc(var(--full-height) - 120px)';
-                        }
-                        if (chatInBar) chatInBar.style.transform = 'translateY(0)';
-                    }
-                });
-            }
         });
 
         async function loadProfileFromDB() {
@@ -1041,7 +1019,7 @@
             const anonClass = userProfile.isAnon ? 'anon-active' : '';
 
             res.innerHTML = `
-                <div class="profile-view" id="profile-scroll-box" style="overflow-y:auto; flex:1;">
+                <div class="profile-view" id="profile-scroll-box">
                     <div class="profile-row">
                         <span class="profile-label">Логин</span>
                         <input type="text" id="edit-login" class="profile-input-edit" value="${userProfile.login}" oninput="showSaveBtn()">
@@ -1163,16 +1141,17 @@
             document.getElementById('container-label').innerText = topic.title;
             
             const res = document.getElementById('results');
+            // Переработанная структура для фиксации инпута и кнопки назад
             res.innerHTML = `
                 <div class="chat-view-wrapper">
                     <div class="chat-container" id="chat-msgs"></div>
-                    <div class="chat-bottom-area">
-                        <div class="chat-input-bar" id="chat-input-container">
-                            <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
-                            <button class="chat-send-btn" onclick="sendMessage()">➤</button>
-                        </div>
-                        <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
+                    
+                    <div class="chat-input-bar-fixed">
+                        <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
+                        <button class="chat-send-btn" onclick="sendMessage()">➤</button>
                     </div>
+
+                    <button class="section-back-btn" onclick="openForum()">НАЗАД</button>
                 </div>`;
             
             const { data } = await _supabase.from('forum_messages').select('*').eq('topic_id', id).order('created_at', { ascending: true });
