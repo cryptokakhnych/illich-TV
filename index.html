@@ -222,10 +222,10 @@
 
         .glass-container {
             width: 94%; 
-            height: 78vh; 
+            height: calc(100vh - 170px); 
             margin-top: 0;
             margin-bottom: 15px; 
-            background: rgba(0, 0, 0, 0.4); 
+            background: rgba(20, 20, 20, 0.8); 
             border-radius: 20px;
             border: 1.5px solid rgba(255, 255, 255, 0.2); 
             overflow: hidden; 
@@ -235,8 +235,8 @@
             flex-shrink: 0;
             position: relative;
             transition: height 0.3s ease-out;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
 
         .container-header { 
@@ -811,7 +811,7 @@
 
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
-            document.getElementById('glass').style.height = '78vh';
+            document.getElementById('glass').style.height = 'calc(100vh - 170px)';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
@@ -913,7 +913,7 @@
             hideMenu();
             currentMode = 'all-anime';
             allAnimePage = 1;
-            document.getElementById('glass').style.height = '78vh';
+            document.getElementById('glass').style.height = 'calc(100vh - 170px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
@@ -948,7 +948,7 @@
             if(!isAuth()) return;
             hideMenu();
             currentMode = 'favorites';
-            document.getElementById('glass').style.height = '78vh';
+            document.getElementById('glass').style.height = 'calc(100vh - 170px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
@@ -985,7 +985,7 @@
             if(!isAuth()) return;
             hideMenu();
             currentMode = 'profile';
-            document.getElementById('glass').style.height = '78vh';
+            document.getElementById('glass').style.height = 'calc(100vh - 170px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
@@ -1063,7 +1063,7 @@
             hideMenu();
             currentMode = 'forum';
             deleteMode = false;
-            document.getElementById('glass').style.height = '78vh';
+            document.getElementById('glass').style.height = 'calc(100vh - 170px)';
             document.getElementById('top-search-bar').style.display = 'none';
             document.getElementById('home-tabs-container').style.display = 'none';
             document.getElementById('container-header').style.display = 'flex';
