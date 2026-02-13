@@ -181,6 +181,7 @@
             text-shadow: 1px 1px 2px #000; 
         }
         .menu-item:active { background: rgba(0, 212, 255, 0.1); border-color: #00d4ff; }
+        .menu-item svg { width: 20px; height: 20px; stroke: #00d4ff; fill: none; stroke-width: 2; }
 
         .auth-container { display: none; flex-direction: column; gap: 10px; padding: 5px 0; }
         
@@ -223,7 +224,7 @@
 
         .glass-container {
             width: 94%; 
-            height: 68vh; 
+            height: 62vh; 
             margin-top: 10px;
             margin-bottom: 15px; 
             background: rgba(0, 0, 0, 0.4); 
@@ -273,8 +274,11 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ */
+        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ТЕПЕРЬ ФИКСИРОВАННАЯ */
         .bottom-nav-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 3%;
             width: 94%;
             height: 70px;
             background: rgba(0, 0, 0, 0.6);
@@ -612,11 +616,10 @@
             </div>
 
             <div id="user-menu" style="display:none">
-                <div class="menu-item" onclick="openProfile()">👤 Профиль</div>
-                <div class="menu-item" onclick="openAllAnime()">📺 Все аниме</div>
-                <div class="menu-item" onclick="openFavorites()">⭐ Избранные</div>
-                <div class="menu-item" onclick="openForum()">💬 Форум</div>
-                <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">🚪 Выход</div>
+                <div class="menu-item" style="color:#ff4b4b; border-color: rgba(255, 75, 75, 0.4);" onclick="logout()">
+                    <svg viewBox="0 0 24 24" style="stroke:#ff4b4b"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Выход
+                </div>
             </div>
         </div>
 
@@ -683,6 +686,8 @@
         let searchTimeout;
         let deleteMode = false;
         let allAnimePage = 1;
+        let recPage = 1;
+        let newPage = 1;
         let isLoadingAll = false;
 
         window.addEventListener('load', () => { 
@@ -697,9 +702,11 @@
             }
 
             document.getElementById('results').addEventListener('scroll', function() {
-                if (currentMode === 'all-anime' && !isLoadingAll) {
-                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 50) {
-                        loadAllAnime(true);
+                if (!isLoadingAll) {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 100) {
+                        if (currentMode === 'all-anime') loadAllAnime(true);
+                        else if (currentMode === 'recommendations') loadHomeContent('recommendations', true);
+                        else if (currentMode === 'new') loadHomeContent('new', true);
                     }
                 }
             });
@@ -741,7 +748,7 @@
                 document.getElementById('user-menu').style.display = 'block';
             } else {
                 document.getElementById('guest-menu').style.display = 'block';
-                document.getElementById('user-menu').style.none = 'none';
+                document.getElementById('user-menu').style.display = 'none';
             }
         }
 
@@ -795,12 +802,14 @@
             document.getElementById('tab-rec').classList.toggle('active', type === 'recommendations');
             document.getElementById('tab-new').classList.toggle('active', type === 'new');
             document.getElementById('tab-hist').classList.toggle('active', type === 'history');
+            if(type === 'recommendations') recPage = 1;
+            if(type === 'new') newPage = 1;
             loadHomeContent(type);
         }
 
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
-            document.getElementById('glass').style.height = '68vh';
+            document.getElementById('glass').style.height = '62vh';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
@@ -813,7 +822,7 @@
             switchHomeTab('recommendations');
         }
 
-        async function loadHomeContent(type) {
+        async function loadHomeContent(type, append = false) {
             currentMode = type;
             const res = document.getElementById('results');
             const label = document.getElementById('container-label');
@@ -831,19 +840,29 @@
             }
 
             label.innerText = type === 'recommendations' ? "Рекомендации" : "Новинки";
-            res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
+            if (!append) {
+                res.innerHTML = '<p style="text-align:center; padding:20px;">Загрузка...</p>';
+            } else {
+                isLoadingAll = true;
+            }
             
             let order = type === 'recommendations' ? 'popularity' : 'id';
+            let page = type === 'recommendations' ? recPage : newPage;
+
             try {
-                const r = await fetch(`https://shikimori.one/api/animes?limit=20&order=${order}`);
+                const r = await fetch(`https://shikimori.one/api/animes?limit=20&order=${order}&page=${page}`);
                 const data = await r.json();
-                res.innerHTML = '';
+                if (!append) res.innerHTML = '';
                 data.forEach(a => {
                     const obj = { id: a.id, title: a.russian || a.name, img: `https://shikimori.one${a.image.preview}` };
                     res.appendChild(createCard(obj));
                 });
-                applyFadeEffect();
-            } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; }
+                if (type === 'recommendations') recPage++; else newPage++;
+                if (!append) applyFadeEffect();
+            } catch(e) { 
+                if (!append) res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка сети</p>'; 
+            }
+            isLoadingAll = false;
         }
 
         function createCard(a) {
