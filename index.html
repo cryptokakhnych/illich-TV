@@ -87,10 +87,11 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 #plr{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:2000}
 #ifr{width:100%;height:100%;border:none}
 .cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
-.info-desc{font-size:14px; line-height:1.4; color:#ccc; padding:0 5px; margin-bottom: 20px;}
+.info-desc{font-size:14px; line-height:1.4; color:#fff; padding:0 5px; margin-bottom: 20px;}
+.info-desc a {color: #fff !important; text-decoration: none !important; pointer-events: none;}
 .info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
 .lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
-.mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-top:10px;}
+.mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-bottom: 80px;}
 .info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
 .info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a;}
 </style>
@@ -265,18 +266,28 @@ async function loadHome(t,app=0){
     
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
-    if (t==='new') s='START_DATE_DESC';
+    let filter = '';
+    if (t==='new') {
+        s='START_DATE_DESC';
+        filter = ', episodes_greater: 0, status_in: [RELEASING, FINISHED]';
+    }
 
-    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME ${filter}) { id idMal title { romaji english } coverImage { large } } } }`;
     
     try{
         const d = await AL(Q, {p:p, s:s});
         const list = d.data.Page.media;
         if(!app)res.innerHTML='';
-        list.forEach(a=>{
-            const tit = a.title.english || a.title.romaji;
+        for(const a of list){
+            let tit = a.title.english || a.title.romaji;
+            if(a.idMal){
+                try{
+                    const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
+                    if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
+                }catch(e){}
+            }
             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
-        });
+        }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
     }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}ldAll=!1;
 }
@@ -292,9 +303,14 @@ async function opInfo(id) {
     cMode = 'info';
     const res = G('res');
     res.innerHTML = `<p style="text-align:center;padding:20px">${txt('load')}</p>`;
-    G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Info";
+    G('glass').style.height='calc(var(--fh) - 120px)';
+    G('t-bar').style.display='none';
+    G('h-tabs').style.display='none';
+    G('c-head').style.display='flex';
+    G('gl-back').style.display='block'; // Показываем закрепленную кнопку Назад
+    G('c-lbl').innerText="Info";
     
-    const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } characters(perPage: 10, sort: [ROLE, RELEVANCE]) { nodes { image { large } } } } }`;
+    const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } } }`;
 
     try {
         const d = await AL(Q, {id:id});
@@ -302,8 +318,8 @@ async function opInfo(id) {
         
         let finalTitle = a.title.english || a.title.romaji;
         let finalDesc = a.description || "No description.";
+        let screenshots = [];
 
-        // Попытка взять перевод с Shikimori через idMal
         if (a.idMal) {
             try {
                 const sR = await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
@@ -311,41 +327,42 @@ async function opInfo(id) {
                     const sD = await sR.json();
                     if (sD.russian) finalTitle = sD.russian;
                     if (sD.description_html) finalDesc = sD.description_html;
+                    
+                    const scrR = await fetch(`https://shikimori.one/api/animes/${a.idMal}/screenshots`);
+                    if(scrR.ok) screenshots = await scrR.json();
                 }
             } catch (err) { console.log("Shiki error"); }
         }
 
-        // История
         hist=hist.filter(i=>String(i.id)!==String(id));
         hist.unshift({id, title: finalTitle, img: a.coverImage.extraLarge});
         if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
 
-        // Галерея (персонажи/доп фото из Anilist)
         let galleryHtml = '';
-        if(a.characters && a.characters.nodes){
+        if(screenshots.length > 0){
             galleryHtml = '<div class="info-gallery">';
-            a.characters.nodes.forEach(c => {
-                galleryHtml += `<img src="${c.image.large}">`;
+            screenshots.slice(0, 8).forEach(s => {
+                galleryHtml += `<img src="https://shikimori.one${s.original}">`;
             });
             galleryHtml += '</div>';
         }
 
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
-                <img src="${a.coverImage.extraLarge}" class="info-img">
+                <img src="${a.bannerImage || a.coverImage.extraLarge}" class="info-img">
                 ${galleryHtml}
                 <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
-                <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700;">
+                <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700; margin-bottom:10px;">
                     <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
                 </div>
                 <div class="info-desc">${finalDesc}</div>
-                <div style="text-align:center; font-weight:700; color:#00d4ff; margin-bottom:5px;">${cLang==='ru'?'ПЛЕЕР':'ПЛЕЄР'}</div>
                 <div class="mini-player">
                     <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
-                <button class="btn" style="background:#333; margin-top:15px;" onclick="goHome()">${txt('back')}</button>
+                <div style="height:20px"></div>
             </div>
         `;
+        res.scrollTop = 0;
         fade();
     } catch(e) { res.innerHTML = `<p style="text-align:center;padding:20px">${txt('err')}</p>`; }
 }
@@ -353,16 +370,22 @@ async function opInfo(id) {
 async function search(q=null){
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
     res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
-    const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {s:v});
         const list = d.data.Page.media;
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
-        list.forEach(a=>{
-             const tit = a.title.english || a.title.romaji;
+        for(const a of list){
+             let tit = a.title.english || a.title.romaji;
+             if(a.idMal){
+                try{
+                    const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
+                    if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
+                }catch(e){}
+             }
              res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
-        });
+        }
         fade();
     }catch(e){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('err')}</p>`;}
 }
@@ -373,16 +396,25 @@ function opAll(){
 }
 async function ldAllAn(app=0){
     if(ldAll)return;ldAll=!0;
-    const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:aPg});
         const list = d.data.Page.media;
         const res=G('res');
         if(!app)res.innerHTML='';
-        if(list.length){list.forEach(a=>{
-             const tit = a.title.english || a.title.romaji;
-             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
-        });aPg++;}
+        if(list.length){
+            for(const a of list){
+                let tit = a.title.english || a.title.romaji;
+                if(a.idMal){
+                    try{
+                        const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
+                        if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
+                    }catch(e){}
+                }
+                res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}));
+            }
+            aPg++;
+        }
     }catch(e){}ldAll=!1;
 }
 
