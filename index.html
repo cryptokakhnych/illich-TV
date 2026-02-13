@@ -512,6 +512,10 @@
 
         .chat-input-bar { 
             display: flex; gap: 10px; align-items: center; padding: 10px;
+            transition: transform 0.1s ease-out;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .chat-send-btn {
@@ -722,6 +726,34 @@
                     }
                 }
             });
+
+            // ОБРАБОТКА ВИЗУАЛЬНОГО ВЬЮПОРТА (КЛАВИАТУРА)
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    const vh = window.visualViewport.height;
+                    const fullH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--full-height'));
+                    const diff = fullH - vh;
+                    const glass = document.getElementById('glass');
+                    const chatInBar = document.getElementById('chat-input-container');
+
+                    if (diff > 100) { // Клавиатура открыта
+                        // Уменьшаем панель, чтобы внутри появился скролл
+                        glass.style.height = (vh - 120) + 'px';
+                        
+                        // Если в теме, поднимаем ввод сообщения
+                        if (currentMode === 'topic' && chatInBar) {
+                            chatInBar.style.transform = `translateY(-${diff - 80}px)`;
+                        }
+                    } else { // Клавиатура закрыта
+                        if (currentMode === 'recommendations' || currentMode === 'new' || currentMode === 'history' || currentMode === 'search') {
+                            glass.style.height = 'calc(var(--full-height) - 185px)';
+                        } else {
+                            glass.style.height = 'calc(var(--full-height) - 120px)';
+                        }
+                        if (chatInBar) chatInBar.style.transform = 'translateY(0)';
+                    }
+                });
+            }
         });
 
         async function loadProfileFromDB() {
@@ -1135,7 +1167,7 @@
                 <div class="chat-view-wrapper">
                     <div class="chat-container" id="chat-msgs"></div>
                     <div class="chat-bottom-area">
-                        <div class="chat-input-bar">
+                        <div class="chat-input-bar" id="chat-input-container">
                             <input type="text" id="chat-in" class="chat-input" placeholder="Сообщение...">
                             <button class="chat-send-btn" onclick="sendMessage()">➤</button>
                         </div>
