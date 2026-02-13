@@ -13,7 +13,6 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 #bg-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:#000}
 .bg-fix{width:100%;height:100%;background:url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/100% 100% no-repeat;opacity:.6}
 
-/* Загрузочный экран */
 #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;transition:opacity .4s ease-out}
 #load-c{margin-bottom:80px;display:flex;flex-direction:column;align-items:center}
 .p-box{width:220px;height:22px;background:#00000099;border-radius:20px;overflow:hidden;border:1px solid #00d4ff66;position:relative;box-shadow:0 0 15px #00d4ff33}
@@ -21,14 +20,11 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 #bar{height:100%;background:#00d4ff;width:0%;transition: width 0.1s linear;}
 
 #main{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content: center; position:relative;opacity:0;transition:opacity .3s ease-in-out}
-
 .glass{width:94%;height:80vh;background:#141414cc;border-radius:20px;border:1.5px solid #ffffff33;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px 0 #0000005e;position:relative;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
 
 .search-header {padding: 20px; display: flex; gap: 10px; border-bottom: 1px solid #ffffff1a;}
 .search-header input {flex: 1; border: 1px solid #ffffff33; outline: 0; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #fff; background: #00000080; caret-color: #00d4ff;}
-.search-header input:focus {border-color: #00d4ff;}
 .btn-search {background: #00d4ff4d; color: #fff; border: 1px solid #00d4ff4d; padding: 0 25px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: all .2s; backdrop-filter: blur(10px);}
-.btn-search:active {background: #00d4ff80;}
 
 #res{width:100%;padding:15px;overflow-y:auto;flex:1; scroll-behavior: smooth;}
 .fade{animation:f .4s ease-out forwards}@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -39,10 +35,7 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 
 <div id="splash">
     <div id="load-c">
-        <div class="p-box">
-            <div id="perc">0%</div>
-            <div id="bar"></div>
-        </div>
+        <div class="p-box"><div id="perc">0%</div><div id="bar"></div></div>
     </div>
 </div>
 
@@ -61,102 +54,92 @@ const G = i => document.getElementById(i);
 let S = null;
 let AdController = null;
 
-// Безопасная инициализация библиотек
+// Инициализация библиотек
 function initLibraries() {
     try {
-        if (typeof supabase !== 'undefined') {
-            S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
-        }
+        S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
+        
         if (window.Adsgram) {
             AdController = window.Adsgram.init({ blockId: "int-22923" });
+            console.log("Adsgram инициализирован");
+        } else {
+            console.error("Adsgram SDK не найден");
         }
-    } catch (e) {
-        console.error("Ошибка при инициализации SDK:", e);
-    }
+    } catch (e) { console.error("Ошибка инициализации:", e); }
 }
 
-// Логика шкалы загрузки
+// Загрузочный экран
 let prg = 0;
 const lI = setInterval(() => {
-    prg += 2;
+    prg += 5; 
     G('bar').style.width = prg + '%';
     G('perc').innerText = prg + '%';
-
     if (prg >= 100) {
         clearInterval(lI);
-        initLibraries(); // Инициализируем только когда все готово
-        
-        const s = G('splash');
-        s.style.opacity = '0';
+        initLibraries();
+        G('splash').style.opacity = '0';
         setTimeout(() => {
-            s.style.display = 'none';
-            const m = G('main');
-            m.style.display = 'flex';
-            setTimeout(() => { m.style.opacity = '1' }, 50);
+            G('splash').style.display = 'none';
+            G('main').style.display = 'flex';
+            setTimeout(() => G('main').style.opacity = '1', 50);
         }, 400);
     }
-}, 30);
+}, 50);
 
-// Поиск с рекламой
 async function handleSearchWithAd() {
     const val = G('sInp').value.trim();
     if (!val) return;
 
-    // Если реклама доступна — показываем
+    const resCont = G('res');
+    resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Подготовка рекламы...</p>';
+
     if (AdController) {
         try {
+            console.log("Запуск показа рекламы...");
             await AdController.show();
+            console.log("Реклама просмотрена или закрыта");
         } catch (err) {
-            console.warn("Реклама не загружена или пропущена", err);
+            // Если рекламы нет (no_ads) или ошибка — просто пишем в консоль и идем дальше
+            console.warn("Реклама не была показана:", err.error || err);
         }
+    } else {
+        console.warn("Контроллер рекламы не готов");
     }
     
-    // В любом случае запускаем поиск
+    // Поиск запускается в любом случае после попытки показа рекламы
     performSearch(val);
 }
 
 async function performSearch(val) {
     if (!S) {
-        G('res').innerHTML = '<p style="text-align:center; color:red;">Ошибка: База данных недоступна</p>';
+        G('res').innerHTML = '<p style="text-align:center; color:red;">Ошибка базы данных</p>';
         return;
     }
-
-    const resCont = G('res');
-    resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Загрузка данных...</p>';
+    G('res').innerHTML = '<p style="text-align:center; opacity:0.5;">Ищем в базе...</p>';
     
     try {
         const { data, error } = await S.from('profiles').select('*').ilike('login', `%${val}%`);
-        resCont.innerHTML = '';
-        resCont.classList.add('fade');
+        G('res').innerHTML = '';
+        G('res').classList.add('fade');
 
         if (error) throw error;
-
         if (data && data.length > 0) {
             data.forEach(item => {
                 const div = document.createElement('div');
-                div.style.padding = '12px';
-                div.style.marginBottom = '8px';
-                div.style.background = '#ffffff10';
-                div.style.borderRadius = '10px';
-                div.style.border = '1px solid #ffffff1a';
-                div.innerText = item.login || 'Без имени';
-                resCont.appendChild(div);
+                div.style.cssText = 'padding:12px; margin-bottom:8px; background:#ffffff10; border-radius:10px; border:1px solid #ffffff1a;';
+                div.innerText = item.login || 'User';
+                G('res').appendChild(div);
             });
         } else {
-            resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Ничего не найдено</p>';
+            G('res').innerHTML = '<p style="text-align:center; opacity:0.5;">Ничего не найдено</p>';
         }
     } catch (err) {
-        resCont.innerHTML = '<p style="text-align:center; color:#ff4b4b;">Ошибка подключения к базе</p>';
+        G('res').innerHTML = '<p style="text-align:center; color:red;">Ошибка запроса</p>';
     }
 }
 
-// Блокировка Enter
-G('sInp').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        return false;
-    }
-});
+// Отключаем Enter
+G('sInp').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
 </script>
 </body>
 </html>
