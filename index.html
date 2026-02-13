@@ -224,7 +224,7 @@
 
         .glass-container {
             width: 94%; 
-            height: 62vh; 
+            height: 78vh; 
             margin-top: 10px;
             margin-bottom: 15px; 
             background: rgba(0, 0, 0, 0.4); 
@@ -274,7 +274,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ТЕПЕРЬ ФИКСИРОВАННАЯ */
+        /* КНОПОЧНАЯ ПАНЕЛЬ ВНИЗУ - ФИКСИРОВАННАЯ */
         .bottom-nav-bar {
             position: fixed;
             bottom: 15px;
@@ -809,7 +809,7 @@
 
         function goHome() {
             document.getElementById('main-back-btn').style.display = 'none';
-            document.getElementById('glass').style.height = '62vh';
+            document.getElementById('glass').style.height = '78vh';
             document.getElementById('save-profile-btn').style.display = 'none';
             document.getElementById('top-search-bar').style.display = 'flex';
             document.getElementById('global-back-btn').style.display = 'none';
@@ -897,11 +897,16 @@
             } catch(e) { res.innerHTML = '<p style="text-align:center; padding:20px;">Ошибка</p>'; }
         }
 
-        function openAllAnime() {
+        function isAuth() {
             if(localStorage.getItem('illich_is_logged_in') !== 'true') {
                 alert("Раздел доступен только авторизованным пользователям.");
-                return;
+                return false;
             }
+            return true;
+        }
+
+        function openAllAnime() {
+            if(!isAuth()) return;
             hideMenu();
             currentMode = 'all-anime';
             allAnimePage = 1;
@@ -936,6 +941,7 @@
         }
 
         function openFavorites() {
+            if(!isAuth()) return;
             hideMenu();
             currentMode = 'favorites';
             document.getElementById('glass').style.height = '78vh';
@@ -971,6 +977,7 @@
         }
 
         function openProfile() {
+            if(!isAuth()) return;
             hideMenu();
             currentMode = 'profile';
             document.getElementById('glass').style.height = '78vh';
@@ -1046,6 +1053,7 @@
         }
 
         async function openForum() {
+            if(!isAuth()) return;
             hideMenu();
             currentMode = 'forum';
             deleteMode = false;
