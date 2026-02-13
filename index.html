@@ -89,15 +89,11 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
 .info-desc{font-size:14px; line-height:1.4; color:#fff; padding:0 5px; margin-bottom: 20px;}
 .info-desc a {color: #fff !important; text-decoration: none !important; pointer-events: none;}
-.info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33; cursor: pointer;}
+.info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
+.lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
 .mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-bottom: 80px;}
-.info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory;}
-.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer; scroll-snap-align: start; flex-shrink: 0;}
-/* Overlay for full image view */
-#img-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;z-index:3000;justify-content:center;align-items:center;}
-#img-ov img{max-width:95%;max-height:90%;border-radius:10px;box-shadow:0 0 30px rgba(0,212,255,0.3); transition: transform 0.2s;}
-.ov-nav{position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,212,255,0.2); border:1px solid #00d4ff; color:#fff; width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; z-index:3100;}
-#ov-prev{left:20px;} #ov-next{right:20px;}
+.info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
+.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a;}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -113,6 +109,7 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 <div class="menu-btn" onclick="event.stopPropagation();tgMenu()"><span></span><span></span><span></span></div>
 </div>
 <div id="menu-ov" onclick="event.stopPropagation()">
+<div class="lang-btn" onclick="toggleLang()">🌐 <span id="l-txt">RU</span></div>
 <div id="g-menu"><div class="m-item" id="m-login" onclick="opAuth('login')">🔑 Вход</div><div class="m-item" id="m-reg" onclick="opAuth('reg')">📝 Регистрация</div></div>
 <div id="a-frm" class="auth-c">
 <h4 id="a-tit" style="text-align:center;margin-bottom:5px;font-size:14px;text-shadow:1px 1px 2px #000">Вход</h4>
@@ -144,45 +141,13 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 </div>
 </div>
 <div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
-
-<div id="img-ov" onclick="if(event.target===this)this.style.display='none'">
-    <div class="ov-nav" id="ov-prev" onclick="event.stopPropagation();navImg(-1)">❮</div>
-    <img id="full-img" src="">
-    <div class="ov-nav" id="ov-next" onclick="event.stopPropagation();navImg(1)">❯</div>
-</div>
-
 <script>
 const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
 let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
-let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
-let currentPhotos = [], currentPhotoIdx = 0;
-
-const imgP = (u, w) => {
-    if(!u) return '';
-    const cleanUrl = u.replace(/^https?:\/\//, '');
-    return `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}${w ? '&w=' + w : ''}&output=webp&n=-1`;
-};
-
-function opImg(u, gallery = []){
-    currentPhotos = gallery.length ? gallery : [u];
-    currentPhotoIdx = currentPhotos.indexOf(u);
-    if(currentPhotoIdx === -1) currentPhotoIdx = 0;
-    
-    G('full-img').src = imgP(currentPhotos[currentPhotoIdx]);
-    G('img-ov').style.display='flex';
-    G('ov-prev').style.display = currentPhotos.length > 1 ? 'flex' : 'none';
-    G('ov-next').style.display = currentPhotos.length > 1 ? 'flex' : 'none';
-}
-
-function navImg(dir){
-    currentPhotoIdx += dir;
-    if(currentPhotoIdx < 0) currentPhotoIdx = currentPhotos.length - 1;
-    if(currentPhotoIdx >= currentPhotos.length) currentPhotoIdx = 0;
-    G('full-img').src = imgP(currentPhotos[currentPhotoIdx]);
-}
+let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru';
 
 const LANG = {
     ru: {
@@ -199,18 +164,44 @@ const LANG = {
         prof_ps: "Пароль", prof_mod: "Режим форума", prof_sv: "СОХРАНИТЬ",
         f_s_ph: "Поиск темы...", f_s_btn: "ПОИСК", f_nt_ph: "Название темы", f_nt_btn: "Создать тему",
         msg_ph: "Сообщение..."
+    },
+    uk: {
+        search_ph: "Пошук аніме...", search_btn: "ПОШУК", back: "НАЗАД",
+        login: "🔑 Вхід", reg: "📝 Реєстрація", exit: "Вихід",
+        tab_rec: "Рекомендації", tab_new: "Новинки", tab_hst: "Історія",
+        lbl_rec: "Рекомендації", lbl_new: "Новинки", lbl_hst: "Історія переглядів",
+        lbl_res: "Результати пошуку", lbl_all: "Всі аніме", lbl_fav: "Обрані",
+        lbl_prof: "Профіль", lbl_forum: "Форум", load: "Завантаження...", net_err: "Помилка мережі",
+        empty_hst: "Ви ще нічого не дивилися", not_found: "Не знайдено", err: "Помилка",
+        n_forum: "Форум", n_all: "Всі", n_prof: "Профіль", n_fav: "Обрані",
+        login_tit: "ВХІД", reg_tit: "РЕЄСТРАЦІЯ", btn_ent: "Увійти", btn_crt: "Створити",
+        bk: "← Назад", prof_log: "Логін", prof_dob: "Дата народження", prof_nat: "Національність",
+        prof_ps: "Пароль", prof_mod: "Режим форуму", prof_sv: "ЗБЕРЕГТИ",
+        f_s_ph: "Пошук теми...", f_s_btn: "ПОШУК", f_nt_ph: "Назва теми", f_nt_btn: "Створити тему",
+        msg_ph: "Повідомлення..."
     }
 };
 
+function toggleLang(){cLang=(cLang==='ru'?'uk':'ru');G('l-txt').innerText=cLang.toUpperCase();applyLang();if(cMode==='recommendations'||cMode==='new')loadHome(cMode);}
 function applyLang(){
-    const t=LANG.ru;
+    const t=LANG[cLang];
     G('sInp').placeholder=t.search_ph;G('btn-search').innerText=t.search_btn;G('m-back').innerText=t.back;G('gl-back').innerText=t.back;
     G('m-login').innerHTML=t.login;G('m-reg').innerHTML=t.reg;G('m-exit').innerText=t.exit;
     G('t-rec').innerText=t.tab_rec;G('t-new').innerText=t.tab_new;G('t-hst').innerText=t.tab_hst;
     G('n-forum').innerText=t.n_forum;G('n-all').innerText=t.n_all;G('n-prof').innerText=t.n_prof;G('n-fav').innerText=t.n_fav;
     G('a-back').innerText=t.bk;
 }
-function txt(k){return LANG.ru[k];}
+function txt(k){return LANG[cLang][k];}
+
+if(window.visualViewport){
+    window.visualViewport.addEventListener('resize', () => {
+        const fix = document.querySelector('.c-fix');
+        if(fix) {
+            const kbHeight = window.innerHeight - window.visualViewport.height;
+            fix.style.bottom = (kbHeight > 50 ? kbHeight : 50) + 'px';
+        }
+    });
+}
 
 window.addEventListener('load',()=>{
     document.documentElement.style.setProperty('--fh', window.innerHeight+'px');
@@ -233,7 +224,7 @@ async function ldProf(mail){
 function fade(){const r=G('res');r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');}
 function tgMenu(){const m=G('menu-ov');m.style.display=(m.style.display==='block')?'none':'block';}
 function hideMenu(){G('menu-ov').style.display='none';}
-function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?LANG.ru.btn_ent:LANG.ru.btn_crt;G('a-tit').innerText=m==='login'?LANG.ru.login_tit:LANG.ru.reg_tit;}
+function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?LANG[cLang].btn_ent:LANG[cLang].btn_crt;G('a-tit').innerText=m==='login'?LANG[cLang].login_tit:LANG[cLang].reg_tit;}
 function rstMenu(){G('a-frm').style.display='none';if(LS.getItem('illich_is_logged_in')==='true')G('u-menu').style.display='block';else{G('g-menu').style.display='block';G('u-menu').style.display='none';}}
 async function pAuth(){
     const e=G('a-em').value, p=G('a-ps').value; if(!e) return;
@@ -268,52 +259,47 @@ async function AL(q, v) {
 }
 
 async function loadHome(t,app=0){
-    if(ldAll && !app) return;
-    const res=G('res'),lbl=G('c-lbl');
-    const thisMode = t;
-    cMode=t;
+    cMode=t;const res=G('res'),lbl=G('c-lbl');
     if(t==='history'){lbl.innerText=txt('lbl_hst');res.innerHTML='';if(!hist.length)res.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
     lbl.innerText=t==='recommendations'?txt('lbl_rec'):txt('lbl_new');
-    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
+    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;else ldAll=!0;
     
-    ldAll=true;
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
     let filter = '';
-    if (t==='new') { s='START_DATE_DESC'; filter = ', episodes_greater: 0, status_in: [RELEASING, FINISHED]'; }
+    if (t==='new') {
+        s='START_DATE_DESC';
+        filter = ', episodes_greater: 0, status_in: [RELEASING, FINISHED]';
+    }
 
     const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME ${filter}) { id idMal title { romaji english } coverImage { large } } } }`;
     
     try{
         const d = await AL(Q, {p:p, s:s});
         const list = d.data.Page.media;
-        if(cMode !== thisMode) { ldAll=false; return; }
         if(!app)res.innerHTML='';
         for(const a of list){
-            if(cMode !== thisMode) break;
-            let tit = a.title.romaji || a.title.english;
+            let tit = a.title.english || a.title.romaji;
             if(a.idMal){
                 try{
                     const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
                     if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
                 }catch(e){}
             }
-            if(cMode === thisMode) res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
+            res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
         }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
-    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}
-    ldAll=false;
+    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}ldAll=!1;
 }
 
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
-    d.innerHTML=`<img src="${imgP(a.img, 150)}" onclick="opInfo('${a.id}')" onerror="this.src='https://via.placeholder.com/50x70?text=?'"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
 
 async function opInfo(id) {
-    const thisMode = 'info';
     cMode = 'info';
     const res = G('res');
     res.innerHTML = `<p style="text-align:center;padding:20px">${txt('load')}</p>`;
@@ -321,18 +307,17 @@ async function opInfo(id) {
     G('t-bar').style.display='none';
     G('h-tabs').style.display='none';
     G('c-head').style.display='flex';
-    G('gl-back').style.display='block';
-    G('c-lbl').innerText="Инфо";
+    G('gl-back').style.display='block'; // Показываем закрепленную кнопку Назад
+    G('c-lbl').innerText="Info";
     
     const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } } }`;
 
     try {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
-        if(cMode !== thisMode) return;
         
-        let finalTitle = a.title.romaji || a.title.english;
-        let finalDesc = a.description || "Нет описания.";
+        let finalTitle = a.title.english || a.title.romaji;
+        let finalDesc = a.description || "No description.";
         let screenshots = [];
 
         if (a.idMal) {
@@ -342,10 +327,11 @@ async function opInfo(id) {
                     const sD = await sR.json();
                     if (sD.russian) finalTitle = sD.russian;
                     if (sD.description_html) finalDesc = sD.description_html;
+                    
                     const scrR = await fetch(`https://shikimori.one/api/animes/${a.idMal}/screenshots`);
                     if(scrR.ok) screenshots = await scrR.json();
                 }
-            } catch (err) {}
+            } catch (err) { console.log("Shiki error"); }
         }
 
         hist=hist.filter(i=>String(i.id)!==String(id));
@@ -353,30 +339,27 @@ async function opInfo(id) {
         if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
 
         let galleryHtml = '';
-        let photoUrls = [];
         if(screenshots.length > 0){
-            photoUrls = screenshots.map(s => `https://shikimori.one${s.original}`);
             galleryHtml = '<div class="info-gallery">';
-            photoUrls.forEach(u => {
-                galleryHtml += `<img src="${imgP(u, 300)}" onclick="opImg('${u}', ${JSON.stringify(photoUrls)})">`;
+            screenshots.slice(0, 8).forEach(s => {
+                galleryHtml += `<img src="https://shikimori.one${s.original}">`;
             });
             galleryHtml += '</div>';
         }
 
-        const bnr = a.bannerImage || a.coverImage.extraLarge;
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
-                <img src="${imgP(bnr)}" class="info-img" onclick="opImg('${bnr}')" onerror="this.src='https://via.placeholder.com/400x200?text=Photo'">
+                <img src="${a.bannerImage || a.coverImage.extraLarge}" class="info-img">
                 ${galleryHtml}
                 <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
                 <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700; margin-bottom:10px;">
-                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} эп.</span><span>📅 ${a.startDate.year || '?'}</span>
+                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
                 </div>
                 <div class="info-desc">${finalDesc}</div>
                 <div class="mini-player">
                     <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
                 </div>
-                <div style="height:40px"></div>
+                <div style="height:20px"></div>
             </div>
         `;
         res.scrollTop = 0;
@@ -385,20 +368,16 @@ async function opInfo(id) {
 }
 
 async function search(q=null){
-    const thisMode = 'search';
-    cMode = 'search';
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
     res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
     const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {s:v});
         const list = d.data.Page.media;
-        if(cMode !== thisMode) return;
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
-             if(cMode !== thisMode) break;
-             let tit = a.title.romaji || a.title.english;
+             let tit = a.title.english || a.title.romaji;
              if(a.idMal){
                 try{
                     const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
@@ -416,25 +395,21 @@ function opAll(){
     if(!isAu())return;hideMenu();cMode='all-anime';aPg=1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_all');G('res').innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;ldAllAn();fade();
 }
 async function ldAllAn(app=0){
-    if(ldAll && !app)return;
-    const thisMode = 'all-anime';
-    ldAll=!0;
+    if(ldAll)return;ldAll=!0;
     const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:aPg});
         const list = d.data.Page.media;
-        if(cMode !== thisMode) { ldAll=false; return; }
         const res=G('res');
         if(!app)res.innerHTML='';
         if(list.length){
             for(const a of list){
-                if(cMode !== thisMode) break;
-                let tit = a.title.romaji || a.title.english;
+                let tit = a.title.english || a.title.romaji;
                 if(a.idMal){
-                    try {
+                    try{
                         const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
                         if(sR.ok){const sD=await sR.json(); if(sD.russian) tit=sD.russian;}
-                    } catch(e){}
+                    }catch(e){}
                 }
                 res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}));
             }
@@ -452,8 +427,9 @@ function tgFav(e,id,tit,img){e.stopPropagation();const i=fav.findIndex(f=>String
 function opProf(){
     if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_prof');
     const r=G('res'),an=uProf.isAnon?'Аноним':'Не аноним',ac=uProf.isAnon?'anon-act':'';
-    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">${txt('prof_log')}</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}"></div><div class="p-row"><span class="p-lbl">${txt('prof_dob')}</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}"></div><div class="p-row"><span class="p-lbl">${txt('prof_nat')}</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}"></div><div class="p-row"><span class="p-lbl">${txt('prof_ps')}</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}"></div><div class="p-row"><span class="p-lbl">${txt('prof_mod')}</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">${txt('prof_sv')}</button><div style="height:100px"></div></div>`;fade();
+    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">${txt('prof_log')}</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_dob')}</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_nat')}</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_ps')}</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_mod')}</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">${txt('prof_sv')}</button><div style="height:100px"></div></div>`;fade();
 }
+function pScr(on){const g=G('glass');if(on){g.style.height='calc(var(--fh) - 250px)';g.style.overflowY='auto';}else{setTimeout(()=>{g.style.height='calc(var(--fh) - 120px)';g.style.overflow='hidden';},100);}}
 async function svProf(){
     uProf.login=G('e-log').value;uProf.email=G('e-em').value;uProf.dob=G('e-dob').value;uProf.nat=G('e-nat').value;uProf.password=G('e-ps').value;
     await S.from('profiles').upsert({id:uProf.email,login:uProf.login,email:uProf.email,password:uProf.password,dob:uProf.dob,nat:uProf.nat,is_anon:uProf.isAnon});
