@@ -89,11 +89,14 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
 .info-desc{font-size:14px; line-height:1.4; color:#fff; padding:0 5px; margin-bottom: 20px;}
 .info-desc a {color: #fff !important; text-decoration: none !important; pointer-events: none;}
-.info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
+.info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33; cursor: pointer;}
 .lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
 .mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-bottom: 80px;}
 .info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
-.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a;}
+.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a; cursor: pointer;}
+/* Overlay for full image view */
+#img-ov{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;z-index:3000;justify-content:center;align-items:center;}
+#img-ov img{max-width:95%;max-height:90%;border-radius:10px;box-shadow:0 0 30px rgba(0,212,255,0.3);}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -141,6 +144,8 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 </div>
 </div>
 <div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
+<div id="img-ov" onclick="this.style.display='none'"><img id="full-img" src=""></div>
+
 <script>
 const S=supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
@@ -148,6 +153,11 @@ let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeF
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
 let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru';
+
+// IMAGE PROXY HELPER
+const imgP = (u, w) => u ? `https://wsrv.nl/?url=${encodeURIComponent(u.replace(/^https?:\/\//, ''))}${w ? '&w=' + w : ''}&output=webp` : '';
+
+function opImg(u){G('full-img').src=imgP(u);G('img-ov').style.display='flex';}
 
 const LANG = {
     ru: {
@@ -279,7 +289,7 @@ async function loadHome(t,app=0){
         const list = d.data.Page.media;
         if(!app)res.innerHTML='';
         for(const a of list){
-            let tit = a.title.english || a.title.romaji;
+            let tit = a.title.romaji || a.title.english;
             if(a.idMal){
                 try{
                     const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
@@ -295,7 +305,7 @@ async function loadHome(t,app=0){
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
-    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    d.innerHTML=`<img src="${imgP(a.img, 150)}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
 
@@ -307,7 +317,7 @@ async function opInfo(id) {
     G('t-bar').style.display='none';
     G('h-tabs').style.display='none';
     G('c-head').style.display='flex';
-    G('gl-back').style.display='block'; // Показываем закрепленную кнопку Назад
+    G('gl-back').style.display='block';
     G('c-lbl').innerText="Info";
     
     const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } } }`;
@@ -316,7 +326,7 @@ async function opInfo(id) {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
         
-        let finalTitle = a.title.english || a.title.romaji;
+        let finalTitle = a.title.romaji || a.title.english;
         let finalDesc = a.description || "No description.";
         let screenshots = [];
 
@@ -342,14 +352,17 @@ async function opInfo(id) {
         if(screenshots.length > 0){
             galleryHtml = '<div class="info-gallery">';
             screenshots.slice(0, 8).forEach(s => {
-                galleryHtml += `<img src="https://shikimori.one${s.original}">`;
+                const sUrl = `https://shikimori.one${s.original}`;
+                galleryHtml += `<img src="${imgP(sUrl, 300)}" onclick="opImg('${sUrl}')">`;
             });
             galleryHtml += '</div>';
         }
 
+        const bnr = a.bannerImage || a.coverImage.extraLarge;
+
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
-                <img src="${a.bannerImage || a.coverImage.extraLarge}" class="info-img">
+                <img src="${imgP(bnr)}" class="info-img" onclick="opImg('${bnr}')">
                 ${galleryHtml}
                 <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
                 <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700; margin-bottom:10px;">
@@ -377,7 +390,7 @@ async function search(q=null){
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
-             let tit = a.title.english || a.title.romaji;
+             let tit = a.title.romaji || a.title.english;
              if(a.idMal){
                 try{
                     const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
@@ -404,7 +417,7 @@ async function ldAllAn(app=0){
         if(!app)res.innerHTML='';
         if(list.length){
             for(const a of list){
-                let tit = a.title.english || a.title.romaji;
+                let tit = a.title.romaji || a.title.english;
                 if(a.idMal){
                     try{
                         const sR=await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
