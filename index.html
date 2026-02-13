@@ -87,8 +87,10 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 #plr{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:2000}
 #ifr{width:100%;height:100%;border:none}
 .cls-btn{position:absolute;top:40px;right:20px;background:#ff4b4b;color:#fff;border:none;padding:10px 20px;border-radius:30px;font-weight:700;z-index:2100;box-shadow:0 5px 15px #00000080;text-shadow:1px 1px 2px #000}
-.info-desc{font-size:14px; line-height:1.4; color:#ccc; padding:0 5px;}
+.info-desc{font-size:14px; line-height:1.4; color:#ccc; padding:0 5px; margin-bottom: 20px;}
 .info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
+.lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
+.mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-top:10px;}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -98,22 +100,23 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 <div class="top-bar" id="t-bar">
 <div class="s-box" onclick="event.stopPropagation()">
 <input type="text" id="sInp" placeholder="Поиск аниме..." oninput="hTyp(this.value)">
-<button class="btn" style="padding:0 12px; font-size:11px;" onclick="search();cKey();">ПОИСК</button>
+<button class="btn" id="btn-search" style="padding:0 12px; font-size:11px;" onclick="search();cKey();">ПОИСК</button>
 <button class="back-btn" id="m-back" onclick="goHome()">НАЗАД</button>
 </div>
 <div class="menu-btn" onclick="event.stopPropagation();tgMenu()"><span></span><span></span><span></span></div>
 </div>
 <div id="menu-ov" onclick="event.stopPropagation()">
-<div id="g-menu"><div class="m-item" onclick="opAuth('login')">🔑 Вход</div><div class="m-item" onclick="opAuth('reg')">📝 Регистрация</div></div>
+<div class="lang-btn" onclick="toggleLang()">🌐 <span id="l-txt">RU</span></div>
+<div id="g-menu"><div class="m-item" id="m-login" onclick="opAuth('login')">🔑 Вход</div><div class="m-item" id="m-reg" onclick="opAuth('reg')">📝 Регистрация</div></div>
 <div id="a-frm" class="auth-c">
 <h4 id="a-tit" style="text-align:center;margin-bottom:5px;font-size:14px;text-shadow:1px 1px 2px #000">Вход</h4>
 <input type="email" placeholder="Email" id="a-em"><input type="password" placeholder="Пароль" id="a-ps">
 <button id="a-sub" onclick="pAuth()" style="text-shadow:1px 1px 2px #00000080">Подтвердить</button>
-<div class="auth-bk" onclick="rstMenu()">← Назад</div>
+<div class="auth-bk" id="a-back" onclick="rstMenu()">← Назад</div>
 </div>
 <div id="u-menu" style="display:none">
 <div class="m-item" style="color:#ff4b4b;border-color:#ff4b4b66" onclick="logout()">
-<svg viewBox="0 0 24 24" style="stroke:#ff4b4b"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>Выход</div>
+<svg viewBox="0 0 24 24" style="stroke:#ff4b4b"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg><span id="m-exit">Выход</span></div>
 </div>
 </div>
 <div class="glass" id="glass">
@@ -127,11 +130,11 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 <button id="gl-back" class="sec-back" style="display:none" onclick="goHome()">НАЗАД</button>
 </div>
 <div class="btm-nav" id="b-nav">
-<div class="n-btn" onclick="opForum()"><i><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></i><span>Форум</span></div>
-<div class="n-btn" onclick="opAll()"><i><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></i><span>Все</span></div>
+<div class="n-btn" onclick="opForum()"><i><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></i><span id="n-forum">Форум</span></div>
+<div class="n-btn" onclick="opAll()"><i><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg></i><span id="n-all">Все</span></div>
 <div class="n-btn" onclick="goHome()"><div class="n-home"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg></div></div>
-<div class="n-btn" onclick="opProf()"><i><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></i><span>Профиль</span></div>
-<div class="n-btn" onclick="opFav()"><i><svg viewBox="0 0 24 24" style="fill:#00d4ff;stroke:none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg></i><span>Избранные</span></div>
+<div class="n-btn" onclick="opProf()"><i><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></i><span id="n-prof">Профиль</span></div>
+<div class="n-btn" onclick="opFav()"><i><svg viewBox="0 0 24 24" style="fill:#00d4ff;stroke:none"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg></i><span id="n-fav">Избранные</span></div>
 </div>
 </div>
 <div id="plr"><button class="cls-btn" onclick="clVid()">✕ ЗАКРЫТЬ</button><iframe id="ifr" allowfullscreen></iframe></div>
@@ -141,16 +144,57 @@ const G=i=>document.getElementById(i), LS=localStorage, J=JSON;
 let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeFavorites'))||[], fTops=[], 
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
-let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1;
+let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru';
+
+const LANG = {
+    ru: {
+        search_ph: "Поиск аниме...", search_btn: "ПОИСК", back: "НАЗАД",
+        login: "🔑 Вход", reg: "📝 Регистрация", exit: "Выход",
+        tab_rec: "Рекомендации", tab_new: "Новинки", tab_hst: "История",
+        lbl_rec: "Рекомендации", lbl_new: "Новинки", lbl_hst: "История просмотров",
+        lbl_res: "Результаты поиска", lbl_all: "Все аниме", lbl_fav: "Избранные",
+        lbl_prof: "Профиль", lbl_forum: "Форум", load: "Загрузка...", net_err: "Ошибка сети",
+        empty_hst: "Вы еще ничего не смотрели", not_found: "Не найдено", err: "Ошибка",
+        n_forum: "Форум", n_all: "Все", n_prof: "Профиль", n_fav: "Избранные",
+        login_tit: "ВХОД", reg_tit: "РЕГИСТРАЦИЯ", btn_ent: "Войти", btn_crt: "Создать",
+        bk: "← Назад", prof_log: "Логин", prof_dob: "Дата рождения", prof_nat: "Национальность",
+        prof_ps: "Пароль", prof_mod: "Режим форума", prof_sv: "СОХРАНИТЬ",
+        f_s_ph: "Поиск темы...", f_s_btn: "ПОИСК", f_nt_ph: "Название темы", f_nt_btn: "Создать тему",
+        msg_ph: "Сообщение..."
+    },
+    uk: {
+        search_ph: "Пошук аніме...", search_btn: "ПОШУК", back: "НАЗАД",
+        login: "🔑 Вхід", reg: "📝 Реєстрація", exit: "Вихід",
+        tab_rec: "Рекомендації", tab_new: "Новинки", tab_hst: "Історія",
+        lbl_rec: "Рекомендації", lbl_new: "Новинки", lbl_hst: "Історія переглядів",
+        lbl_res: "Результати пошуку", lbl_all: "Всі аніме", lbl_fav: "Обрані",
+        lbl_prof: "Профіль", lbl_forum: "Форум", load: "Завантаження...", net_err: "Помилка мережі",
+        empty_hst: "Ви ще нічого не дивилися", not_found: "Не знайдено", err: "Помилка",
+        n_forum: "Форум", n_all: "Всі", n_prof: "Профіль", n_fav: "Обрані",
+        login_tit: "ВХІД", reg_tit: "РЕЄСТРАЦІЯ", btn_ent: "Увійти", btn_crt: "Створити",
+        bk: "← Назад", prof_log: "Логін", prof_dob: "Дата народження", prof_nat: "Національність",
+        prof_ps: "Пароль", prof_mod: "Режим форуму", prof_sv: "ЗБЕРЕГТИ",
+        f_s_ph: "Пошук теми...", f_s_btn: "ПОШУК", f_nt_ph: "Назва теми", f_nt_btn: "Створити тему",
+        msg_ph: "Повідомлення..."
+    }
+};
+
+function toggleLang(){cLang=(cLang==='ru'?'uk':'ru');G('l-txt').innerText=cLang.toUpperCase();applyLang();if(cMode==='recommendations'||cMode==='new')loadHome(cMode);}
+function applyLang(){
+    const t=LANG[cLang];
+    G('sInp').placeholder=t.search_ph;G('btn-search').innerText=t.search_btn;G('m-back').innerText=t.back;G('gl-back').innerText=t.back;
+    G('m-login').innerHTML=t.login;G('m-reg').innerHTML=t.reg;G('m-exit').innerText=t.exit;
+    G('t-rec').innerText=t.tab_rec;G('t-new').innerText=t.tab_new;G('t-hst').innerText=t.tab_hst;
+    G('n-forum').innerText=t.n_forum;G('n-all').innerText=t.n_all;G('n-prof').innerText=t.n_prof;G('n-fav').innerText=t.n_fav;
+    G('a-back').innerText=t.bk;
+}
+function txt(k){return LANG[cLang][k];}
 
 if(window.visualViewport){
     window.visualViewport.addEventListener('resize', () => {
         const fix = document.querySelector('.c-fix');
         if(fix) {
             const kbHeight = window.innerHeight - window.visualViewport.height;
-            // Устанавливаем положение в зависимости от высоты клавиатуры
-            // Если клавиатура есть (kbHeight > 50), ставим ее впритык к ней
-            // Если нет, возвращаем стандартные 50px (высота кнопки НАЗАД)
             fix.style.bottom = (kbHeight > 50 ? kbHeight : 50) + 'px';
         }
     });
@@ -158,6 +202,7 @@ if(window.visualViewport){
 
 window.addEventListener('load',()=>{
     document.documentElement.style.setProperty('--fh', window.innerHeight+'px');
+    applyLang();
     loadHome('recommendations'); G('bg-container').style.height=window.innerHeight+'px';
     if(LS.getItem('illich_is_logged_in')==='true'){G('g-menu').style.display='none';G('u-menu').style.display='block';ldProf(LS.getItem('user_email'));}
     G('res').addEventListener('scroll',function(){
@@ -176,7 +221,7 @@ async function ldProf(mail){
 function fade(){const r=G('res');r.classList.remove('fade');void r.offsetWidth;r.classList.add('fade');}
 function tgMenu(){const m=G('menu-ov');m.style.display=(m.style.display==='block')?'none':'block';}
 function hideMenu(){G('menu-ov').style.display='none';}
-function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?'Войти':'Создать';G('a-tit').innerText=m==='login'?'ВХОД':'РЕГИСТРАЦИЯ';}
+function opAuth(m){G('g-menu').style.display='none';G('a-frm').style.display='flex';G('a-sub').innerText=m==='login'?LANG[cLang].btn_ent:LANG[cLang].btn_crt;G('a-tit').innerText=m==='login'?LANG[cLang].login_tit:LANG[cLang].reg_tit;}
 function rstMenu(){G('a-frm').style.display='none';if(LS.getItem('illich_is_logged_in')==='true')G('u-menu').style.display='block';else{G('g-menu').style.display='block';G('u-menu').style.display='none';}}
 async function pAuth(){
     const e=G('a-em').value, p=G('a-ps').value; if(!e) return;
@@ -188,7 +233,7 @@ async function pAuth(){
 function logout(){LS.removeItem('illich_is_logged_in');LS.removeItem('user_email');G('u-menu').style.display='none';G('g-menu').style.display='block';G('a-frm').style.display='none';goHome();}
 function hTyp(v){
     clearTimeout(sTm);const b=G('m-back');
-    if(v.trim().length>0){b.style.display='block';isS=!0;cMode='search';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Результаты поиска";sTm=setTimeout(()=>search(),300);}
+    if(v.trim().length>0){b.style.display='block';isS=!0;cMode='search';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText=txt('lbl_res');sTm=setTimeout(()=>search(),300);}
     else{b.style.display='none';goHome();}
 }
 function swTab(t){
@@ -200,68 +245,132 @@ function goHome(){
     if(cMode==='topic'){opForum();return;}
     isS=!1;G('sInp').value='';cKey();swTab('recommendations');
 }
+
+// AniList Fetcher
+async function AL(q, v) {
+    const r = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ query: q, variables: v })
+    });
+    return await r.json();
+}
+
 async function loadHome(t,app=0){
     cMode=t;const res=G('res'),lbl=G('c-lbl');
-    if(t==='history'){lbl.innerText="История просмотров";res.innerHTML='';if(!hist.length)res.innerHTML='<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">Вы еще ничего не смотрели</p>';else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
-    lbl.innerText=t==='recommendations'?"Рекомендации":"Новинки";
-    if(!app)res.innerHTML='<p style="text-align:center;padding:20px">Загрузка...</p>';else ldAll=!0;
-    let o=t==='recommendations'?'popularity':'id',p=t==='recommendations'?rPg:nPg;
+    if(t==='history'){lbl.innerText=txt('lbl_hst');res.innerHTML='';if(!hist.length)res.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
+    lbl.innerText=t==='recommendations'?txt('lbl_rec'):txt('lbl_new');
+    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;else ldAll=!0;
+    
+    let p=t==='recommendations'?rPg:nPg;
+    let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
+    // Новинки также могут быть отсортированы по START_DATE_DESC
+    if (t==='new') s='START_DATE_DESC';
+
+    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME, status: RELEASING) { id title { romaji english } coverImage { large } } } }`;
+    const QRec = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    
     try{
-        const r=await fetch(`https://shikimori.one/api/animes?limit=20&order=${o}&page=${p}`),data=await r.json();
-        if(!app)res.innerHTML='';data.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));
+        const d = await AL(t==='recommendations'?QRec:Q, {p:p, s:s});
+        const list = d.data.Page.media;
+        if(!app)res.innerHTML='';
+        list.forEach(a=>{
+            const tit = a.title.english || a.title.romaji;
+            res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
+        });
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
-    }catch(e){if(!app)res.innerHTML='<p style="text-align:center;padding:20px">Ошибка сети</p>';}ldAll=!1;
+    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}ldAll=!1;
 }
+
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
     d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')"><div onclick="opInfo('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
+
 async function opInfo(id, title, img) {
+    // Добавляем в историю сразу при открытии
+    hist=hist.filter(i=>String(i.id)!==String(id));hist.unshift({id,title,img});if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
+
     cMode = 'info';
     const res = G('res');
-    res.innerHTML = '<p style="text-align:center;padding:20px">Загрузка данных...</p>';
-    G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="О аниме";
+    res.innerHTML = `<p style="text-align:center;padding:20px">${txt('load')}</p>`;
+    G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Info";
+    
+    const Q = `query ($id: Int) { Media(id: $id) { id title { romaji english } coverImage { extraLarge } description averageScore episodes startDate { year } } }`;
+
     try {
-        const r = await fetch(`https://shikimori.one/api/animes/${id}`);
-        const a = await r.json();
+        const d = await AL(Q, {id:id});
+        const a = d.data.Media;
+        const tit = a.title.english || a.title.romaji;
+        const desc = a.description || "No description.";
+        
         res.innerHTML = `
             <div style="padding:10px; display:flex; flex-direction:column; gap:15px;">
-                <img src="https://shikimori.one${a.image.original}" class="info-img">
-                <h2 style="color:#00d4ff; text-align:center;">${a.russian || a.name}</h2>
+                <img src="${a.coverImage.extraLarge}" class="info-img">
+                <h2 style="color:#00d4ff; text-align:center;">${tit}</h2>
                 <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700;">
-                    <span>⭐ ${a.score}</span><span>🎬 ${a.episodes} эп.</span><span>📅 ${a.aired_on.split('-')[0]}</span>
+                    <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
                 </div>
-                <div class="info-desc">${a.description || 'Описание отсутствует.'}</div>
-                <button class="btn" style="font-size:16px; margin-top:10px;" onclick="play('${id}','${title.replace(/'/g,"\\'")}','${img}')">СМОТРЕТЬ</button>
-                <button class="btn" style="background:#333; margin-top:5px;" onclick="goHome()">НАЗАД</button>
+                <div class="info-desc">${desc}</div>
+                <div style="text-align:center; font-weight:700; color:#00d4ff; margin-bottom:5px;">${cLang==='ru'?'ПЛЕЕР':'ПЛЕЄР'}</div>
+                <div class="mini-player">
+                    <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+                </div>
+                <button class="btn" style="background:#333; margin-top:15px;" onclick="goHome()">${txt('back')}</button>
             </div>
         `;
         fade();
-    } catch(e) { res.innerHTML = '<p style="text-align:center;padding:20px">Ошибка загрузки</p>'; }
+    } catch(e) { res.innerHTML = `<p style="text-align:center;padding:20px">${txt('err')}</p>`; }
 }
+
 async function search(q=null){
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
-    res.innerHTML='<p style="text-align:center;padding:20px">Загрузка...</p>';
-    try{const r=await fetch(`https://shikimori.one/api/animes?search=${encodeURIComponent(v)}&limit=20`),d=await r.json();res.innerHTML='';if(!d.length){res.innerHTML='<p style="text-align:center;padding:20px">Не найдено</p>';return;}d.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));fade();}catch(e){res.innerHTML='<p style="text-align:center;padding:20px">Ошибка</p>';}
+    res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
+    const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    try{
+        const d = await AL(Q, {s:v});
+        const list = d.data.Page.media;
+        res.innerHTML='';
+        if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
+        list.forEach(a=>{
+             const tit = a.title.english || a.title.romaji;
+             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
+        });
+        fade();
+    }catch(e){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('err')}</p>`;}
 }
+
 function isAu(){if(LS.getItem('illich_is_logged_in')!=='true'){alert("Раздел доступен только авторизованным пользователям.");return 0;}return 1;}
 function opAll(){
-    if(!isAu())return;hideMenu();cMode='all-anime';aPg=1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Все аниме";G('res').innerHTML='<p style="text-align:center;padding:20px">Загрузка списка...</p>';ldAllAn();fade();
+    if(!isAu())return;hideMenu();cMode='all-anime';aPg=1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_all');G('res').innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;ldAllAn();fade();
 }
 async function ldAllAn(app=0){
-    if(ldAll)return;ldAll=!0;try{const r=await fetch(`https://shikimori.one/api/animes?limit=50&order=popularity&page=${aPg}`),d=await r.json(),res=G('res');if(!app)res.innerHTML='';if(d.length){d.forEach(a=>res.appendChild(mkCard({id:a.id,title:a.russian||a.name,img:`https://shikimori.one${a.image.preview}`})));aPg++;}}catch(e){}ldAll=!1;
+    if(ldAll)return;ldAll=!0;
+    const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    try{
+        const d = await AL(Q, {p:aPg});
+        const list = d.data.Page.media;
+        const res=G('res');
+        if(!app)res.innerHTML='';
+        if(list.length){list.forEach(a=>{
+             const tit = a.title.english || a.title.romaji;
+             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
+        });aPg++;}
+    }catch(e){}ldAll=!1;
 }
+
 function opFav(){
-    if(!isAu())return;hideMenu();cMode='favorites';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Избранные";renFav();fade();
+    if(!isAu())return;hideMenu();cMode='favorites';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_fav');renFav();fade();
 }
-function renFav(){const r=G('res');r.innerHTML='';if(!fav.length){r.innerHTML='<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">Нет избранных</p>';return;}fav.forEach(a=>r.appendChild(mkCard(a)));}
+function renFav(){const r=G('res');r.innerHTML='';if(!fav.length){r.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;return;}fav.forEach(a=>r.appendChild(mkCard(a)));}
 function tgFav(e,id,tit,img){e.stopPropagation();const i=fav.findIndex(f=>String(f.id)===String(id));if(i>-1){fav.splice(i,1);e.target.innerText='🤍';e.target.classList.remove('fav-act');if(cMode==='favorites')renFav();}else{fav.unshift({id,title:tit,img});e.target.innerText='❤️';e.target.classList.add('fav-act');}LS.setItem('animeFavorites',J.stringify(fav));}
+
 function opProf(){
-    if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Профиль";
+    if(!isAu())return;hideMenu();cMode='profile';G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_prof');
     const r=G('res'),an=uProf.isAnon?'Аноним':'Не аноним',ac=uProf.isAnon?'anon-act':'';
-    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">Логин</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Дата рождения</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Национальность</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Пароль</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Режим форума</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">СОХРАНИТЬ</button><div style="height:100px"></div></div>`;fade();
+    r.innerHTML=`<div class="p-view"><div class="p-row"><span class="p-lbl">${txt('prof_log')}</span><input type="text" id="e-log" class="p-inp" value="${uProf.login}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">Email</span><input type="email" id="e-em" class="p-inp" value="${uProf.email}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_dob')}</span><input type="text" id="e-dob" class="p-inp" value="${uProf.dob}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_nat')}</span><input type="text" id="e-nat" class="p-inp" value="${uProf.nat}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_ps')}</span><input type="password" id="e-ps" class="p-inp" value="${uProf.password}" onfocus="pScr(1)" onblur="pScr(0)"></div><div class="p-row"><span class="p-lbl">${txt('prof_mod')}</span><button class="anon-btn ${ac}" onclick="tgAnon()">${an}</button></div><button id="sv-p-btn" class="sv-btn" onclick="svProf()">${txt('prof_sv')}</button><div style="height:100px"></div></div>`;fade();
 }
 function pScr(on){const g=G('glass');if(on){g.style.height='calc(var(--fh) - 250px)';g.style.overflowY='auto';}else{setTimeout(()=>{g.style.height='calc(var(--fh) - 120px)';g.style.overflow='hidden';},100);}}
 async function svProf(){
@@ -271,9 +380,9 @@ async function svProf(){
 }
 async function tgAnon(){uProf.isAnon=!uProf.isAnon;await S.from('profiles').upsert({id:uProf.email,is_anon:uProf.isAnon});opProf();}
 async function opForum(){
-    if(!isAu())return;hideMenu();cMode='forum';delMode=!1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText="Форум";
+    if(!isAu())return;hideMenu();cMode='forum';delMode=!1;G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('gl-back').style.display='none';G('c-lbl').innerText=txt('lbl_forum');
     const r=G('res'),adm=(uProf.login===ADMIN);
-    r.innerHTML=`<div class="f-head"><div class="f-tool"><input type="text" id="f-s-inp" class="f-inp" placeholder="Поиск темы..."><div class="f-grp"><div class="btn" style="padding:0 10px;display:flex;align-items:center" onclick="fltTop(G('f-s-inp').value)">ПОИСК</div><div class="f-add" onclick="tgTopF()">+</div><div class="f-del" id="adm-del" style="display:${adm?'flex':'none'}" onclick="tgDel()">-</div></div></div></div><div id="nt-area" style="display:none"><div class="nt-form"><input type="text" id="nt-tit" class="new-top-inp" placeholder="Название темы"><button class="nt-btn" onclick="crTop()">Создать тему</button></div></div><div id="t-list" style="padding:10px"></div>`;
+    r.innerHTML=`<div class="f-head"><div class="f-tool"><input type="text" id="f-s-inp" class="f-inp" placeholder="${txt('f_s_ph')}"><div class="f-grp"><div class="btn" style="padding:0 10px;display:flex;align-items:center" onclick="fltTop(G('f-s-inp').value)">${txt('f_s_btn')}</div><div class="f-add" onclick="tgTopF()">+</div><div class="f-del" id="adm-del" style="display:${adm?'flex':'none'}" onclick="tgDel()">-</div></div></div></div><div id="nt-area" style="display:none"><div class="nt-form"><input type="text" id="nt-tit" class="new-top-inp" placeholder="${txt('f_nt_ph')}"><button class="nt-btn" onclick="crTop()">${txt('f_nt_btn')}</button></div></div><div id="t-list" style="padding:10px"></div>`;
     const{data}=await S.from('forum_topics').select('*').order('created_at',{ascending:!1});fTops=data||[];rnTop();fade();
 }
 function rnTop(f=''){
@@ -283,7 +392,7 @@ function rnTop(f=''){
 async function opTop(id){
     cMode='topic';cTId=id;G('glass').style.height='calc(var(--fh) - 120px)';
     const t=fTops.find(x=>x.id===id);G('c-lbl').innerText=t.title;
-    G('res').innerHTML=`<div class="chat-wrp"><div class="chat-c" id="c-msgs"></div><div class="c-fix"><input type="text" id="chat-in" class="chat-inp" placeholder="Сообщение..."><button class="c-snd" onclick="sndMsg()">➤</button></div><button class="sec-back" onclick="opForum()">НАЗАД</button></div>`;
+    G('res').innerHTML=`<div class="chat-wrp"><div class="chat-c" id="c-msgs"></div><div class="c-fix"><input type="text" id="chat-in" class="chat-inp" placeholder="${txt('msg_ph')}"><button class="c-snd" onclick="sndMsg()">➤</button></div><button class="sec-back" onclick="opForum()">${txt('back')}</button></div>`;
     const{data}=await S.from('forum_messages').select('*').eq('topic_id',id).order('created_at',{ascending:!0});rnChat(data||[]);fade();
 }
 function rnChat(m){const c=G('c-msgs');c.innerHTML='';m.forEach(x=>{const d=document.createElement('div');d.className='c-msg';d.innerHTML=`<div class="c-usr">${x.user}</div><div class="c-txt">${x.text}</div><div class="c-tm">${x.time}</div>`;c.appendChild(d);});c.scrollTop=c.scrollHeight;}
@@ -291,7 +400,8 @@ async function sndMsg(){
     const tx=G('chat-in').value;if(!tx.trim())return;const n=new Date(),ts=n.toLocaleDateString()+' '+n.toLocaleTimeString().slice(0,5),usr=uProf.isAnon?'Аноним':uProf.login;
     await S.from('forum_messages').insert({topic_id:cTId,user:usr,text:tx,time:ts});G('chat-in').value='';opTop(cTId);
 }
-function play(id,t,img){hist=hist.filter(i=>String(i.id)!==String(id));hist.unshift({id,title:t,img});if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));G('plr').style.display='block';G('ifr').src=`https://pizdec.pro/id/${id}`;}
+// Старый плеер (на всякий случай оставил код скрытия, но запуск идет через iframe в opInfo)
+function play(id,t,img){}
 function clVid(){G('plr').style.display='none';G('ifr').src='';}
 function cKey(){G('sInp').blur();}
 function tgTopF(){const a=G('nt-area');a.style.display=a.style.display==='none'?'block':'none';}
