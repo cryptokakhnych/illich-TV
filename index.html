@@ -270,7 +270,7 @@ async function loadHome(t,app=0){
     ldAll = true;
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
-    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english native } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:p, s:s});
         if(activeReq !== thisReq) return; 
@@ -278,7 +278,7 @@ async function loadHome(t,app=0){
         if(!app)res.innerHTML='';
         for(const a of list){
             if(res.querySelector(`[data-id="${a.id}"]`)) continue;
-            res.appendChild(mkCard({id:a.id,title:a.title.romaji,img:a.coverImage.large}))
+            res.appendChild(mkCard({id:a.id,title:a.title.english || a.title.romaji,img:a.coverImage.large}))
         }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
     }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}
@@ -287,8 +287,10 @@ async function loadHome(t,app=0){
 
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
+    const hItem = hist.find(h => String(h.id) === String(a.id));
+    const displayTitle = hItem ? hItem.title : a.title;
     d.className='card'; d.dataset.id = a.id;
-    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${displayTitle}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${displayTitle.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
 
@@ -301,12 +303,11 @@ async function opInfo(id) {
     G('c-head').style.display='flex'; G('gl-back').style.display='block'; 
     G('c-lbl').innerText="Info";
     
-    const Q = `query ($id: Int) { Media(id: $id) { id title { romaji english } coverImage { extraLarge } description } }`;
+    const Q = `query ($id: Int) { Media(id: $id) { id title { romaji english native } coverImage { extraLarge } description } }`;
     try {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
         
-        // Вызов твоей функции DeepL через Supabase Edge Functions
         const translated = await getTranslation(id, a.title.english || a.title.romaji, a.description);
         
         const finalTitle = translated.title_ru || a.title.romaji;
@@ -336,7 +337,7 @@ async function search(q=null){
     const thisReq = Date.now(); activeReq = thisReq;
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
     res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
-    const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id title { romaji english native } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {s:v});
         if(activeReq !== thisReq) return;
@@ -344,7 +345,7 @@ async function search(q=null){
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
-             res.appendChild(mkCard({id:a.id,title:a.title.romaji,img:a.coverImage.large}))
+             res.appendChild(mkCard({id:a.id,title:a.title.english || a.title.romaji,img:a.coverImage.large}))
         }
         fade();
     }catch(e){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('err')}</p>`;}
@@ -357,7 +358,7 @@ function opAll(){
 async function ldAllAn(app=0){
     if(ldAll)return;ldAll=!0;
     const thisReq = Date.now(); activeReq = thisReq;
-    const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id title { romaji english native } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:aPg});
         if(activeReq !== thisReq) {ldAll = false; return;}
@@ -367,7 +368,7 @@ async function ldAllAn(app=0){
         if(list.length){
             for(const a of list){
                 if(res.querySelector(`[data-id="${a.id}"]`)) continue;
-                res.appendChild(mkCard({id:a.id,title:a.title.romaji,img:a.coverImage.large}));
+                res.appendChild(mkCard({id:a.id,title:a.title.english || a.title.romaji,img:a.coverImage.large}));
             }
             aPg++;
         }
