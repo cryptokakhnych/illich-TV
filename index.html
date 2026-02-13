@@ -154,6 +154,7 @@ let hist=J.parse(LS.getItem('animeHistory'))||[], fav=J.parse(LS.getItem('animeF
 uProf={login:'Пользователь',email:'',password:'',dob:'01.01.2000',nat:'Планета Земля',isAnon:!1};
 const ADMIN="663587165";
 let isS=!1, cMode='recommendations', cTId=null, sTm, delMode=!1, aPg=1, rPg=1, nPg=1, ldAll=!1, cLang='ru', galImgs=[], galIdx=0;
+let activeReq = 0; // Fix race conditions
 
 const LANG = {
     ru: {
@@ -275,10 +276,12 @@ async function AL(q, v) {
 }
 
 async function loadHome(t,app=0){
+    const thisReq = Date.now(); activeReq = thisReq;
     cMode=t;const res=G('res'),lbl=G('c-lbl');
     if(t==='history'){lbl.innerText=txt('lbl_hst');res.innerHTML='';if(!hist.length)res.innerHTML=`<p style="text-align:center;padding:40px;opacity:.3;font-size:12px">${txt('empty_hst')}</p>`;else hist.forEach(a=>res.appendChild(mkCard(a)));fade();return;}
     lbl.innerText=t==='recommendations'?txt('lbl_rec'):txt('lbl_new');
-    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;else ldAll=!0;
+    if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
+    ldAll = true;
     
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
@@ -292,9 +295,12 @@ async function loadHome(t,app=0){
     
     try{
         const d = await AL(Q, {p:p, s:s});
+        if(activeReq !== thisReq) return; 
+
         const list = d.data.Page.media;
         if(!app)res.innerHTML='';
         for(const a of list){
+            if(res.querySelector(`[data-id="${a.id}"]`)) continue;
             let tit = a.title.english || a.title.romaji;
             if(a.idMal){
                 try{
@@ -305,12 +311,14 @@ async function loadHome(t,app=0){
             res.appendChild(mkCard({id:a.id,title:tit,img:a.coverImage.large}))
         }
         if(t==='recommendations')rPg++;else nPg++;if(!app)fade();
-    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}ldAll=!1;
+    }catch(e){if(!app)res.innerHTML=`<p style="text-align:center;padding:20px">${txt('net_err')}</p>`;}
+    ldAll = false;
 }
 
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
+    d.dataset.id = a.id;
     d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
@@ -396,15 +404,18 @@ function chGal(d){
 }
 
 async function search(q=null){
+    const thisReq = Date.now(); activeReq = thisReq;
     const v=q||G('sInp').value;if(!v&&!q)return;const res=G('res');
     res.innerHTML=`<p style="text-align:center;padding:20px">${txt('load')}</p>`;
     const Q = `query ($s: String) { Page(page: 1, perPage: 20) { media(search: $s, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {s:v});
+        if(activeReq !== thisReq) return;
         const list = d.data.Page.media;
         res.innerHTML='';
         if(!list.length){res.innerHTML=`<p style="text-align:center;padding:20px">${txt('not_found')}</p>`;return;}
         for(const a of list){
+             if(res.querySelector(`[data-id="${a.id}"]`)) continue;
              let tit = a.title.english || a.title.romaji;
              if(a.idMal){
                 try{
@@ -424,14 +435,17 @@ function opAll(){
 }
 async function ldAllAn(app=0){
     if(ldAll)return;ldAll=!0;
+    const thisReq = Date.now(); activeReq = thisReq;
     const Q = `query ($p: Int) { Page(page: $p, perPage: 50) { media(sort: POPULARITY_DESC, type: ANIME) { id idMal title { romaji english } coverImage { large } } } }`;
     try{
         const d = await AL(Q, {p:aPg});
+        if(activeReq !== thisReq) {ldAll = false; return;}
         const list = d.data.Page.media;
         const res=G('res');
         if(!app)res.innerHTML='';
         if(list.length){
             for(const a of list){
+                if(res.querySelector(`[data-id="${a.id}"]`)) continue;
                 let tit = a.title.english || a.title.romaji;
                 if(a.idMal){
                     try{
