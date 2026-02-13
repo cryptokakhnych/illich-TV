@@ -91,6 +91,8 @@ body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;posi
 .info-img{width:100%; border-radius:15px; margin-bottom:15px; border:1px solid #ffffff33;}
 .lang-btn{display:flex;justify-content:center;align-items:center;gap:5px;border:1px solid #00d4ff;padding:8px;border-radius:10px;color:#00d4ff;font-weight:700;cursor:pointer;margin-bottom:10px;}
 .mini-player{width:100%; height:200px; background:#000; border:1px solid #00d4ff4d; border-radius:10px; margin-top:10px;}
+.info-gallery{display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px;}
+.info-gallery img{height: 120px; border-radius: 8px; border: 1px solid #ffffff1a;}
 </style>
 </head>
 <body onclick="hideMenu()">
@@ -246,7 +248,6 @@ function goHome(){
     isS=!1;G('sInp').value='';cKey();swTab('recommendations');
 }
 
-// AniList Fetcher
 async function AL(q, v) {
     const r = await fetch('https://graphql.anilist.co', {
         method: 'POST',
@@ -264,14 +265,12 @@ async function loadHome(t,app=0){
     
     let p=t==='recommendations'?rPg:nPg;
     let s=t==='recommendations'?'POPULARITY_DESC':'TRENDING_DESC';
-    // Новинки также могут быть отсортированы по START_DATE_DESC
     if (t==='new') s='START_DATE_DESC';
 
-    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME, status: RELEASING) { id title { romaji english } coverImage { large } } } }`;
-    const QRec = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
+    const Q = `query ($p: Int, $s: [MediaSort]) { Page(page: $p, perPage: 20) { media(sort: $s, type: ANIME) { id title { romaji english } coverImage { large } } } }`;
     
     try{
-        const d = await AL(t==='recommendations'?QRec:Q, {p:p, s:s});
+        const d = await AL(Q, {p:p, s:s});
         const list = d.data.Page.media;
         if(!app)res.innerHTML='';
         list.forEach(a=>{
@@ -285,35 +284,61 @@ async function loadHome(t,app=0){
 function mkCard(a){
     const d=document.createElement('div'),favd=fav.some(f=>String(f.id)===String(a.id));
     d.className='card';
-    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')"><div onclick="opInfo('${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
+    d.innerHTML=`<img src="${a.img}" onclick="opInfo('${a.id}')"><div onclick="opInfo('${a.id}')">${a.title}</div><button class="fav-btn ${favd?'fav-act':''}" onclick="tgFav(event,'${a.id}','${a.title.replace(/'/g,"\\'")}','${a.img}')">${favd?'❤️':'🤍'}</button>`;
     return d;
 }
 
-async function opInfo(id, title, img) {
-    // Добавляем в историю сразу при открытии
-    hist=hist.filter(i=>String(i.id)!==String(id));hist.unshift({id,title,img});if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
-
+async function opInfo(id) {
     cMode = 'info';
     const res = G('res');
     res.innerHTML = `<p style="text-align:center;padding:20px">${txt('load')}</p>`;
     G('glass').style.height='calc(var(--fh) - 120px)';G('t-bar').style.display='none';G('h-tabs').style.display='none';G('c-head').style.display='flex';G('c-lbl').innerText="Info";
     
-    const Q = `query ($id: Int) { Media(id: $id) { id title { romaji english } coverImage { extraLarge } description averageScore episodes startDate { year } } }`;
+    const Q = `query ($id: Int) { Media(id: $id) { id idMal title { romaji english } coverImage { extraLarge } bannerImage description averageScore episodes startDate { year } characters(perPage: 10, sort: [ROLE, RELEVANCE]) { nodes { image { large } } } } }`;
 
     try {
         const d = await AL(Q, {id:id});
         const a = d.data.Media;
-        const tit = a.title.english || a.title.romaji;
-        const desc = a.description || "No description.";
         
+        let finalTitle = a.title.english || a.title.romaji;
+        let finalDesc = a.description || "No description.";
+
+        // Попытка взять перевод с Shikimori через idMal
+        if (a.idMal) {
+            try {
+                const sR = await fetch(`https://shikimori.one/api/animes/${a.idMal}`);
+                if (sR.ok) {
+                    const sD = await sR.json();
+                    if (sD.russian) finalTitle = sD.russian;
+                    if (sD.description_html) finalDesc = sD.description_html;
+                }
+            } catch (err) { console.log("Shiki error"); }
+        }
+
+        // История
+        hist=hist.filter(i=>String(i.id)!==String(id));
+        hist.unshift({id, title: finalTitle, img: a.coverImage.extraLarge});
+        if(hist.length>20)hist.pop();LS.setItem('animeHistory',J.stringify(hist));
+
+        // Галерея (персонажи/доп фото из Anilist)
+        let galleryHtml = '';
+        if(a.characters && a.characters.nodes){
+            galleryHtml = '<div class="info-gallery">';
+            a.characters.nodes.forEach(c => {
+                galleryHtml += `<img src="${c.image.large}">`;
+            });
+            galleryHtml += '</div>';
+        }
+
         res.innerHTML = `
-            <div style="padding:10px; display:flex; flex-direction:column; gap:15px;">
+            <div style="padding:10px; display:flex; flex-direction:column; gap:10px;">
                 <img src="${a.coverImage.extraLarge}" class="info-img">
-                <h2 style="color:#00d4ff; text-align:center;">${tit}</h2>
+                ${galleryHtml}
+                <h2 style="color:#00d4ff; text-align:center;">${finalTitle}</h2>
                 <div style="display:flex; justify-content:space-around; font-size:12px; color:#00d4ff; font-weight:700;">
                     <span>⭐ ${a.averageScore || '?'}</span><span>🎬 ${a.episodes || '?'} ep.</span><span>📅 ${a.startDate.year || '?'}</span>
                 </div>
-                <div class="info-desc">${desc}</div>
+                <div class="info-desc">${finalDesc}</div>
                 <div style="text-align:center; font-weight:700; color:#00d4ff; margin-bottom:5px;">${cLang==='ru'?'ПЛЕЕР':'ПЛЕЄР'}</div>
                 <div class="mini-player">
                     <iframe src="https://pizdec.pro/id/${id}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
@@ -400,8 +425,6 @@ async function sndMsg(){
     const tx=G('chat-in').value;if(!tx.trim())return;const n=new Date(),ts=n.toLocaleDateString()+' '+n.toLocaleTimeString().slice(0,5),usr=uProf.isAnon?'Аноним':uProf.login;
     await S.from('forum_messages').insert({topic_id:cTId,user:usr,text:tx,time:ts});G('chat-in').value='';opTop(cTId);
 }
-// Старый плеер (на всякий случай оставил код скрытия, но запуск идет через iframe в opInfo)
-function play(id,t,img){}
 function clVid(){G('plr').style.display='none';G('ifr').src='';}
 function cKey(){G('sInp').blur();}
 function tgTopF(){const a=G('nt-area');a.style.display=a.style.display==='none'?'block':'none';}
