@@ -3,126 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Illich Search</title>
+<title>Search App</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-    :root{--fh:100vh}
-    body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;position:fixed}
-    
-    /* Фон */
-    #bg-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:#000}
-    .bg-fix{width:100%;height:100%;background:url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/cover no-repeat;opacity:.4}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}:root{--fh:100vh}
+body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;position:fixed;-webkit-text-size-adjust:100%}
+#bg-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:#000}
+.bg-fix{width:100%;height:100%;background:url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/100% 100% no-repeat;opacity:.6}
 
-    /* Загрузка */
-    #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;justify-content:center;align-items:center;z-index:1000;transition:opacity .4s}
-    .p-box{width:220px;height:4px;background:#333;border-radius:10px;overflow:hidden}
-    #bar{height:100%;background:#00d4ff;width:0%;transition:width 0.2s}
+/* Загрузочный экран */
+#splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;transition:opacity .4s ease-out}
+#load-c{margin-bottom:80px;display:flex;flex-direction:column;align-items:center}
+.p-box{width:220px;height:22px;background:#00000099;border-radius:20px;overflow:hidden;border:1px solid #00d4ff66;position:relative;box-shadow:0 0 15px #00d4ff33}
+#perc{position:absolute;width:100%;height:100%;display:flex;justify-content:center;align-items:center;z-index:5;color:#fff;font-weight:900;font-size:14px;text-shadow:1px 1px 2px #000;pointer-events:none}
+#bar{height:100%;background:#00d4ff;width:0%}
 
-    #main{display:none;width:100%;height:100%;flex-direction:column;align-items:center;padding:20px;opacity:0;transition:opacity .5s}
+#main{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content: center; position:relative;opacity:0;transition:opacity .3s ease-in-out}
 
-    /* Новая панель поиска */
-    .search-container{width:100%;max-width:600px;display:flex;gap:10px;margin-bottom:20px}
-    .s-input{flex:1;background:rgba(255,255,255,0.1);border:1px solid rgba(0,212,255,0.3);padding:12px 20px;border-radius:12px;color:#fff;outline:none;font-size:16px}
-    .s-input:focus{border-color:#00d4ff}
-    .s-btn{background:#00d4ff;color:#000;border:none;padding:0 25px;border-radius:12px;font-weight:700;cursor:pointer;transition:0.2s}
-    .s-btn:active{transform:scale(0.95)}
+/* Стеклянная панель */
+.glass{width:94%;height:80vh;background:#141414cc;border-radius:20px;border:1.5px solid #ffffff33;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 32px 0 #0000005e;position:relative;backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
 
-    /* Контейнер для данных из Supabase */
-    .glass{width:100%;max-width:800px;flex:1;background:rgba(20,20,20,0.8);border-radius:20px;border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(10px)}
-    #res{padding:20px;overflow-y:auto;flex:1}
-    
-    .data-item{padding:15px;border-bottom:1px solid rgba(255,255,255,0.05);animation:fadeIn 0.3s ease-in-out}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* Верхняя часть со строкой поиска внутри стекла */
+.search-header {padding: 20px; display: flex; gap: 10px; border-bottom: 1px solid #ffffff1a;}
+.search-header input {flex: 1; border: 1px solid #ffffff33; outline: 0; padding: 12px 20px; font-size: 16px; border-radius: 50px; color: #fff; background: #00000080; caret-color: #00d4ff;}
+.search-header input:focus {border-color: #00d4ff;}
+.btn-search {background: #00d4ff4d; color: #fff; border: 1px solid #00d4ff4d; padding: 0 25px; border-radius: 50px; font-weight: 700; cursor: pointer; transition: all .2s; backdrop-filter: blur(10px);}
+.btn-search:active {background: #00d4ff80;}
+
+#res{width:100%;padding:15px;overflow-y:auto;flex:1; scroll-behavior: smooth;}
+.fade{animation:f .4s ease-out forwards}@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
-
 <div id="bg-container"><div class="bg-fix"></div></div>
 
 <div id="splash">
-    <div class="p-box"><div id="bar"></div></div>
-</div>
-
-<div id="main">
-    <div class="search-container">
-        <input type="text" id="sInp" class="s-input" placeholder="Введите запрос...">
-        <button class="s-btn" onclick="handleSearch()">ПОИСК</button>
-    </div>
-
-    <div class="glass">
-        <div id="res">
-            <p style="text-align:center; opacity:0.5; margin-top:20px;">Введите текст для поиска в базе данных</p>
+    <div id="load-c">
+        <div class="p-box">
+            <div id="perc">0%</div>
+            <div id="bar"></div>
         </div>
     </div>
 </div>
 
-<script>
-// Связь с Supabase
-const S = supabase.createClient(
-    'https://qklkjobkymwsevnzlrzj.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA'
-);
+<div id="main">
+    <div class="glass">
+        <div class="search-header">
+            <input type="text" id="sInp" placeholder="Введите запрос...">
+            <button class="btn-search" onclick="handleSearch()">ПОИСК</button>
+        </div>
+        
+        <div id="res"></div>
+    </div>
+</div>
 
+<script>
+// Подключение к Supabase
+const S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
 const G = i => document.getElementById(i);
 
-// Логика поиска по базе (пример для таблицы 'forum_topics')
+// Логика загрузки (шкала)
+let prg = 0;
+let lI = setInterval(() => {
+    prg += 2;
+    if (prg >= 100) {
+        clearInterval(lI);
+        const s = G('splash');
+        s.style.opacity = '0';
+        setTimeout(() => {
+            s.style.display = 'none';
+            const m = G('main');
+            m.style.display = 'flex';
+            setTimeout(() => { m.style.opacity = '1' }, 50);
+        }, 400);
+    }
+    G('bar').style.width = prg + '%';
+    G('perc').innerText = prg + '%';
+}, 30);
+
+// Функция поиска (пример работы с базой)
 async function handleSearch() {
     const val = G('sInp').value.trim();
     if (!val) return;
 
     const resCont = G('res');
-    resCont.innerHTML = '<p style="text-align:center;">Загрузка...</p>';
-
+    resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Загрузка данных из Supabase...</p>';
+    
     try {
-        // Пример запроса к таблице forum_topics (как наиболее вероятной для хранения данных)
+        // Пример запроса к любой вашей таблице в Supabase
+        // Замените 'your_table_name' на реальное имя таблицы
         const { data, error } = await S
-            .from('forum_topics') 
+            .from('profiles') 
             .select('*')
-            .ilike('title', `%${val}%`);
+            .ilike('login', `%${val}%`);
+
+        resCont.innerHTML = '';
+        resCont.classList.add('fade');
 
         if (error) throw error;
 
-        resCont.innerHTML = '';
-        if (data.length === 0) {
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.style.padding = '10px';
+                div.style.borderBottom = '1px solid #ffffff1a';
+                div.innerText = item.login || 'Запись найдена';
+                resCont.appendChild(div);
+            });
+        } else {
             resCont.innerHTML = '<p style="text-align:center; opacity:0.5;">Ничего не найдено</p>';
-            return;
         }
-
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'data-item';
-            div.innerHTML = `<strong>${item.title || 'Без названия'}</strong><br>
-                             <small style="opacity:0.5">ID: ${item.id}</small>`;
-            resCont.appendChild(div);
-        });
-
-    } catch (e) {
-        resCont.innerHTML = `<p style="text-align:center; color:#ff4b4b;">Ошибка: ${e.message}</p>`;
+    } catch (err) {
+        resCont.innerHTML = '<p style="text-align:center; color:#ff4b4b;">Ошибка подключения</p>';
+        console.error(err);
     }
 }
 
-// Слушатель Enter
+// Поиск по Enter
 G('sInp').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleSearch();
 });
-
-// Анимация загрузки
-let prg = 0;
-const lI = setInterval(() => {
-    prg += 2;
-    G('bar').style.width = prg + '%';
-    if (prg >= 100) {
-        clearInterval(lI);
-        G('splash').style.opacity = '0';
-        setTimeout(() => {
-            G('splash').style.display = 'none';
-            G('main').style.display = 'flex';
-            setTimeout(() => G('main').style.opacity = '1', 50);
-        }, 400);
-    }
-}, 15);
 </script>
-
 </body>
 </html>
