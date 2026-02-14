@@ -3,207 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Search App + SDK Loader</title>
+    <title>illich TV - Stable</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body, html { height: 100%; width: 100%; background: #000; color: #fff; overflow: hidden; position: fixed; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body, html { height: 100%; background: #000; color: #fff; overflow: hidden; }
         
-        /* Фон */
-        #bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/cover no-repeat; }
+        /* Загрузочный экран */
+        #loader-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; display: flex; 
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        .progress-container { width: 70%; height: 4px; background: #222; border-radius: 10px; margin-top: 20px; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: #00d4ff; transition: width 0.4s; }
+        #loader-status { font-size: 12px; margin-top: 10px; color: #666; text-transform: uppercase; }
 
-        /* ЭКРАН ЗАГРУЗКИ SDK */
-        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0c0c0c; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; transition: opacity 0.5s; }
-        
-        .loader-box { width: 240px; text-align: center; }
-        .p-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 15px; position: relative; }
-        
-        /* Сама полоска */
-        #p-bar { height: 100%; width: 0%; transition: width 0.3s ease, background-color 0.3s; background: #00d4ff; box-shadow: 0 0 10px #00d4ff; }
-        
-        /* Текст статуса */
-        #status-text { margin-top: 10px; font-size: 12px; color: #888; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; font-family: monospace; }
+        /* Основной контент */
+        #app { display: none; padding: 20px; flex-direction: column; align-items: center; height: 100vh; }
+        .search-box { 
+            width: 100%; max-width: 400px; background: #1a1a1a; 
+            padding: 15px; border-radius: 20px; border: 1px solid #333;
+            display: flex; gap: 10px; margin-top: 20px;
+        }
+        input { flex: 1; background: transparent; border: none; color: #fff; outline: none; font-size: 16px; }
+        button { background: #00d4ff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        /* Интерфейс */
-        #main { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.5s; }
-        .glass { width: 100%; max-width: 500px; height: 85vh; background: rgba(20, 20, 20, 0.85); border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow: hidden; }
-
-        .search-area { padding: 15px; display: flex; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .search-area input { flex: 1; border: 1px solid rgba(255,255,255,0.2); outline: 0; padding: 12px; font-size: 16px; border-radius: 12px; color: #fff; background: rgba(0,0,0,0.5); }
-        .btn-search { background: #00d4ff; color: #000; border: none; padding: 0 20px; border-radius: 12px; font-weight: 800; cursor: pointer; }
-
-        #res { flex: 1; overflow-y: auto; padding: 15px; }
-
-        /* Таблица статусов */
-        .status-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
-        .status-table th { text-align: left; padding: 10px; font-size: 11px; color: #00d4ff; background: rgba(0, 212, 255, 0.1); text-transform: uppercase; }
-        .status-table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
-        .c-err { color: #ff4b4b; }
-        .c-ok { color: #00ff88; }
-        .c-warn { color: #ffcc00; }
+        /* Таблица результатов */
+        .res-table { width: 100%; max-width: 400px; margin-top: 20px; border-collapse: collapse; font-size: 14px; }
+        .res-table th { color: #00d4ff; text-align: left; padding: 10px; border-bottom: 1px solid #333; font-size: 12px; }
+        .res-table td { padding: 12px 10px; border-bottom: 1px solid #111; }
+        .err-msg { color: #ff4b4b; background: rgba(255,75,75,0.1); padding: 10px; border-radius: 10px; width: 100%; text-align: center; }
     </style>
 </head>
 <body>
-    <div id="bg-container"></div>
 
-    <div id="splash">
-        <div class="loader-box">
-            <h2 style="font-weight: 300; font-size: 18px;">illich TV</h2>
-            <div class="p-track">
-                <div id="p-bar"></div>
-            </div>
-            <p id="status-text">Инициализация...</p>
+    <div id="loader-screen">
+        <h1 style="letter-spacing: 2px;">illich TV</h1>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
         </div>
+        <p id="loader-status">Подключение к сети...</p>
     </div>
 
-    <div id="main">
-        <div class="glass">
-            <div class="search-area">
-                <input type="text" id="sInp" placeholder="Логин...">
-                <button class="btn-search" onclick="runSearch()">ПОИСК</button>
-            </div>
-            <div id="res">
-                <p style="text-align:center; opacity:0.4; margin-top:50px;">Ожидание ввода...</p>
-            </div>
+    <div id="app">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск по логину...">
+            <button onclick="startAction()">ПОИСК</button>
         </div>
+        <div id="resultArea" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
     </div>
 
     <script>
-        const G = i => document.getElementById(i);
-        const S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
-        
-        let sdkStatus = "waiting"; // waiting, loaded, error
+        const supabaseUrl = 'https://qklkjobkymwsevnzlrzj.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA';
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // === ЛОГИКА ШКАЛЫ ЗАГРУЗКИ ===
-        function startLoadingSystem() {
-            const bar = G('p-bar');
-            const txt = G('status-text');
-            let width = 0;
+        let adController = null;
 
-            // 1. Запускаем имитацию загрузки до 70%
-            const fakeLoad = setInterval(() => {
-                if (width < 70 && sdkStatus === "waiting") {
-                    width += Math.random() * 5;
-                    bar.style.width = width + '%';
-                    txt.innerText = "Подключение SDK... " + Math.floor(width) + "%";
-                }
-            }, 100);
-
-            // 2. Реально создаем и грузим скрипт
+        // --- ЛОГИКА ЗАГРУЗКИ SDK ---
+        function initSDK() {
+            const bar = document.getElementById('progress-bar');
+            const status = document.getElementById('loader-status');
+            
+            // Шаг 1: Имитируем начало
+            bar.style.width = '30%';
+            
             const script = document.createElement('script');
             script.src = "https://sad.adsgram.ai/js/adsgram-ad-sdk.js";
             script.async = true;
 
-            // Если загрузился успешно
             script.onload = () => {
-                clearInterval(fakeLoad);
-                sdkStatus = "loaded";
-                bar.style.width = "100%";
-                bar.style.background = "#00ff88"; // Зеленый
-                bar.style.boxShadow = "0 0 15px #00ff88";
-                txt.innerText = "SDK ЗАГРУЖЕН УСПЕШНО";
-                txt.style.color = "#00ff88";
-                setTimeout(openApp, 800);
+                bar.style.width = '100%';
+                status.innerText = 'Готово';
+                // Инициализируем контроллер сразу после загрузки
+                if (window.Adsgram) {
+                    adController = window.Adsgram.init({ blockId: "int-22923" });
+                }
+                setTimeout(showApp, 500);
             };
 
-            // Если ошибка (блокировщик или нет сети)
             script.onerror = () => {
-                clearInterval(fakeLoad);
-                sdkStatus = "error";
-                bar.style.width = "100%";
-                bar.style.background = "#ff4b4b"; // Красный
-                bar.style.boxShadow = "0 0 15px #ff4b4b";
-                txt.innerText = "ОШИБКА: SDK НЕ ДОСТУПЕН";
-                txt.style.color = "#ff4b4b";
-                // Все равно пускаем в приложение через 1.5 сек
-                setTimeout(openApp, 1500);
+                bar.style.background = '#ff4b4b';
+                status.innerText = 'Ошибка загрузки SDK';
+                status.style.color = '#ff4b4b';
+                setTimeout(showApp, 1500); // Всё равно пускаем в приложение
             };
 
             document.head.appendChild(script);
         }
 
-        function openApp() {
-            G('splash').style.opacity = '0';
-            setTimeout(() => {
-                G('splash').style.display = 'none';
-                G('main').style.display = 'flex';
-                setTimeout(() => G('main').style.opacity = '1', 50);
-                
-                // Если была ошибка, выводим её сразу в таблицу результатов
-                if(sdkStatus === 'error') {
-                    G('res').innerHTML = `
-                        <table class="status-table">
-                            <tr><th>СИСТЕМА</th><th>СТАТУС</th></tr>
-                            <tr><td>Adsgram SDK</td><td class="c-err">Не загружен</td></tr>
-                            <tr><td>Совет</td><td style="font-size:11px">Выключите VPN или AdBlock</td></tr>
-                        </table>`;
-                }
-            }, 500);
+        function showApp() {
+            document.getElementById('loader-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
         }
 
-        // Запуск при старте страницы
-        startLoadingSystem();
-
-        // === ПОИСК И РЕКЛАМА ===
-        function runSearch() {
-            const val = G('sInp').value.trim();
-            const out = G('res');
-
-            // Очищаем и показываем статус
-            out.innerHTML = '<p style="text-align:center; color:#00d4ff;">Подготовка...</p>';
-
-            // Если SDK сломан, просто ищем в базе
-            if (!window.Adsgram) {
-                out.innerHTML = `
-                    <table class="status-table">
-                        <tr><th>ОШИБКА</th><th>ДЕТАЛИ</th></tr>
-                        <tr><td>Реклама</td><td class="c-err">SDK недоступен</td></tr>
-                    </table>`;
-                if(val) doSearch(val);
-                return;
-            }
-
-            // Показ рекламы
-            const AdController = window.Adsgram.init({ blockId: "int-22923" });
+        // --- ЛОГИКА ПОИСКА И РЕКЛАМЫ ---
+        function startAction() {
+            const val = document.getElementById('searchInput').value.trim();
+            const res = document.getElementById('resultArea');
             
-            AdController.show().then((result) => {
-                // Успех
-                out.innerHTML = `
-                    <table class="status-table">
-                        <tr><th>РЕКЛАМА</th><th>СТАТУС</th></tr>
-                        <tr><td>Просмотр</td><td class="c-ok">Успешно</td></tr>
-                    </table>`;
-                if(val) doSearch(val);
-            }).catch((result) => {
-                // Ошибка или пропуск
-                const errName = result.error ? result.error : "unknown";
-                out.innerHTML = `
-                    <table class="status-table">
-                        <tr><th>РЕКЛАМА</th><th>СТАТУС</th></tr>
-                        <tr><td>Ошибка</td><td class="c-err">${errName}</td></tr>
-                    </table>`;
-                if(val) doSearch(val);
-            });
+            if (!val) return;
+
+            res.innerHTML = '<p style="margin-top:20px; color:#666;">Запуск проверки...</p>';
+
+            if (adController) {
+                // ИСПОЛЬЗУЕМ СИНТАКСИС ИЗ ТВОЕЙ ДОКУМЕНТАЦИИ (Скриншот 6)
+                adController.show().then((result) => {
+                    // Реклама либо просмотрена, либо закрыта — в любом случае даем результат
+                    searchData(val);
+                }).catch((err) => {
+                    res.innerHTML = `<div class="err-msg">Реклама не загрузилась (${err.error || 'Сбой'})</div>`;
+                    searchData(val); // Всё равно ищем
+                });
+            } else {
+                res.innerHTML = `<div class="err-msg">SDK отсутствует. Проверьте соединение.</div>`;
+                searchData(val);
+            }
         }
 
-        async function doSearch(val) {
-            const out = G('res');
+        async function searchData(login) {
+            const res = document.getElementById('resultArea');
             try {
-                const { data, error } = await S.from('profiles').select('*').ilike('login', `%${val}%`);
+                const { data, error } = await sb.from('profiles').select('*').ilike('login', `%${login}%`);
+                
                 if (data && data.length > 0) {
-                    let h = `<table class="status-table" style="margin-top:10px"><tr><th>ЛОГИН</th><th>ID</th></tr>`;
-                    data.forEach(u => h+=`<tr><td>${u.login}</td><td style="opacity:0.5;font-size:11px">${u.id.slice(0,8)}...</td></tr>`);
-                    h += `</table>`;
-                    out.innerHTML += h;
+                    let table = `<table class="res-table"><tr><th>ЛОГИН</th><th>ID</th></tr>`;
+                    data.forEach(item => {
+                        table += `<tr><td>${item.login}</td><td style="color:#666; font-size:10px;">${item.id}</td></tr>`;
+                    });
+                    table += `</table>`;
+                    res.innerHTML = table;
                 } else {
-                    out.innerHTML += `<p style="text-align:center; opacity:0.5; margin-top:15px">Ничего не найдено</p>`;
+                    res.innerHTML = '<p style="margin-top:20px;">Ничего не найдено</p>';
                 }
             } catch (e) {
-                out.innerHTML += `<p style="color:red; text-align:center">Ошибка БД</p>`;
+                res.innerHTML = '<p style="color:red;">Ошибка базы данных</p>';
             }
         }
+
+        // Запуск системы
+        initSDK();
     </script>
 </body>
 </html>
