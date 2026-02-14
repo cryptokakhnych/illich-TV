@@ -1,173 +1,160 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Search App | Adsgram + Supabase</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Search App</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
 
-<style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}:root{--fh:100vh}
-    body,html{height:100%;width:100%;background:#000;color:#fff;overflow:hidden;position:fixed;-webkit-text-size-adjust:100%}
-    #bg-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;background:#000}
-    .bg-fix{width:100%;height:100%;background:url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/100% 100% no-repeat;opacity:.6}
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body, html { height: 100%; width: 100%; background: #000; color: #fff; overflow: hidden; position: fixed; }
+        #bg-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; }
+        .bg-fix { width: 100%; height: 100%; background: url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/7E068F8D-434C-4D58-A6EB-587EF192B1E6%20(1).webp') center/cover no-repeat; opacity: 0.6; }
 
-    /* Загрузочный экран */
-    #splash{position:fixed;top:0;left:0;width:100%;height:100%;background:#000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;transition:opacity .4s}
-    .p-box{width:220px;height:22px;background:#00000099;border-radius:20px;overflow:hidden;border:1px solid #00d4ff66;position:relative}
-    #bar{height:100%;background:#00d4ff;width:0%;transition:width 0.1s linear}
-    #perc{position:absolute;width:100%;text-align:center;font-weight:900;font-size:12px;line-height:22px}
+        /* Splash Screen */
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000 url('https://cdn.jsdelivr.net/gh/cryptokakhnych/illich-TV@main/582912BF-C3C2-4689-B94E-BB11A3D639EF.webp') center/cover; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.5s; }
+        .p-box { width: 200px; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        #bar { height: 100%; background: #00d4ff; width: 0%; transition: width 0.1s linear; }
 
-    /* Основной экран */
-    #main{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
-    .glass{width:94%;height:85vh;background:#141414cc;border-radius:24px;border:1px solid #ffffff26;overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 50px rgba(0,0,0,0.5)}
+        /* Main UI */
+        #main { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s; padding: 15px; }
+        .glass { width: 100%; max-width: 450px; height: 80vh; background: rgba(20, 20, 20, 0.85); border-radius: 25px; border: 1px solid rgba(255,255,255,0.15); display: flex; flex-direction: column; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); overflow: hidden; }
 
-    /* Поиск */
-    .search-header {padding:20px;display:flex;gap:10px;background:#ffffff05}
-    .search-header input {flex:1;border:1px solid #ffffff26;outline:0;padding:14px 20px;font-size:16px;border-radius:50px;color:#fff;background:#00000066}
-    .btn-search {background:#00d4ff;color:#000;border:none;padding:0 25px;border-radius:50px;font-weight:700;cursor:pointer;transition:transform 0.1s}
-    .btn-search:active {transform:scale(0.95)}
+        .search-header { padding: 15px; display: flex; gap: 8px; background: rgba(255,255,255,0.03); }
+        .search-header input { flex: 1; border: 1px solid rgba(255,255,255,0.2); outline: 0; padding: 12px 18px; font-size: 16px; border-radius: 50px; color: #fff; background: rgba(0,0,0,0.4); }
+        .btn-search { background: #00d4ff; color: #000; border: none; padding: 0 20px; border-radius: 50px; font-weight: 700; cursor: pointer; }
 
-    /* Таблица результатов */
-    #res{width:100%;padding:15px;overflow-y:auto;flex:1}
-    .res-table {width:100%;border-collapse:collapse;margin-top:10px;color:#eee}
-    .res-table th {text-align:left;padding:12px;border-bottom:2px solid #ffffff1a;color:#00d4ff;font-size:14px;text-transform:uppercase}
-    .res-table td {padding:12px;border-bottom:1px solid #ffffff0d;font-size:15px}
-    
-    /* Уведомления */
-    .status-msg {padding:10px;border-radius:12px;text-align:center;margin-bottom:15px;font-size:14px;background:#ffffff0d;border:1px solid #ffffff1a}
-    .err {color:#ff4b4b;border-color:#ff4b4b33;background:#ff4b4b1a}
-    .succ {color:#00ff88;border-color:#00ff8833;background:#00ff881a}
-    
-    .fade{animation:f .4s ease-out forwards}@keyframes f{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-</style>
+        /* Контейнер результатов */
+        #res { flex: 1; overflow-y: auto; padding: 15px; }
+        
+        /* Таблица */
+        .res-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; margin-top: 10px; }
+        .res-table th { background: rgba(255,255,255,0.05); color: #00d4ff; text-align: left; padding: 12px; font-size: 13px; text-transform: uppercase; }
+        .res-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: #eee; }
+
+        /* Статус-боксы */
+        .status-box { padding: 12px; border-radius: 12px; text-align: center; font-size: 14px; margin-bottom: 10px; border: 1px solid transparent; }
+        .status-err { background: rgba(255, 75, 75, 0.15); border-color: rgba(255, 75, 75, 0.3); color: #ff4b4b; }
+        .status-ok { background: rgba(0, 212, 255, 0.1); border-color: rgba(0, 212, 255, 0.3); color: #00d4ff; }
+
+        .fade { animation: f 0.4s ease-out forwards; }
+        @keyframes f { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-<div id="bg-container"><div class="bg-fix"></div></div>
+    <div id="bg-container"><div class="bg-fix"></div></div>
 
-<div id="splash">
-    <div class="p-box"><div id="perc">0%</div><div id="bar"></div></div>
-</div>
+    <div id="splash">
+        <div class="p-box"><div id="bar"></div></div>
+        <p id="perc" style="margin-top: 10px; font-size: 12px; color: #00d4ff;">0%</p>
+    </div>
 
-<div id="main">
-    <div class="glass">
-        <div class="search-header">
-            <input type="text" id="sInp" placeholder="Введите логин для поиска...">
-            <button class="btn-search" onclick="handleSearchWithAd()">ПОИСК</button>
-        </div>
-        <div id="res">
-            <p style="text-align:center;opacity:0.4;margin-top:20px;">Здесь появятся результаты после просмотра рекламы</p>
+    <div id="main">
+        <div class="glass">
+            <div class="search-header">
+                <input type="text" id="sInp" placeholder="Логин для поиска...">
+                <button class="btn-search" onclick="handleSearchWithAd()">ПОИСК</button>
+            </div>
+            <div id="res">
+                <p style="text-align: center; opacity: 0.4; padding-top: 30px;">Введите запрос и нажмите поиск</p>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-const G = i => document.getElementById(i);
-let S = null;
-let AdController = null;
+    <script>
+        const G = i => document.getElementById(i);
+        let S = null;
+        let AdController = null;
 
-// Инициализация
-function initLibraries() {
-    try {
-        S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
-        
-        if (window.Adsgram) {
-            AdController = window.Adsgram.init({ blockId: "int-22923" });
-            console.log("Adsgram успешно инициализирован");
+        // Попытка инициализации SDK
+        function initSDK() {
+            try {
+                if (!S) S = supabase.createClient('https://qklkjobkymwsevnzlrzj.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbGtqb2JreW13c2V2bnpscnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NjE0OTksImV4cCI6MjA4NjUzNzQ5OX0.DYwygDJ-fvcDP1UUefWjbhcB3OTdAzR9gj-Qi30BYnA');
+                
+                if (window.Adsgram && !AdController) {
+                    AdController = window.Adsgram.init({ blockId: "int-22923" });
+                    console.log("Adsgram SDK подгружен успешно");
+                }
+            } catch (e) { console.error("Ошибка инициализации:", e); }
         }
-    } catch (e) { console.error("Ошибка SDK:", e); }
-}
 
-// Загрузка
-let prg = 0;
-const lI = setInterval(() => {
-    prg += 5; G('bar').style.width = prg + '%'; G('perc').innerText = prg + '%';
-    if (prg >= 100) {
-        clearInterval(lI);
-        initLibraries();
-        G('splash').style.opacity = '0';
-        setTimeout(() => {
-            G('splash').style.display = 'none';
-            G('main').style.display = 'flex';
-            setTimeout(() => G('main').style.opacity = '1', 50);
-        }, 400);
-    }
-}, 40);
+        // Шкала загрузки
+        let prg = 0;
+        const lI = setInterval(() => {
+            prg += 4;
+            G('bar').style.width = prg + '%';
+            G('perc').innerText = prg + '%';
+            if (prg >= 100) {
+                clearInterval(lI);
+                initSDK();
+                G('splash').style.opacity = '0';
+                setTimeout(() => {
+                    G('splash').style.display = 'none';
+                    G('main').style.display = 'flex';
+                    setTimeout(() => G('main').style.opacity = '1', 50);
+                }, 500);
+            }
+        }, 50);
 
-async function handleSearchWithAd() {
-    const val = G('sInp').value.trim();
-    const resCont = G('res');
-    
-    resCont.innerHTML = '<div class="status-msg">Вызов рекламного блока...</div>';
-
-    // Реклама
-    if (AdController) {
-        try {
-            await AdController.show();
-            resCont.innerHTML = '<div class="status-msg succ">✓ Реклама просмотрена</div>';
-        } catch (err) {
-            let errorType = err.error || "unknown";
-            let msg = "Реклама недоступна";
+        async function handleSearchWithAd() {
+            const val = G('sInp').value.trim();
+            const resCont = G('res');
             
-            if (errorType === 'no_ads') msg = "На данный момент рекламы нет (no_ads)";
-            else if (errorType === 'user_closed') msg = "Вы закрыли рекламу слишком рано";
-            
-            resCont.innerHTML = `<div class="status-msg err">ℹ ${msg}</div>`;
-            console.warn("Adsgram Error:", errorType);
+            // Если SDK почему-то не загрузился при старте, пробуем еще раз
+            if (!AdController) initSDK();
+
+            resCont.innerHTML = '<div class="status-box status-ok">Загрузка рекламы...</div>';
+
+            if (AdController) {
+                try {
+                    await AdController.show();
+                    resCont.innerHTML = '<div class="status-box status-ok">✓ Реклама просмотрена</div>';
+                } catch (err) {
+                    const errorMsg = err.error === 'no_ads' ? 'Рекламы нет в наличии' : 'Реклама пропущена';
+                    resCont.innerHTML = `<div class="status-box status-err">${errorMsg}</div>`;
+                }
+            } else {
+                resCont.innerHTML = '<div class="status-box status-err">Ошибка: SDK Adsgram всё еще не загружен. Проверьте интернет.</div>';
+                // Даже если реклама упала, даем пользователю найти данные, если есть запрос
+            }
+
+            if (val) {
+                setTimeout(() => performSearch(val), 500);
+            }
         }
-    } else {
-        resCont.innerHTML = '<div class="status-msg err">Ошибка: SDK Adsgram не загружен</div>';
-    }
-    
-    // Поиск
-    if (val) {
-        setTimeout(() => performSearch(val), 800);
-    } else {
-        resCont.innerHTML += '<p style="text-align:center;opacity:0.5;">Введите текст запроса для поиска по базе.</p>';
-    }
-}
 
-async function performSearch(val) {
-    if (!S) return;
-    const resCont = G('res');
-    resCont.innerHTML += '<p style="text-align:center;opacity:0.5;">Загрузка данных из Supabase...</p>';
-    
-    try {
-        const { data, error } = await S.from('profiles').select('*').ilike('login', `%${val}%`);
-        
-        if (error) throw error;
+        async function performSearch(val) {
+            if (!S) return;
+            const resCont = G('res');
+            
+            try {
+                const { data, error } = await S.from('profiles').select('*').ilike('login', `%${val}%`);
+                if (error) throw error;
 
-        if (data && data.length > 0) {
-            let html = `
-                <table class="res-table fade">
-                    <thead>
-                        <tr>
-                            <th>Логин</th>
-                            <th>ID профиля</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-            
-            data.forEach(item => {
-                html += `
-                    <tr>
-                        <td>${item.login || '—'}</td>
-                        <td style="color:#888; font-size:12px;">${item.id.substring(0,8)}...</td>
-                    </tr>`;
-            });
-            
-            html += `</tbody></table>`;
-            resCont.innerHTML = html;
-        } else {
-            resCont.innerHTML = '<div class="status-msg">Ничего не найдено</div>';
+                if (data && data.length > 0) {
+                    let tableHTML = `
+                        <table class="res-table fade">
+                            <thead>
+                                <tr><th>Логин</th><th>ID</th></tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    data.forEach(item => {
+                        tableHTML += `<tr><td>${item.login || '—'}</td><td style="font-family: monospace; font-size:11px; opacity:0.6;">${item.id.slice(0,8)}...</td></tr>`;
+                    });
+                    tableHTML += `</tbody></table>`;
+                    resCont.innerHTML += tableHTML;
+                } else {
+                    resCont.innerHTML += '<p style="text-align:center; opacity:0.5; margin-top:20px;">Ничего не найдено</p>';
+                }
+            } catch (err) {
+                resCont.innerHTML += '<div class="status-box status-err">Ошибка базы данных</div>';
+            }
         }
-    } catch (err) {
-        resCont.innerHTML = '<div class="status-msg err">Ошибка базы данных</div>';
-    }
-}
 
-G('sInp').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
-</script>
+        G('sInp').addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    </script>
 </body>
 </html>
